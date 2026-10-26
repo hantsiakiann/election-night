@@ -183,12 +183,12 @@
     }
     return t;
   }
-  function balanceBar(g, races, summary) {
+  function balanceBar(g, races, summary, { need: needOpt, senateNote = g === "senate" } = {}) {
     const t = tally(races);
     const hold = summary[g + "_holdovers"] || {};
     const hD = hold.D || 0, hR = hold.R || 0;
     const total = races.length + hD + hR;
-    const need = g === "senate" ? summary.senate_control || 51 : g === "house" ? summary.house_control || 218 : null;
+    const need = needOpt ?? (g === "senate" ? summary.senate_control || 51 : g === "house" ? summary.house_control || 218 : null);
     const seg = (n, cls, label) => n ? `<span class="${cls}" style="flex-grow:${n}" title="${label}: ${n}"></span>` : "";
     const word = g === "governor" ? "governorships" : "seats";
     return `<div class="balance">
@@ -200,7 +200,7 @@
         ${seg(t.none, "none", "Not called yet")}${seg(t.R, "R", "Called for Republicans")}${seg(hR, "hR", "Republican seats not up")}
         ${need ? `<i class="mark" style="left:${(100 * need) / total}%"></i>` : ""}
       </div>
-      <p class="balance-note">${need ? `${need} ${word} for a majority${g === "senate" ? "; Republicans need 50 with the vice president's tiebreak" : ""}. ` : ""}Counts only races the AP has called, plus races settled before Election Day; a candidate leading the count isn't counted. ${t.none} of ${races.length} races not called yet.</p>
+      <p class="balance-note">${need ? `${need} ${word} for a majority${senateNote ? "; Republicans need 50 with the vice president's tiebreak" : ""}. ` : ""}Counts only races the AP has called, plus races settled before Election Day; a candidate leading the count isn't counted. ${t.none} of ${races.length} races not called yet.</p>
     </div>`;
   }
   function renderNational(d) {
@@ -269,10 +269,13 @@
     if (!d.georgia) return pills + mapbox + notice("Georgia results aren't flowing yet.",
       "They start once the Secretary of State posts the November 3 election and its ID is set in <code>config/races.yml</code>.");
     const secs = d.georgia.sections.filter((s) => (s.tab || "statewide") === t);
+    // Georgia legislature: majority tracker (every seat is up; 29 of 56 Senate, 91 of 180 House)
+    const chamber = t !== "statewide" && secs.length
+      ? balanceBar("ga-" + t, secs.flatMap((s) => s.races), {}, { need: t === "senate" ? 29 : 91, senateNote: false }) : "";
     const body = t === "statewide"
       ? secs.map((s) => group(s.name, s.races, { collapsible: true, collapsed: s.collapsed, key: "ga:" + s.name })).join("")
       : secs.map((s) => group(s.name, s.races)).join("");
-    return pills + mapbox + wait + (body || notice(state.q ? "No races here match the search." : `No ${GA_TABS[t]} contests in the feed yet.`));
+    return pills + chamber + mapbox + wait + (body || notice(state.q ? "No races here match the search." : `No ${GA_TABS[t]} contests in the feed yet.`));
   }
   function renderMetro(d) {
     if (!d.metro) return notice("Metro Atlanta results come from the same Georgia feed, which isn't flowing yet.");
