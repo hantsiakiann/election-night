@@ -1,0 +1,276 @@
+# Statewide ballot measures shown on the Initiatives tab.
+#
+# Each entry: id (unique; used in manual.yml), state, title (the ballot label), name (short
+# subject), yes_means (what a Yes vote does), needs (approval threshold if not a simple majority),
+# note (optional), and pattern (regex for the contest name, only for states with a results
+# feed: GA, NC, MN). Without a feed, a measure shows "No feed" and a link to official results;
+# enter numbers in config/manual.yml under the measure's id with candidates Yes and No.
+#
+# Sources: Wikipedia "2026 United States ballot measures", state election offices and news
+# coverage, Oct 2026.
+measures:
+  # ---- Alaska
+  - id: AK-M2
+    state: AK
+    title: Ballot Measure 2
+    name: Repeal open primaries and ranked-choice voting
+    yes_means: Repeals the top-four primary and ranked-choice general election adopted in 2020, returns to party primaries, and repeals some 2020 campaign-finance disclosure rules.
+  - id: AK-M3
+    state: AK
+    title: Ballot Measure 3
+    name: Citizenship requirement for voting
+    yes_means: Changes the wording of the state's voter qualifications to say only U.S. citizens may vote.
+
+  # ---- Arizona
+  - id: AZ-P144
+    state: AZ
+    title: Proposition 144
+    name: Citizen voting, voter ID and foreign contributions
+    yes_means: Limits voting to U.S. citizens, requires voter ID, and bans foreign contributions to influence elections.
+  - id: AZ-P318
+    state: AZ
+    title: Proposition 318
+    name: Restrooms and school sports by birth sex
+    yes_means: Requires schools and athletic groups to separate restrooms, locker rooms and sports teams by sex at birth.
+
+  # ---- California
+  - id: CA-P3
+    state: CA
+    title: Proposition 3
+    name: Make top income tax rates permanent
+    yes_means: Permanently extends the higher income tax rates on high earners that are set to expire after 2030, for schools and health care.
+  - id: CA-P39
+    state: CA
+    title: Proposition 39
+    name: Voter ID and citizenship verification
+    yes_means: Requires photo ID to vote in person, ID numbers on mail ballots, and citizenship checks of voter rolls. Constitutional amendment.
+  - id: CA-P40
+    state: CA
+    title: Proposition 40
+    name: One-time billionaire tax
+    yes_means: Imposes a one-time tax of up to 5% on the net worth of residents with more than $1 billion, for health, education and food programs.
+    note: Conflicts with Props 41 and 42; if both sides pass, the one with more Yes votes generally prevails.
+  - id: CA-P41
+    state: CA
+    title: Proposition 41
+    name: Audits and spending limit for special taxes
+    yes_means: Requires audits of programs funded by new state special taxes and bars exempting new taxes from the state spending limit. Constitutional amendment.
+    note: Conflicts with Prop 40.
+  - id: CA-P42
+    state: CA
+    title: Proposition 42
+    name: Ban taxes on savings and personal assets
+    yes_means: Prohibits new state taxes on personal property such as savings, investments and retirement accounts, and limits retroactive taxes. Constitutional amendment.
+    note: Conflicts with Prop 40.
+  - id: CA-P43
+    state: CA
+    title: Proposition 43
+    name: Two-thirds vote for local special taxes
+    yes_means: Requires two-thirds voter approval for local special taxes placed by initiative and bars property taxes by initiative.
+  - id: CA-P45
+    state: CA
+    title: Proposition 45
+    name: Faster environmental review (CEQA)
+    yes_means: Sets deadlines and limits on CEQA environmental review and court challenges for designated housing, water, energy and transportation projects.
+
+  # ---- Colorado
+  - id: CO-A81
+    state: CO
+    title: Amendment 81
+    name: Cooperation with federal immigration authorities
+    yes_means: Requires state and local law enforcement to notify and cooperate with federal immigration authorities in certain cases.
+    needs: 55%
+  - id: CO-A86
+    state: CO
+    title: Amendment 86
+    name: Limits on mid-decade redistricting
+    yes_means: Requires mid-decade redistricting to be approved by the independent commission and the state Supreme Court, and bars maps drawn to favor a party.
+    needs: 55%
+  - id: CO-A87
+    state: CO
+    title: Amendment 87
+    name: Graduated income tax
+    yes_means: Replaces the flat income tax with graduated rates, higher above $500,000 a year.
+    needs: 55%
+    note: Conflicts with Proposition 136.
+  - id: CO-P134
+    state: CO
+    title: Proposition 134
+    name: School sports by sex at birth
+    yes_means: Defines girls' and boys' school sports teams by sex at birth.
+  - id: CO-P135
+    state: CO
+    title: Proposition 135
+    name: Gender-related surgery for minors
+    yes_means: Bans gender-related surgeries for minors and public or insurance funding for them.
+  - id: CO-P136
+    state: CO
+    title: Proposition 136
+    name: Cap income tax at 4.4%
+    yes_means: Caps state income tax rates at 4.4%.
+    note: Conflicts with Amendment 87; if both pass, the one with more Yes votes prevails.
+
+  # ---- Florida
+  - id: FL-A3
+    state: FL
+    title: Amendment 3
+    name: Property tax relief
+    yes_means: Raises homestead exemptions, caps yearly assessment growth on non-homestead property at 5%, and limits local property-tax spending.
+    needs: 60%
+
+  # ---- Idaho
+  - id: ID-REPRO
+    state: ID
+    title: Reproductive Freedom and Privacy Act
+    name: Abortion rights initiative
+    yes_means: Creates a state law right to reproductive decisions, allowing abortion to be regulated after viability except in medical emergencies.
+
+  # ---- Indiana
+  - id: IN-PQ1
+    state: IN
+    title: Public Question 1
+    name: Denying bail for dangerous defendants
+    yes_means: Allows courts to deny bail for most offenses when a defendant poses a substantial risk and no release conditions would protect the community.
+
+  # ---- Maryland
+  - id: MD-REDIST
+    state: MD
+    title: Congressional redistricting amendment
+    name: Redistricting criteria
+    yes_means: Limits the state constitution's redistricting criteria to legislative districts and allows state Supreme Court review of congressional maps.
+
+  # ---- Massachusetts
+  - id: MA-Q3
+    state: MA
+    title: Question 3
+    name: Top-two primaries
+    yes_means: Replaces party primaries for state offices with a single primary in which the top two finishers advance.
+  - id: MA-Q4
+    state: MA
+    title: Question 4
+    name: Same-day voter registration
+    yes_means: Allows voters to register and vote on the same day.
+  - id: MA-Q8
+    state: MA
+    title: Question 8
+    name: Repeal recreational marijuana sales
+    yes_means: Ends recreational marijuana sales while keeping limited possession subject to civil penalties.
+  - id: MA-Q9
+    state: MA
+    title: Question 9
+    name: Firearms law (veto referendum)
+    yes_means: Keeps the 2024 gun law, including assault-style weapon restrictions and safety certificates. No repeals it.
+
+  # ---- Michigan
+  - id: MI-P1
+    state: MI
+    title: Proposal 1
+    name: Constitutional convention
+    yes_means: Calls a convention to revise the state constitution (asked automatically every 16 years).
+
+  # ---- Missouri
+  - id: MO-A3
+    state: MO
+    title: Amendment 3
+    name: Repeal abortion-rights amendment
+    yes_means: Repeals the 2024 abortion-rights amendment, bans most abortions with exceptions, requires parental consent for minors, and restricts gender transition care for minors.
+
+  # ---- Nevada
+  - id: NV-Q6
+    state: NV
+    title: Question 6
+    name: Abortion rights (second approval)
+    yes_means: Adds a right to abortion to the state constitution, with regulation allowed after viability except to protect the patient. Voters approved it once in 2024; a second Yes makes it final.
+  - id: NV-Q7
+    state: NV
+    title: Question 7
+    name: Voter ID (second approval)
+    yes_means: Requires photo ID to vote in person and ID verification for mail ballots. Approved once in 2024; a second Yes makes it final.
+
+  # ---- North Carolina (state feed)
+  - id: NC-VOTERID
+    state: NC
+    title: Voter ID amendment
+    name: Photo ID for all voters
+    yes_means: Requires photo ID for all voters, including those voting by mail.
+    pattern: "AMENDMENT.*(PHOTO|IDENTIFICATION|VOTER ID)"
+  - id: NC-INCTAX
+    state: NC
+    title: Income tax cap amendment
+    name: Lower the income tax cap to 3.5%
+    yes_means: Lowers the constitutional cap on the state income tax rate from 7% to 3.5%.
+    pattern: "AMENDMENT.*INCOME TAX"
+
+  # ---- North Dakota
+  - id: ND-M2
+    state: ND
+    title: Constitutional Measure 2
+    name: 60% to amend the constitution
+    yes_means: Requires 60% voter approval for future constitutional amendments.
+
+  # ---- Ohio
+  - id: OH-I3
+    state: OH
+    title: Issue 3
+    name: Photo ID to vote
+    yes_means: Requires a photo ID to vote.
+
+  # ---- South Dakota
+  - id: SD-J
+    state: SD
+    title: Amendment J
+    name: Citizenship requirement for voting
+    yes_means: Limits state and local voting to U.S. citizens.
+  - id: SD-L
+    state: SD
+    title: Amendment L
+    name: 60% to amend the constitution
+    yes_means: Requires 60% voter approval for constitutional amendments.
+
+  # ---- Tennessee
+  - id: TN-A2
+    state: TN
+    title: Amendment 2
+    name: Ban state property taxes
+    yes_means: Bars the legislature from enacting a state property tax.
+
+  # ---- Virginia
+  - id: VA-REPRO
+    state: VA
+    title: Reproductive freedom amendment
+    name: Abortion rights
+    yes_means: Establishes a constitutional right to reproductive decisions, including abortion up to fetal viability.
+  - id: VA-MARRIAGE
+    state: VA
+    title: Marriage amendment
+    name: Repeal same-sex marriage ban
+    yes_means: Removes the constitutional ban on same-sex marriage and affirms that two adults may marry regardless of sex.
+  - id: VA-VOTING
+    state: VA
+    title: Voting rights amendment
+    name: Restore voting rights after prison
+    yes_means: Establishes a right to vote and restores voting rights automatically when a person is released from prison for a felony.
+
+  # ---- Washington
+  - id: WA-INCTAX
+    state: WA
+    title: Income tax repeal initiative
+    name: Repeal the tax on income over $1 million
+    yes_means: Repeals the 9.9% tax on income over $1 million and bars future income taxes.
+  - id: WA-PARENTS
+    state: WA
+    title: Parental rights initiative
+    name: Parents' rights in public schools
+    yes_means: Restores parental notice and record-review rights changed by a 2025 law.
+  - id: WA-SPORTS
+    state: WA
+    title: Girls' sports initiative
+    name: School sports by sex
+    yes_means: Requires sex-based eligibility for girls' school sports.
+
+  # ---- Wisconsin
+  - id: WI-DISCRIM
+    state: WI
+    title: Anti-discrimination amendment
+    name: Ban race- and sex-based preferences
+    yes_means: Bars government discrimination or preferential treatment based on race, sex, ethnicity or national origin.

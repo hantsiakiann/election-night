@@ -162,6 +162,34 @@ def national_summary(cfg):
             "house_control": ncfg.get("house_control", 218)}
 
 
+def build_initiatives(cfg, loaded, measures):
+    """Statewide ballot measures (config/initiatives.yml), grouped by state."""
+    ncfg = cfg.get("national") or {}
+    feeds, links = ncfg.get("feeds") or {}, ncfg.get("links") or {}
+    by_state = {}
+    for m in measures or []:
+        abbr = m["state"]
+        src = feeds.get(abbr, "manual")
+        data = loaded.get(src)
+        contest = find_contest(data["contests"], m["pattern"]) if data and m.get("pattern") else None
+        meta = {"group": "initiative", "state": abbr, "state_name": BY_ABBR[abbr][1], "county_state": abbr,
+                "subtitle": m.get("name"), "yes_means": m.get("yes_means"), "needs": m.get("needs"),
+                "note": m.get("note"), "link": links.get(abbr)}
+        if contest:
+            race = finalize(contest, race_id=m["id"], title=m["title"], source=src,
+                            source_url=links.get(abbr) or data.get("page"), updated=data.get("updated"))
+        else:
+            race = finalize({"name": m["title"], "candidates": [{"name": "Yes", "party": "", "votes": 0},
+                                                               {"name": "No", "party": "", "votes": 0}]},
+                            race_id=m["id"], title=m["title"], source=src, source_url=links.get(abbr))
+            race["status"] = "no-feed" if src == "manual" or not m.get("pattern") else ("not-found" if data else "source-error")
+            race["counties"], race["statewide"] = [], True
+        race.update({k: v for k, v in meta.items() if v is not None})
+        by_state.setdefault(abbr, []).append(race)
+    return {"states": [{"abbr": a, "name": BY_ABBR[a][1], "measures": rs}
+                       for a, rs in sorted(by_state.items(), key=lambda kv: BY_ABBR[kv[0]][1])]}
+
+
 def build_georgia(cfg, ga):
     gcfg = cfg.get("georgia") or {}
     sections = [dict(name=s["name"], collapsed=bool(s.get("collapsed")), races=[], _rx=re.compile(s["match"], re.I))
@@ -225,6 +253,8 @@ def build_metro(cfg, ga):
 def iter_races(results):
     for group in (results.get("national") or {}).values():
         yield from group
+    for st in (results.get("initiatives") or {}).get("states", []):
+        yield from st["measures"]
     for s in (results.get("georgia") or {}).get("sections", []):
         yield from s["races"]
     for c in (results.get("metro") or {}).get("counties", []):
@@ -274,6 +304,11 @@ def carry_forward(results, previous, failed_sources):
             p = prev.get(race["id"])
             if race.get("source") in failed_sources and p and p.get("candidates"):
                 group[i] = dict(p, stale=True, status="stale")
+    for st in (results.get("initiatives") or {}).get("states", []):
+        for i, race in enumerate(st["measures"]):
+            p = prev.get(race["id"])
+            if race.get("source") in failed_sources and p and p.get("total_votes"):
+                st["measures"][i] = dict(p, stale=True, status="stale")
     if "georgia" in failed_sources:
         for key in ("georgia", "metro"):
             if previous.get(key) and not results.get(key):
@@ -312,6 +347,10 @@ def main(argv=None):
     if not cand_path.exists():
         cand_path = Path("config/candidates.yml")
     prelim = (yaml.safe_load(cand_path.read_text()) or {}).get("races", {}) if cand_path.exists() else {}
+    ini_path = Path(args.config).resolve().parent / "initiatives.yml"
+    if not ini_path.exists():
+        ini_path = Path("config/initiatives.yml")
+    measures = (yaml.safe_load(ini_path.read_text()) or {}).get("measures", []) if ini_path.exists() else []
     # forecaster ratings (tools/build_ratings.py), kept beside races.yml like candidates.yml
     rat_path = Path(args.config).resolve().parent / "ratings.yml"
     if not rat_path.exists():
@@ -352,6 +391,7 @@ def main(argv=None):
         "states": state_table(),
         "summary": national_summary(cfg),
         "national": build_national(cfg, loaded, prelim),
+        "initiatives": build_initiatives(cfg, loaded, measures),
         "georgia": build_georgia(cfg, loaded["georgia"]) if "georgia" in loaded else None,
         "metro": build_metro(cfg, loaded["georgia"]) if "georgia" in loaded else None,
     }

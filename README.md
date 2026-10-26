@@ -72,6 +72,15 @@ results at all, and Texas's machine-readable feed is a paid subscription. Those 
 If a feed goes down mid-night, its races keep the last numbers received and are marked
 "Feed down".
 
+## Initiatives tab
+
+Key statewide ballot measures, grouped by state, listed in `config/initiatives.yml` (ballot
+label, subject, what a Yes vote does, approval threshold, conflicts). North Carolina's come from
+the state feed when the contest name matches the entry's `pattern`; the rest show "No feed" with
+a link to official results, and you can enter numbers in `config/manual.yml` under the measure's
+id (e.g. `CA-P40`) with candidates `Yes` and `No`. Each measure has a "Show county map" button;
+counties fill in where the feed reports them.
+
 ## Maps
 
 - **Senate and Governor:** a U.S. map colored by who leads each race (deeper color = wider

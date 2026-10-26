@@ -144,7 +144,9 @@ def nc(reporting, seed):
             base = int(rnd.uniform(400, 1500)) if reported else 0
             for cname, opts in [("US SENATE", senate),
                                 (f"US HOUSE OF REPRESENTATIVES DISTRICT {district:02d}",
-                                 [(f"NC{district} Dem", "DEM", .5), (f"NC{district} Rep", "REP", .5)])]:
+                                 [(f"NC{district} Dem", "DEM", .5), (f"NC{district} Rep", "REP", .5)]),
+                                ("CONSTITUTIONAL AMENDMENT [PHOTO IDENTIFICATION FOR VOTING]",
+                                 [("For", "", .56), ("Against", "", .44)])]:
                 for choice, party, v in zip([o[0] for o in opts], [o[1] for o in opts], _split(opts, lean, base)):
                     w.writerow([county.upper(), "11/03/2026", f"P{p:03d}", 1, "S", cname, choice, party, 1,
                                 v // 3, v - v // 3, 0, 0, v, "Y"])

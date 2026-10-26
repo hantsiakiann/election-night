@@ -46,12 +46,14 @@ window.ENMaps = (() => {
     if (r.call || (!r.total_votes && r.decided)) return base;         // called / settled: full color
     return leadFill(base, r.margin_pct ?? 0, false);
   }
+  const MEASURE = { yes: "var(--yes)", for: "var(--yes)", no: "var(--no)", against: "var(--no)" };
   function countyFill(row, cands, partisan) {
     const v = row[2], tot = v.reduce((a, b) => a + b, 0);
     if (!tot) return "var(--map-blank)";
     const order = v.map((n, i) => [n, i]).sort((a, b) => b[0] - a[0]);
     const [first, second = [0]] = order, i = first[1];
-    const base = partisan ? (PARTY[cands[i]?.party] || "var(--oth)") : NEUTRAL[i % NEUTRAL.length];
+    const base = MEASURE[(cands[i]?.name || "").trim().toLowerCase()]
+      || (partisan ? (PARTY[cands[i]?.party] || "var(--oth)") : NEUTRAL[i % NEUTRAL.length]);
     return leadFill(base, 100 * (first[0] - second[0]) / tot, false);
   }
 
@@ -330,7 +332,8 @@ window.ENMaps = (() => {
     const rowNames = new Set((r.counties || []).map((row) => norm(row[0])));
     let feats = topojson.feature(topo, topo.objects.counties).features.filter((f) => f.id.startsWith(stateFips));
     // district or other partial-state races: only the counties the race covers
-    if (!r.statewide) feats = feats.filter((f) => rowNames.has(norm(f.properties.name)));
+    const statewide = r.statewide || r.group === "initiative";
+    if (!statewide) feats = feats.filter((f) => rowNames.has(norm(f.properties.name)));
     if (!feats.length) { el.textContent = "No county shapes for this race."; return; }
     const CW = 560, CH = 420;
     const proj = d3.geoIdentity().fitExtent([[6, 6], [CW - 6, CH - 6]], { type: "FeatureCollection", features: feats });
@@ -345,7 +348,10 @@ window.ENMaps = (() => {
     }).join("");
     const unmatched = Object.keys(rows).length - matched;
     el.innerHTML = `<svg viewBox="0 0 ${CW} ${CH}" class="cmapsvg" role="img" aria-label="County results for ${esc(r.title)}">${defs()}${shapes}</svg>
-      ${!r.statewide ? `<p class="cmapnote">Counties this race covers. District lines can split counties, so a county here may be only partly in the district.</p>` : ""}
+      ${!Object.keys(rows).length ? `<p class="cmapnote">${r.status === "no-feed" || r.status === "manual"
+        ? "No county results: this state isn't in a live feed here."
+        : "Counties fill in as the state reports them."}</p>` : ""}
+      ${!statewide ? `<p class="cmapnote">Counties this race covers. District lines can split counties, so a county here may be only partly in the district.</p>` : ""}
       ${unmatched > 0 ? `<p class="cmapnote">${unmatched} counties in the feed didn't match a map shape.</p>` : ""}`;
     bindTips(el.querySelector("svg"), (name) => countyTip(name, r, rows));
   }

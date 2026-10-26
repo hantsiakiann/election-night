@@ -38,7 +38,7 @@
   function readHash() {
     if (!location.hash.replace(/^#/, "")) { state.tab = "national"; state.natGroup = "senate"; return; }  // default view
     const [tab, sub] = location.hash.replace(/^#/, "").split("/");
-    if (["national", "georgia", "metro"].includes(tab)) state.tab = tab;
+    if (["national", "initiatives", "georgia", "metro"].includes(tab)) state.tab = tab;
     if (tab === "national" && sub && GROUP_NAMES[sub]) state.natGroup = sub;
     if (tab === "metro" && sub) state.county = decodeURIComponent(sub);
   }
@@ -49,10 +49,15 @@
   }
 
   // ------------------------------------------------------------------ race row
+  const MEASURE = { yes: "var(--yes)", for: "var(--yes)", no: "var(--no)", against: "var(--no)" };
   function color(c, i, partisan) {
+    const m = MEASURE[(c.name || "").trim().toLowerCase()];
+    if (m) return m;
     return partisan && PARTY[c.party] ? PARTY[c.party] : partisan ? "var(--oth)" : NEUTRAL[i % NEUTRAL.length];
   }
+  const yesNo = (c) => MEASURE[(c?.name || "").trim().toLowerCase()];
   function barOrder(cands) {
+    if (cands.every(yesNo)) return [...cands].sort((a, b) => (yesNo(a) === "var(--yes)" ? 0 : 1) - (yesNo(b) === "var(--yes)" ? 0 : 1));
     const d = cands.filter((c) => c.party === "D"), r = cands.filter((c) => c.party === "R");
     const rest = cands.filter((c) => c.party !== "D" && c.party !== "R");
     return d.length && r.length ? [...d, ...rest, ...r] : cands;
@@ -67,7 +72,7 @@
     if (r.margin_votes === 0) return `<div class="margin tie">Tied</div>`;
     const lead = r.candidates[0];
     let label, cls;
-    if (r.measure) { label = `${lead.name} +${pct1(r.margin_pct)}`; cls = "X"; }
+    if (r.measure) { label = `${lead.name} +${pct1(r.margin_pct)}`; cls = yesNo(lead) === "var(--yes)" ? "yes" : yesNo(lead) ? "no" : "X"; }
     else if (lead.party === "D" || lead.party === "R") { label = `${lead.party}+${pct1(r.margin_pct)}`; cls = lead.party; }
     else { label = `${lead.name.split(" ").pop()} +${pct1(r.margin_pct)}`; cls = "X"; }
     return `<div class="margin ${cls}" title="${esc(lead.name)} leads by ${fmt(r.margin_votes)} votes">${esc(label)}</div>`;
@@ -81,7 +86,9 @@
     const cands = orderCands(r);
     const partisan = cands.some((c) => c.party);
     const lead = cands[0];
-    const leadCls = !r.total_votes ? (r.decided ? "lead-" + r.decided.party : "") : lead?.party === "D" || lead?.party === "R" ? "lead-" + lead.party : "lead-X";
+    const leadCls = !r.total_votes ? (r.decided ? "lead-" + r.decided.party : "")
+      : yesNo(lead) ? (yesNo(lead) === "var(--yes)" ? "lead-yes" : "lead-no")
+      : lead?.party === "D" || lead?.party === "R" ? "lead-" + lead.party : "lead-X";
     const bar = r.total_votes
       ? barOrder(cands.map((c, i) => ({ ...c, _i: i }))).map((c) =>
         `<span style="width:${c.pct}%;background:${color(c, c._i, partisan)}" title="${esc(c.name)} ${pct1(c.pct)}%"></span>`).join("")
@@ -101,6 +108,7 @@
     if (r.below_majority) flags.push(`<span class="flag warn">Leader under 50%: runoff Dec 1 if it holds</span>`);
     if (r.stale) flags.push(`<span class="flag warn">Feed down: showing last numbers received</span>`);
     if (r.status === "manual") flags.push(`<span class="flag">Entered by hand</span>`);
+    if (r.needs) flags.push(`<span class="flag">Needs ${esc(r.needs)} to pass</span>`);
     if (r.vote_for > 1) flags.push(`<span class="flag">Top ${r.vote_for} win</span>`);
     if (r.decided) flags.push(`<span class="flag called">${r.decided.winner ? `${esc(r.decided.winner)} (${esc(r.decided.party)}) is unopposed` : esc(r.decided.reason)}</span>`);
     if (r.held === "D" || r.held === "R") flags.push(`<span class="flag held ${r.held}">Now held by ${r.held === "D" ? "Democrats" : "Republicans"}</span>`);
@@ -115,16 +123,17 @@
       const href = r.link || r.source_url;
       if (href) flags.push(`<span class="flag"><a href="${esc(href)}" target="_blank" rel="noopener">Official results</a></span>`);
     }
-    const hasCmap = r.counties?.length > 1 && r.county_state;
+    const hasCmap = (r.counties?.length > 1 || r.group === "initiative") && r.county_state;
     const cmapShown = hasCmap && state.cmapOpen.has(r.id);
     if (hasCmap) flags.push(`<button class="flag btn" data-cmap-toggle="${esc(r.id)}" aria-expanded="${cmapShown}">${cmapShown ? "Hide" : "Show"} county map</button>`);
     if (cmapShown) state.raceIndex.set(r.id, r);
-    const sub = "";
+    const sub = r.subtitle || "";
     return `<li class="race ${leadCls}${r.status === "no-feed" ? " nofeed" : ""}${state.fresh.has(r.id) ? " fresh" : ""}" data-id="${esc(r.id)}">
       <div class="race-name">${esc(r.title)}${sub ? `<small>${esc(sub)}</small>` : ""}</div>
       <div class="bar${partisan && cands.some((c) => c.party === "D") && cands.some((c) => c.party === "R") ? "" : " multi"}" role="img"
         aria-label="${esc(cands.map((c) => `${c.name} ${pct1(c.pct)}%`).join(", ") || "No results yet")}">${bar}</div>
       ${marginCell(r)}${inCell(r)}
+      ${r.yes_means ? `<p class="yesmeans"><b>Yes:</b> ${esc(r.yes_means)}</p>` : ""}
       ${cands.length ? `<ol class="cands">${candHtml}</ol>` : ""}
       ${flags.length ? `<div class="flags">${flags.join("")}</div>` : ""}
       ${cmapShown ? `<div class="cmap" data-cmap="${esc(r.id)}"><p class="cmapnote">Loading county map…</p></div>` : ""}
@@ -136,7 +145,7 @@
   function matches(r) {
     if (!state.q) return true;
     const q = state.q.toLowerCase();
-    return [r.title, r.feed_name, r.id, r.state_name, ...(r.candidates || []).map((c) => c.name)]
+    return [r.title, r.feed_name, r.id, r.state_name, r.subtitle, ...(r.candidates || []).map((c) => c.name)]
       .some((s) => s && s.toLowerCase().includes(q)) || (r.state && r.state.toLowerCase() === q);
   }
   function arrange(races) {
@@ -146,11 +155,11 @@
     const key = (r) => (r.margin_pct == null || !r.total_votes ? 1e9 : Math.abs(r.margin_pct));
     return [...list].sort((a, b) => key(a) - key(b));
   }
-  function group(name, races, { collapsible = false, collapsed = false, key = name } = {}) {
+  function group(name, races, { collapsible = false, collapsed = false, key = name, unit = "race" } = {}) {
     const list = arrange(races);
     if (!list.length) return "";
     const body = `<ul class="races">${list.map(raceRow).join("")}</ul>`;
-    const count = `<span class="count">${list.length} ${list.length === 1 ? "race" : "races"}</span>`;
+    const count = `<span class="count">${list.length} ${unit}${list.length === 1 ? "" : "s"}</span>`;
     if (!collapsible) return `<section class="group"><h2>${esc(name)} ${count}</h2>${body}</section>`;
     const open = state.q ? true : state.open.has(key) ? state.open.get(key) : !collapsed;
     return `<details class="group" data-key="${esc(key)}"${open ? " open" : ""}><summary>${esc(name)} ${count}</summary>${body}</details>`;
@@ -234,6 +243,13 @@
       <div class="listbar">${scopes}${pickChip}</div>` +
       (group(title, list) || notice("No races match."));
   }
+  function renderInitiatives(d) {
+    const states = d.initiatives?.states || [];
+    if (!states.length) return notice("No ballot measures are listed yet.", "Add them in <code>config/initiatives.yml</code>.");
+    const html = states.map((s) => group(s.name, s.measures, { unit: "measure" })).join("");
+    return (html || (state.q ? "" : notice("No ballot measures match."))) +
+      `<p class="cmapnote">Only North Carolina's measures come from a live feed here; the rest show "No feed" with a link to official results unless numbers are entered by hand.</p>`;
+  }
   function renderGeorgia(d) {
     if (!d.georgia) return notice("Georgia results aren't flowing yet.",
       "They start once the Secretary of State posts the November 3 election and its ID is set in <code>config/races.yml</code>.");
@@ -261,7 +277,8 @@
     applyTheme();
     if (!d) return;
     state.raceIndex.clear();
-    const html = state.tab === "national" ? renderNational(d) : state.tab === "georgia" ? renderGeorgia(d) : renderMetro(d);
+    const html = state.tab === "national" ? renderNational(d) : state.tab === "initiatives" ? renderInitiatives(d)
+      : state.tab === "georgia" ? renderGeorgia(d) : renderMetro(d);
     $("#panel").innerHTML = html.trim() ? html : "";
     drawMaps(d);
     alignParties();

@@ -17,3 +17,8 @@ races:
       - {name: "Test Independent", party: I, votes: 9100}
       - {name: "Test Green", party: G, votes: 2300}
       - {name: "Test Libertarian", party: L, votes: 1400}
+  CA-P40:
+    reporting_pct: 38
+    candidates:
+      - {name: "Yes", votes: 2104332}
+      - {name: "No", votes: 2391877}
