@@ -95,13 +95,34 @@ window.ENMaps = (() => {
       <line x1="0" y1="0" x2="0" y2="7" stroke="var(--flip-stripe)" stroke-width="2.6"/></pattern>`;
   const defs = () => `<defs>${pat("hatch", "var(--map-blank)")}${flipPat}</defs>`;
 
+  // Outlines for the hovered or selected shape go on a top layer, so neighbors drawn later
+  // never cover them.
+  const SVGNS = "http://www.w3.org/2000/svg";
+  function topLayer(svg, el) {
+    const g = el.closest(".world") || svg;
+    let layer = [...g.children].find((c) => c.classList?.contains("hl-layer"));
+    if (!layer) { layer = document.createElementNS(SVGNS, "g"); layer.setAttribute("class", "hl-layer"); }
+    g.appendChild(layer);  // (re)append so it stays last
+    return layer;
+  }
+  function outline(svg, el, cls) {
+    if (!el || !/^(path|rect)$/i.test(el.tagName)) return null;
+    const c = el.cloneNode(false);
+    c.removeAttribute("data-k"); c.removeAttribute("style"); c.removeAttribute("id");
+    c.setAttribute("class", cls);
+    topLayer(svg, el).appendChild(c);
+    return c;
+  }
   function bindTips(svg, html, click) {
+    let cur = null, hl = null;
+    const clear = () => { hl?.remove(); hl = null; cur = null; };
     svg.addEventListener("pointermove", (e) => {
       const el = e.target.closest("[data-k]");
-      if (!el) return hideTip();
+      if (!el) { clear(); return hideTip(); }
+      if (el !== cur) { clear(); cur = el; hl = outline(svg, el, "hl"); }
       showTip(e, html(el.dataset.k));
     });
-    svg.addEventListener("pointerleave", hideTip);
+    svg.addEventListener("pointerleave", () => { clear(); hideTip(); });
     if (click) svg.addEventListener("click", (e) => { const el = e.target.closest("[data-k]"); if (el) { hideTip(); click(el.dataset.k); } });
   }
 
@@ -113,6 +134,17 @@ window.ENMaps = (() => {
   }
   const tstr = (t) => `translate(${t.x},${t.y}) scale(${t.k})`;
   const IDENTITY = { k: 1, x: 0, y: 0 };
+  // Smooth pan+zoom between two transforms (d3.interpolateZoom zooms out a little while
+  // panning between two zoomed-in states, so a jump to a neighbor reads as a move).
+  function flyTo(world, a, b, done) {
+    const toView = (t) => [(W / 2 - t.x) / t.k, (H / 2 - t.y) / t.k, W / t.k];
+    const fromView = ([cx, cy, w]) => { const k = W / w; return { k, x: W / 2 - k * cx, y: H / 2 - k * cy }; };
+    const zi = d3.interpolateZoom(toView(a), toView(b));
+    const ms = reduceMotion() ? 0 : Math.max(650, Math.min(1100, zi.duration * 0.9));
+    d3.select(world).transition().duration(ms).ease(d3.easeCubicInOut)
+      .attrTween("transform", () => (t) => tstr(fromView(zi(t))))
+      .on("end", () => { world.setAttribute("transform", tstr(b)); done?.(); });
+  }
 
   /* opts: selected (abbr to show zoomed), animate ("in" | "out" | null), from (abbr zoomed before
      zooming out), held ({abbr: party}), onPick(abbr) */
@@ -154,14 +186,14 @@ window.ENMaps = (() => {
       }).join("");
     }
 
+    const selEl = selected && svg.querySelector(`.states path[data-k="${selected}"]`);
+    if (selEl) outline(svg, selEl, "hl hl-sel");
     const target = selected ? fitTransform(path.bounds(featBy[selected])) : IDENTITY;
-    const start = animate === "in" ? IDENTITY : animate === "out" && from && featBy[from] ? fitTransform(path.bounds(featBy[from])) : target;
+    const start = animate === "in" ? IDENTITY : (animate === "out" || animate === "move") && from && featBy[from] ? fitTransform(path.bounds(featBy[from])) : target;
     world.setAttribute("transform", tstr(start));
     if (start !== target) {
       if (selected || animate === "out") svg.classList.add("zoomed");
-      d3.select(world).transition().duration(reduceMotion() ? 0 : 750).ease(d3.easeCubicInOut)
-        .attr("transform", tstr(target))
-        .on("end", () => { if (!selected) { svg.classList.remove("zoomed"); svg.querySelector(".counties").innerHTML = ""; } });
+      flyTo(world, start, target, () => { if (!selected) { svg.classList.remove("zoomed"); svg.querySelector(".counties").innerHTML = ""; } });
     }
 
     bindTips(svg, (k) => k.startsWith("c:") ? countyTip(k.slice(2), focusRace, rows)
@@ -171,7 +203,7 @@ window.ENMaps = (() => {
   }
 
   // ---------------------------------------------------------------- House district grid
-  async function houseGrid(el, races, states, { onPick, selected } = {}) {
+  async function houseGrid(el, races, states, { onPick, selected, selectedDist } = {}) {
     const grid = await loadGeo("house_grid");
     const S = 22;
     const byId = Object.fromEntries(races.map((r) => [r.id, r]));
@@ -184,7 +216,8 @@ window.ENMaps = (() => {
       const id = seats[s] === 1 ? `H-${s}-AL` : `H-${s}-${String(n).padStart(2, "0")}`;
       const r = byId[id];
       (cellsBy[s] ||= []).push([x, y]);
-      rects += `<rect data-k="${id}" class="${selected && selected !== s ? "dim" : ""}" x="${x * S + 1}" y="${y * S + 1}" width="${S - 2}" height="${S - 2}" rx="2" style="fill:${raceFill(r)}"/>`;
+      const cls = selected && selected !== s ? "dim" : selectedDist && selectedDist !== id ? "dim2" : "";
+      rects += `<rect data-k="${id}" class="${cls}" x="${x * S + 1}" y="${y * S + 1}" width="${S - 2}" height="${S - 2}" rx="2" style="fill:${raceFill(r)}"/>`;
       // state borders: edges where the neighbor belongs to another state (or nothing)
       if (owner.get(`${x},${y - 1}`) !== s) edges += `M${x * S},${y * S}h${S}`;
       if (owner.get(`${x},${y + 1}`) !== s) edges += `M${x * S},${(y + 1) * S}h${S}`;
@@ -200,10 +233,12 @@ window.ENMaps = (() => {
     el.innerHTML = `<svg viewBox="-4 -4 ${grid.w * S + 8} ${grid.h * S + 8}" class="housegrid" role="img"
         aria-label="House districts, one equal square per seat, grouped by state; the list below has the same results">
       ${defs()}<g>${rects}</g><path class="borders" d="${edges}"/><g class="labels">${labels}</g></svg>`;
-    bindTips(el.querySelector("svg"), (k) => {
+    const gsvg = el.querySelector("svg");
+    if (selectedDist) outline(gsvg, gsvg.querySelector(`rect[data-k="${selectedDist}"]`), "hl hl-sel");
+    bindTips(gsvg, (k) => {
       const r = byId[k];
       return r ? raceTip(r.title, r) : "";
-    }, (k) => byId[k] && onPick?.(byId[k].state));
+    }, (k) => byId[k] && onPick?.(byId[k].state, k));
   }
 
   // ---------------------------------------------------------------- House: real district map
@@ -211,7 +246,9 @@ window.ENMaps = (() => {
      2026, so instead of out-of-date lines they're shaded in bands by share of seats each party
      leads. If the district file is missing, every state is shaded that way. */
   async function houseGeo(el, races, states, opts = {}) {
-    const { selected, animate, from, newLines = [], onPick } = opts;
+    // selected: state abbr; selectedDist: race id ("H-GA-05"); zoomFrom: view before this one
+    // ("" = whole U.S., "GA" = a state, "H-GA-05" = a district; undefined = no animation)
+    const { selected, selectedDist, zoomFrom, newLines = [], onPick } = opts;
     const stopo = await loadGeo("states");
     let dtopo = null;
     try { dtopo = await loadGeo("districts"); } catch { /* not built yet: fall back to bands */ }
@@ -248,7 +285,8 @@ window.ENMaps = (() => {
     }
     const districts = dfeats.filter((f) => mapped.has(f.id.slice(0, 2))).map((f) => {
       const r = byKey[f.id];
-      return `<path data-k="${f.id}" class="dist${selected && selected !== f.id.slice(0, 2) ? " dim" : ""}" d="${path(f)}" style="fill:${raceFill(r)}"/>`;
+      const cls = selected && selected !== f.id.slice(0, 2) ? " dim" : selectedDist && selectedDist !== "H-" + f.id ? " dim2" : "";
+      return `<path data-k="${f.id}" class="dist${cls}" d="${path(f)}" style="fill:${raceFill(r)}"/>`;
     }).join("");
     const mesh = path(topojson.mesh(stopo, stopo.objects.states, (a, b) => a !== b));
     const outline = path(topojson.mesh(stopo, stopo.objects.states, (a, b) => a === b));
@@ -257,11 +295,22 @@ window.ENMaps = (() => {
       ${defs()}<defs>${clips}</defs><g class="world">${bands}<g>${districts}</g>
       <path class="smesh" d="${mesh}"/><path class="smesh" d="${outline}"/></g></svg>`;
     const svg = el.querySelector("svg"), world = svg.querySelector(".world");
-    const target = selected && featBy[selected] ? fitTransform(path.bounds(featBy[selected])) : IDENTITY;
-    const start = animate === "in" ? IDENTITY : animate === "out" && from && featBy[from] ? fitTransform(path.bounds(featBy[from])) : target;
+    const distBy = Object.fromEntries(dfeats.filter((f) => mapped.has(f.id.slice(0, 2))).map((f) => ["H-" + f.id, f]));
+    const featFor = (key) => !key ? null : key.startsWith("H-") ? (distBy[key] || featBy[key.slice(2, 4)]) : featBy[key];
+    const view = (key) => { const f = featFor(key); return f ? fitTransform(path.bounds(f), key.startsWith("H-") ? 0.55 : 0.9) : IDENTITY; };
+    const focusKey = selectedDist || selected || "";
+    const focusFeat = featFor(focusKey);
+    if (focusFeat) {
+      const sp = document.createElementNS(SVGNS, "path");
+      sp.setAttribute("d", path(focusFeat));
+      sp.setAttribute("class", "hl hl-sel");
+      topLayer(svg, world.firstElementChild).appendChild(sp);
+    }
+    const target = view(focusKey);
+    const start = zoomFrom === undefined ? target : view(zoomFrom);
     world.setAttribute("transform", tstr(start));
-    if (start !== target) {
-      d3.select(world).transition().duration(reduceMotion() ? 0 : 750).ease(d3.easeCubicInOut).attr("transform", tstr(target));
+    if (zoomFrom !== undefined && zoomFrom !== focusKey) {
+      flyTo(world, start, target);
     }
     bindTips(svg, (k) => {
       if (k.startsWith("S:")) {
@@ -271,7 +320,7 @@ window.ENMaps = (() => {
       }
       const r = byKey[k];
       return r ? raceTip(r.title, r) : `<b>${esc(k)}</b>`;
-    }, (k) => onPick?.(k.startsWith("S:") ? k.slice(2) : k.slice(0, 2)));
+    }, (k) => (k.startsWith("S:") ? onPick?.(k.slice(2), null) : onPick?.(k.slice(0, 2), "H-" + k)));
     return { mappedStates: mapped.size, haveDistricts: !!dtopo };
   }
 

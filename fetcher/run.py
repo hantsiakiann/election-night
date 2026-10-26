@@ -103,6 +103,9 @@ def build_national(cfg, loaded, prelim=None):
         meta = dict(spec, group=group, link=links.get(abbr), note=notes.get(abbr), county_state=abbr)
         if group in ("governor", "senate"):
             meta["held"] = (ncfg.get(group + "_party") or {}).get(abbr)
+        rating = (ncfg.get("house_ratings") or {}).get(spec["id"]) if group == "house" else None
+        if rating:
+            meta["ratings"] = rating
         dec = (ncfg.get("decided") or {}).get(spec["id"])
         if dec:
             if dec.get("party"):

@@ -87,7 +87,10 @@ If a feed goes down mid-night, its races keep the last numbers received and are 
   but no downloadable file was found, so they're shaded in bands by seats each party leads.
   To add one, put its shapefile zip or GeoJSON URL in `tools/district_overrides.json` and
   rerun the workflow.
-  Click a district to zoom into its state.
+- **Clicking on House maps:** the first click picks a state (highlighted in the squares view,
+  zoomed in the geographic view); a click on one of its districts picks that district and lists
+  only its result; clicking the same district again goes back to the state. Clicking another
+  state moves the map to it. Escape steps back one level.
 - **County maps** for statewide races are also available from each race card ("Show county
   map"); they start hidden.
 
@@ -101,7 +104,7 @@ Candidates on the ballot are listed before results arrive (`config/candidates.ym
 votes, Democrats and Republicans are listed first and independents last; once votes arrive,
 candidates sort by votes. The header has a light/dark switch.
 
-Closest-first sort, search by race or candidate, large-text mode for a TV, a brief
+Closest-first sort, search by race or candidate, a brief
 highlight on rows whose count just moved, a "Leader under 50%" flag for Georgia's runoff
 rule, and deep links (`#georgia`, `#metro/Fulton`, `#national/senate`).
 

@@ -125,12 +125,12 @@ details.group[open] > summary::before { content: "–"; }
 .in b { display: block; color: var(--text); font-size: 1.4rem; }
 .cands {
   grid-column: 2 / -1; list-style: none; margin: 4px 0 0; padding: 0;
-  display: grid; grid-template-columns: auto minmax(8em, max-content) minmax(6em, 1fr) auto auto; gap: 2px 14px;
+  display: grid; grid-template-columns: auto var(--namecol, minmax(8em, max-content)) minmax(6em, 1fr) auto auto; gap: 2px 14px;
   font-size: .9rem; font-variant-numeric: tabular-nums; max-width: 640px;
 }
 .cand { display: contents; }
 .cand .dot { width: 10px; height: 10px; border-radius: 2px; align-self: center; }
-.cand .nm { min-width: 0; }
+.cand .nm { min-width: 0; overflow-wrap: anywhere; }
 .cand .v { color: var(--muted); text-align: right; }
 .cand .pct { font: 600 1.05rem var(--num); text-align: right; min-width: 3.2em; }
 .cand.more { display: list-item; grid-column: 2 / -1; color: var(--muted); font-size: .82rem; }
@@ -179,13 +179,11 @@ details.group[open] > summary::before { content: "–"; }
 .mapbox svg { width: 100%; height: auto; display: block; max-height: 62vh; }
 .usmap path.st { stroke: var(--map-edge); stroke-width: .6; }
 .usmap path.st.has { cursor: pointer; }
-.usmap path.st.has:hover, .usmap path.sel { stroke: var(--text); stroke-width: 1.6; }
 .usmap .mesh { fill: none; stroke: var(--map-edge); stroke-width: .6; pointer-events: none; }
 .tilemap .tilebg { fill: color-mix(in srgb, var(--map-blank) 45%, transparent); cursor: pointer; }
 .tilemap .tile.sel .tilebg { stroke: var(--text); stroke-width: 1.5; }
 .tilemap text { font: 600 10px var(--body); fill: var(--muted); pointer-events: none; }
 .tilemap rect[data-k^="H-"] { cursor: pointer; }
-.tilemap rect[data-k^="H-"]:hover { stroke: var(--text); stroke-width: 1; }
 .legend { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: .82rem; color: var(--muted); }
 .legend li { display: flex; align-items: center; gap: 4px; }
 .legend i { width: 14px; height: 14px; border-radius: 2px; display: inline-block; }
@@ -219,7 +217,6 @@ details.group[open] > summary::before { content: "–"; }
 .cmap { grid-column: 1 / -1; max-width: 620px; margin: 6px 0 4px; }
 .cmap svg { width: 100%; height: auto; display: block; }
 .cmap path { stroke: var(--map-edge); stroke-width: .5; }
-.cmap path:hover { stroke: var(--text); stroke-width: 1.4; }
 .cmapnote { margin: 4px 0; font-size: .8rem; color: var(--muted); }
 
 .maptip {
@@ -252,10 +249,8 @@ details.group[open] > summary::before { content: "–"; }
 .usmap.zoomed .states path.st:not(.sel) { fill: var(--map-none) !important; opacity: .6; }
 .usmap.zoomed .states path.sel { fill: none !important; }
 .usmap .counties path { stroke: var(--map-edge); stroke-width: .7; }
-.usmap .counties path:hover { stroke: var(--text); stroke-width: 1.6; }
 .housegrid rect { cursor: pointer; }
 .housegrid rect.dim { opacity: .3; }
-.housegrid rect:hover { stroke: var(--text); stroke-width: 1.5; }
 .housegrid .borders { fill: none; stroke: var(--text); stroke-width: 1.6; stroke-linecap: square; opacity: .85; pointer-events: none; }
 .housegrid .labels text {
   font: 700 8px var(--body); fill: var(--text); text-anchor: middle; pointer-events: none;
@@ -265,7 +260,6 @@ details.group[open] > summary::before { content: "–"; }
 
 .viewtoggle { margin-top: 14px; }
 .housegeo path.dist { stroke: var(--map-edge); stroke-width: .5; cursor: pointer; }
-.housegeo path.dist:hover { stroke: var(--text); stroke-width: 1.5; }
 .housegeo path.dist.dim { fill: var(--map-none) !important; opacity: .6; }
 .housegeo .bands.dim rect { fill: var(--map-none) !important; opacity: .6; }
 .housegeo .bands { cursor: pointer; }
@@ -278,3 +272,11 @@ details.group[open] > summary::before { content: "–"; }
 .maptip td.pty { color: var(--muted); }
 h1 a { color: inherit; text-decoration: none; }
 h1 a:hover { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 4px; }
+/* hover / selection outlines, always drawn on the top layer */
+.hl { fill: none !important; stroke: var(--text); stroke-width: 2; vector-effect: non-scaling-stroke; pointer-events: none; }
+.hl-sel { stroke-width: 2.4; }
+.housegrid .hl { stroke-width: 2; vector-effect: none; }
+.flag.rating { color: var(--muted); }
+.housegeo path.dist.dim2, .housegrid rect.dim2 { opacity: .55; }
+.housegrid rect.dim { opacity: .3; }
+.mapbar .mapback + .mapback { margin-left: -4px; }

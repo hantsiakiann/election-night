@@ -22,7 +22,7 @@
   const state = {
     data: null, tab: "national", natGroup: store.get("natGroup", "senate"), county: store.get("county", null),
     scope: store.get("scope", { senate: "all", governor: "all", house: "key" }), pick: null,
-    houseView: store.get("houseView", "grid"),
+    houseView: store.get("houseView", "grid"), pickDist: null,
     senView: store.get("senView", "up"),
     cmapOpen: new Set(), cmapClosed: new Set(), raceIndex: new Map(),
     closest: store.get("closest", false), theme: store.get("theme", null), q: "",
@@ -105,6 +105,7 @@
     if (r.decided) flags.push(`<span class="flag called">${r.decided.winner ? `${esc(r.decided.winner)} (${esc(r.decided.party)}) is unopposed` : esc(r.decided.reason)}</span>`);
     if (r.held === "D" || r.held === "R") flags.push(`<span class="flag held ${r.held}">Now held by ${r.held === "D" ? "Democrats" : "Republicans"}</span>`);
     if (window.ENMaps?.isFlip(r)) flags.push(`<span class="flag flip">Flip from ${r.held === "D" ? "Democrats" : "Republicans"}</span>`);
+    if (r.ratings) flags.push(`<span class="flag rating">${Object.entries(r.ratings).map(([k, v]) => `${esc(k)}: ${esc(v)}`).join(", ")}</span>`);
     if (r.note) flags.push(`<span class="flag">${esc(r.note)}</span>`);
     if (r.status === "no-feed" || r.status === "not-found" || r.status === "source-error" || r.status === "manual") {
       const href = r.link || r.source_url;
@@ -195,11 +196,12 @@
     let list = scope === "key" && !state.pick ? all.filter((r) => r.key) : all;
     let pickChip = "";
     if (state.pick) {
-      list = list.filter((r) => r.state === state.pick);
+      list = list.filter((r) => r.state === state.pick && (!state.pickDist || r.id === state.pickDist));
       const nm = d.states.find((s) => s.abbr === state.pick)?.name || state.pick;
       pickChip = `<button class="pick" data-unpick>${esc(nm)} only <span aria-hidden="true">✕</span><span class="sr">Show all states</span></button>`;
     }
-    const title = state.pick ? `${GROUP_NAMES[g]}: ${d.states.find((s) => s.abbr === state.pick)?.name}` : `${GROUP_NAMES[g]}${scope === "key" ? ": key races" : ""}`;
+    const stName = state.pick && d.states.find((s) => s.abbr === state.pick)?.name;
+    const title = state.pickDist ? `House: ${list[0]?.title || state.pickDist}` : state.pick ? `${GROUP_NAMES[g]}: ${stName}` : `${GROUP_NAMES[g]}${scope === "key" ? ": key races" : ""}`;
     return `<div class="subnav" role="group" aria-label="Office">${pills}</div>
       <div class="natmap-wrap">
         ${balanceBar(g, all, d.summary || {})}
@@ -211,7 +213,8 @@
           <button data-hview="map" aria-pressed="${state.houseView === "map"}">Geographic</button></div>` : ""}
         <div class="mapbox${state.pick && zoomable() ? " zoomed" : ""}">
           <div id="natmap"></div>
-          ${state.pick && zoomable() ? `<div class="mapbar"><button class="mapback" data-unpick>Back to U.S. map</button><span class="mapcap" id="mapcap"></span></div>` : ""}
+          ${state.pick ? `<div class="mapbar">${state.pickDist ? `<button class="mapback" data-unpick>Back to ${esc(stName)}</button>` : ""}
+            <button class="mapback" data-unpick-all>Back to U.S. map</button><span class="mapcap" id="mapcap"></span></div>` : ""}
         </div>
         <ul class="legend">
           <li><i style="background:var(--dem)"></i><i style="background:color-mix(in srgb, var(--dem) 55%, var(--map-blank))"></i>Democrat leads (lighter = closer)</li>
@@ -221,7 +224,7 @@
           ${g === "senate" && state.senView === "up" ? `<li><i style="background:var(--map-none)"></i>No Senate race this year</li>`
             : `<li><i style="background:var(--dem)"></i><i style="background:var(--rep)"></i>${g === "senate" ? '<i style="background:var(--split)"></i>' : ""}Not up this year: current ${g === "senate" ? "senators (purple = one of each party)" : "governor"}</li>`}`}
           ${g === "house" && state.houseView === "map" ? `<li><i class="bandsw"></i>New 2026 lines, not mapped: shaded by seats each party leads</li>` : ""}
-          <li class="hint">${g === "house" ? (state.houseView === "map" ? "Click a district to zoom into its state." : "Each square is one district. Click one to see its state.") : "Click a state to zoom into its counties."}</li>
+          <li class="hint">${g === "house" ? (state.houseView === "map" ? "Click a state to zoom in, then a district for its results." : "Each square is one district. Click a state, then a district.") : "Click a state to zoom into its counties."}</li>
         </ul>
       </div>
       <div class="listbar">${scopes}${pickChip}</div>` +
@@ -257,9 +260,24 @@
     const html = state.tab === "national" ? renderNational(d) : state.tab === "georgia" ? renderGeorgia(d) : renderMetro(d);
     $("#panel").innerHTML = html.trim() ? html : "";
     drawMaps(d);
+    alignParties();
     if (state.q && !$("#panel .race")) $("#panel").insertAdjacentHTML("beforeend", `<p class="empty-search">No races match “${esc(state.q)}”. Try a last name or a district number.</p>`);
     writeHash();
     renderStatus();
+  }
+
+  // One name-column width for every candidate list on the page, so the party names line up
+  // all the way down. Measured at natural width, then fixed (capped; longer names wrap).
+  document.fonts?.ready.then(() => alignParties());
+  function alignParties() {
+    const panel = $("#panel");
+    const lists = panel?.querySelectorAll(".cands") || [];
+    if (!lists.length) return;
+    panel.style.setProperty("--namecol", "max-content");
+    let w = 0;
+    panel.querySelectorAll(".cand .nm").forEach((n) => { w = Math.max(w, n.getBoundingClientRect().width); });
+    const em = parseFloat(getComputedStyle(lists[0]).fontSize) || 14;
+    panel.style.setProperty("--namecol", `${Math.min(Math.ceil(w) / em + 0.2, 17).toFixed(2)}em`);
   }
 
   function drawMaps(d) {
@@ -280,13 +298,17 @@
       const anim = state.zoomAnim || {};
       state.zoomAnim = null;
       const opts = { selected: state.pick, held, notUp, notUpText, animate: anim.animate, from: anim.from, onPick: (abbr) => pickState(abbr) };
+      const hopts = { selected: state.pick, selectedDist: state.pickDist, zoomFrom: anim.zoomFrom, onPick: (abbr, rid) => pickHouse(abbr, rid) };
       if (state.natGroup === "house" && state.houseView === "map") {
-        ENMaps.houseGeo(nat, races, d.states, { ...opts, newLines: d.summary?.house_new_lines || [] }).then((info) => {
+        ENMaps.houseGeo(nat, races, d.states, { ...hopts, newLines: d.summary?.house_new_lines || [] }).then((info) => {
           const cap = $("#mapcap");
-          if (cap && state.pick) cap.textContent = `${d.states.find((s) => s.abbr === state.pick)?.name} districts`;
+          if (cap && state.pick) cap.textContent = state.pickDist ? state.pickDist.slice(2) : `${d.states.find((s) => s.abbr === state.pick)?.name} districts`;
           if (!info.haveDistricts) nat.insertAdjacentHTML("beforeend", `<p class="cmapnote">District lines haven't been built yet (run "Build district map" in GitHub Actions); states are shaded by seats.</p>`);
         }).catch(fail(nat));
-      } else if (state.natGroup === "house") ENMaps.houseGrid(nat, races, d.states, opts).catch(fail(nat));
+      } else if (state.natGroup === "house") ENMaps.houseGrid(nat, races, d.states, hopts).then(() => {
+        const cap = $("#mapcap");
+        if (cap && state.pick) cap.textContent = state.pickDist ? state.pickDist.slice(2) : `${d.states.find((s) => s.abbr === state.pick)?.name} districts`;
+      }).catch(fail(nat));
       else ENMaps.usMap(nat, races, d.states, opts).then((info) => {
         const cap = $("#mapcap");
         if (cap && state.pick) {
@@ -307,13 +329,29 @@
     const prev = state.pick;
     if (prev === abbr) return unpick();
     state.pick = abbr;
-    state.zoomAnim = zoomable() ? { animate: prev ? null : "in" } : null;
+    state.zoomAnim = zoomable() ? (prev ? { animate: "move", from: prev } : { animate: "in" }) : null;
+    render();
+  }
+  // House: first click picks the state; a click on a district in that state picks the district;
+  // clicking the picked district again steps back to the state.
+  function pickHouse(abbr, rid) {
+    const before = state.pickDist || state.pick || "";
+    if (state.pick !== abbr) { state.pick = abbr; state.pickDist = null; }
+    else if (!rid) return;
+    else state.pickDist = state.pickDist === rid ? null : rid;
+    state.zoomAnim = { zoomFrom: before };
     render();
   }
   function unpick() {
     if (!state.pick) return;
+    if (state.natGroup === "house") {
+      const before = state.pickDist || state.pick;
+      if (state.pickDist) state.pickDist = null; else state.pick = null; state.pickDist = null;
+      state.zoomAnim = { zoomFrom: before };
+      return render();
+    }
     state.zoomAnim = zoomable() ? { animate: "out", from: state.pick } : null;
-    state.pick = null;
+    state.pick = null; state.pickDist = null;
     render();
   }
 
@@ -392,15 +430,20 @@
     const sc = e.target.closest("[data-scope]"), tg = e.target.closest("[data-cmap-toggle]");
     const hv = e.target.closest("[data-hview]"), sv = e.target.closest("[data-sview]");
     if (sv) { state.senView = sv.dataset.sview; store.set("senView", state.senView); render(); return; }
-    if (hv) { state.houseView = hv.dataset.hview; store.set("houseView", state.houseView); state.pick = null; render(); return; }
+    if (hv) { state.houseView = hv.dataset.hview; store.set("houseView", state.houseView); state.pick = null; state.pickDist = null; render(); return; }
     if (e.target.closest("[data-unpick]")) unpick();
-    if (sc) { state.scope = { ...state.scope, [state.natGroup]: sc.dataset.scope }; state.pick = null; store.set("scope", state.scope); render(); }
+    if (e.target.closest("[data-unpick-all]")) {
+      const before = state.pickDist || state.pick;
+      state.pickDist = null;
+      if (state.natGroup === "house") { state.pick = null; state.pickDist = null; state.zoomAnim = { zoomFrom: before }; render(); } else unpick();
+    }
+    if (sc) { state.scope = { ...state.scope, [state.natGroup]: sc.dataset.scope }; state.pick = null; state.pickDist = null; store.set("scope", state.scope); render(); }
     if (tg) {
       const id = tg.dataset.cmapToggle, open = tg.getAttribute("aria-expanded") === "true";
       if (open) { state.cmapOpen.delete(id); state.cmapClosed.add(id); } else { state.cmapClosed.delete(id); state.cmapOpen.add(id); }
       render();
     }
-    if (n) { state.natGroup = n.dataset.nat; state.pick = null; store.set("natGroup", state.natGroup); render(); }
+    if (n) { state.natGroup = n.dataset.nat; state.pick = null; state.pickDist = null; store.set("natGroup", state.natGroup); render(); }
     if (c) { state.county = c.dataset.county; store.set("county", state.county); render(); }
   });
   $("#panel").addEventListener("toggle", (e) => {
@@ -417,7 +460,7 @@
   $("#q").addEventListener("input", (e) => { clearTimeout(qTimer); qTimer = setTimeout(() => { state.q = e.target.value.trim(); render(); }, 120); });
   $("#title").addEventListener("click", (e) => {  // home: Senate, un-zoomed, no filters
     e.preventDefault();
-    state.tab = "national"; state.natGroup = "senate"; state.pick = null; state.q = ""; $("#q").value = "";
+    state.tab = "national"; state.natGroup = "senate"; state.pick = null; state.pickDist = null; state.q = ""; $("#q").value = "";
     store.set("natGroup", "senate");
     render(); scrollTo({ top: 0 });
   });
