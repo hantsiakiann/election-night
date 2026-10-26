@@ -16,12 +16,13 @@ window.ENMaps = (() => {
   // Fill for a lead: party color, deeper as the margin widens (called races are full strength).
   function leadFill(base, margin, called) {
     if (called) return base;
-    const strength = Math.round(28 + Math.min(1, Math.abs(margin) / 20) * 62); // 28%..90%
+    const strength = Math.round(55 + Math.min(1, Math.abs(margin) / 20) * 40); // 55%..95%
     return `color-mix(in srgb, ${base} ${strength}%, var(--map-blank))`;
   }
-  function raceFill(r) {
-    if (!r) return "var(--map-none)";
-    if (!r.total_votes) return "url(#hatch)";
+  const MUTED = { D: "var(--dem-muted)", R: "var(--rep-muted)" };
+  function raceFill(r, held) {
+    if (!r) return MUTED[held] || "var(--map-none)";          // no race this year: current holder, muted
+    if (!r.total_votes) return held && MUTED[held] ? `url(#hatch${held})` : "url(#hatch)";
     const lead = r.candidates[0];
     const base = PARTY[lead.party] || "var(--oth)";
     const called = r.call && r.call === lead.name;
@@ -45,16 +46,20 @@ window.ENMaps = (() => {
     tip.style.transform = `translate(${Math.max(8, x)}px, ${Math.max(8, y)}px)`;
   }
   const hideTip = () => { if (tip) tip.hidden = true; };
-  function raceTip(title, r, extra = "") {
-    if (!r) return `<b>${esc(title)}</b><br>No race this year`;
+  const HELD = { D: "Democrat", R: "Republican" };
+  function raceTip(title, r, extra = "", held) {
+    const h = held && HELD[held] ? `<br>Held by a ${HELD[held]} now` : "";
+    if (!r) return `<b>${esc(title)}</b><br>No race this year${h}`;
+    if (!r.total_votes) return `<b>${esc(title)}</b>${h}<br>${r.status === "no-feed" ? "No live feed; see official results" : "No votes counted yet"}`;
     if (!r.total_votes) return `<b>${esc(title)}</b><br>${r.status === "no-feed" ? "No live feed; see official results" : "No votes counted yet"}`;
     const rows = r.candidates.slice(0, 3).map((c) =>
       `<tr><td>${esc(c.name)}${c.party ? ` (${esc(c.party)})` : ""}</td><td>${pct1(c.pct)}%</td></tr>`).join("");
     const rep = r.reporting_pct != null ? `${Math.round(r.reporting_pct)}% reporting` : "";
     return `<b>${esc(title)}</b>${r.call ? `<br>Called for ${esc(r.call)}` : ""}<table>${rows}</table>${rep}${extra}`;
   }
-  const hatchDefs = `<defs><pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-      <rect width="6" height="6" fill="var(--map-blank)"/><line x1="0" y1="0" x2="0" y2="6" stroke="var(--map-hatch)" stroke-width="2"/></pattern></defs>`;
+  const pat = (id, bg) => `<pattern id="${id}" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="6" height="6" fill="${bg}"/><line x1="0" y1="0" x2="0" y2="6" stroke="var(--map-hatch)" stroke-width="2"/></pattern>`;
+  const hatchDefs = `<defs>${pat("hatch", "var(--map-blank)")}${pat("hatchD", "var(--dem-muted)")}${pat("hatchR", "var(--rep-muted)")}</defs>`;
 
   function bindTips(svg, html, click) {
     svg.addEventListener("pointermove", (e) => {
@@ -67,7 +72,7 @@ window.ENMaps = (() => {
   }
 
   // ---------------------------------------------------------------- U.S. state map
-  async function usMap(el, races, states, { onPick, selected } = {}) {
+  async function usMap(el, races, states, { onPick, selected, held = {} } = {}) {
     const topo = await loadGeo("states");
     const byFips = Object.fromEntries(states.map((s) => [s.fips, s]));
     const raceBy = Object.fromEntries(races.map((r) => [r.state, r]));
@@ -76,13 +81,13 @@ window.ENMaps = (() => {
     const shapes = feats.map((f) => {
       const s = byFips[f.id], r = raceBy[s.abbr];
       const sel = selected === s.abbr ? " sel" : "";
-      return `<path data-k="${s.abbr}" class="st${r ? " has" : ""}${sel}" d="${path(f)}" style="fill:${raceFill(r)}"/>`;
+      return `<path data-k="${s.abbr}" class="st${r ? " has" : ""}${sel}" d="${path(f)}" style="fill:${raceFill(r, held[s.abbr])}"/>`;
     }).join("");
     const mesh = path(topojson.mesh(topo, topo.objects.states, (a, b) => a !== b));
     el.innerHTML = `<svg viewBox="0 0 975 610" class="usmap" role="img" aria-label="Map of races by state; the list below has the same results">
       ${hatchDefs}<g>${shapes}</g><path class="mesh" d="${mesh}"/></svg>`;
     const names = Object.fromEntries(states.map((s) => [s.abbr, s.name]));
-    bindTips(el.querySelector("svg"), (k) => raceTip(names[k] + (raceBy[k]?.special ? " (special)" : ""), raceBy[k]),
+    bindTips(el.querySelector("svg"), (k) => raceTip(names[k] + (raceBy[k]?.special ? " (special)" : ""), raceBy[k], "", held[k]),
       (k) => raceBy[k] && onPick?.(k));
   }
 

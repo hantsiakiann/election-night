@@ -100,6 +100,8 @@ def build_national(cfg, loaded):
         src = feeds.get(abbr, "manual")
         pattern = (patterns.get(src) or {}).get(group)
         meta = dict(spec, group=group, link=links.get(abbr), note=notes.get(abbr), county_state=abbr)
+        if group == "governor":
+            meta["held"] = (ncfg.get("governor_party") or {}).get(abbr)
         data = loaded.get(src)
         contest = None
         if data and pattern:
@@ -121,7 +123,13 @@ def build_national(cfg, loaded):
 
 def national_summary(cfg):
     ncfg = cfg.get("national") or {}
+    gov = ncfg.get("governor_party") or {}
+    up = set(GOVERNOR_2026)
+    gov_hold = {"D": sum(1 for a, p in gov.items() if a not in up and p == "D"),
+                "R": sum(1 for a, p in gov.items() if a not in up and p == "R")}
     return {"senate_holdovers": ncfg.get("senate_holdovers") or {},
+            "governor_holdovers": gov_hold if gov else {},
+            "governor_party": gov,
             "senate_control": ncfg.get("senate_control", 51),
             "house_control": ncfg.get("house_control", 218)}
 

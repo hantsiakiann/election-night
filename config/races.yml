@@ -65,6 +65,13 @@ national:
       house: "U\\.?S\\.? Representative District 0?{n}$"
   # Seats not up this year, for the Senate control bar (current Senate: 53 R, 47 D incl. 2 independents).
   senate_holdovers: {D: 34, R: 31}
+  # Party holding each governorship now (Oct 2026). Seats not up in 2026 count toward the
+  # governor tally; up seats show the current holder in muted color until votes come in.
+  governor_party: {AL: R, AK: R, AZ: D, AR: R, CA: D, CO: D, CT: D, DE: D, FL: R, GA: R, HI: D, ID: R,
+                   IL: D, IN: R, IA: R, KS: D, KY: D, LA: R, ME: D, MD: D, MA: D, MI: D, MN: D, MS: R,
+                   MO: R, MT: R, NE: R, NV: R, NH: R, NJ: D, NM: D, NY: D, NC: D, ND: R, OH: R, OK: R,
+                   OR: D, PA: D, RI: D, SC: R, SD: R, TN: R, TX: R, UT: R, VT: R, VA: D, WA: D, WV: R,
+                   WI: D, WY: R}
   senate_control: 51            # 50 + vice president's tiebreak goes to R; shown as a note
   house_control: 218
   # Key races, shown by default; "All races" lists everything.

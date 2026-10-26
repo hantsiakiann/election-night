@@ -85,6 +85,7 @@
     if (r.stale) flags.push(`<span class="flag warn">Feed down: showing last numbers received</span>`);
     if (r.status === "manual") flags.push(`<span class="flag">Entered by hand</span>`);
     if (r.vote_for > 1) flags.push(`<span class="flag">Top ${r.vote_for} win</span>`);
+    if (r.held === "D" || r.held === "R") flags.push(`<span class="flag held ${r.held}">Now held by ${r.held === "D" ? "Democrats" : "Republicans"}</span>`);
     if (r.note) flags.push(`<span class="flag">${esc(r.note)}</span>`);
     if (r.status === "no-feed" || r.status === "not-found" || r.status === "source-error" || r.status === "manual") {
       const href = r.link || r.source_url;
@@ -145,7 +146,7 @@
   }
   function balanceBar(g, races, summary) {
     const t = tally(races);
-    const hold = g === "senate" ? summary.senate_holdovers || {} : {};
+    const hold = summary[g + "_holdovers"] || {};
     const hD = hold.D || 0, hR = hold.R || 0;
     const total = races.length + hD + hR;
     const need = g === "senate" ? summary.senate_control || 51 : g === "house" ? summary.house_control || 218 : null;
@@ -186,10 +187,11 @@
         ${balanceBar(g, all, d.summary || {})}
         <div class="mapbox" id="natmap" aria-hidden="false"></div>
         <ul class="legend">
-          <li><i style="background:var(--dem)"></i><i style="background:color-mix(in srgb, var(--dem) 35%, var(--map-blank))"></i>Democrat leads (lighter = closer)</li>
-          <li><i style="background:var(--rep)"></i><i style="background:color-mix(in srgb, var(--rep) 35%, var(--map-blank))"></i>Republican leads</li>
-          <li><i class="hatch"></i>No results yet</li>
-          ${g === "house" ? "" : `<li><i style="background:var(--map-none)"></i>No race this year</li>`}
+          <li><i style="background:var(--dem)"></i><i style="background:color-mix(in srgb, var(--dem) 55%, var(--map-blank))"></i>Democrat leads (lighter = closer)</li>
+          <li><i style="background:var(--rep)"></i><i style="background:color-mix(in srgb, var(--rep) 55%, var(--map-blank))"></i>Republican leads</li>
+          ${g === "governor" ? `<li><i style="background:var(--dem-muted)"></i><i style="background:var(--rep-muted)"></i>Current holder, not up this year</li>
+          <li><i class="hatch hD"></i><i class="hatch hR"></i>Current holder, no results yet</li>`
+          : `<li><i class="hatch"></i>No results yet</li>${g === "house" ? "" : `<li><i style="background:var(--map-none)"></i>No race this year</li>`}`}
           <li class="hint">Click a ${g === "house" ? "state or district" : "state"} to filter the list.</li>
         </ul>
       </div>
@@ -238,7 +240,7 @@
     const nat = $("#natmap");
     if (nat) {
       const races = d.national[state.natGroup] || [];
-      const opts = { selected: state.pick, onPick: (abbr) => { state.pick = state.pick === abbr ? null : abbr; render(); $(".listbar")?.scrollIntoView({ behavior: "smooth", block: "start" }); } };
+      const opts = { selected: state.pick, held: state.natGroup === "governor" ? d.summary?.governor_party || {} : {}, onPick: (abbr) => { state.pick = state.pick === abbr ? null : abbr; render(); $(".listbar")?.scrollIntoView({ behavior: "smooth", block: "start" }); } };
       if (state.natGroup === "house") ENMaps.houseTiles(nat, races, d.states, opts);
       else ENMaps.usMap(nat, races, d.states, opts).catch(fail(nat));
     }

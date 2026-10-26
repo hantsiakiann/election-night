@@ -11,6 +11,7 @@
   --grn: #3f9e60;
   --oth: #7d859c;
   --np1: #9b8ad6; --np2: #4fb3b0; --np3: #d58bb3; --np4: #b0b86a;
+  --dem-muted: #2a3756; --rep-muted: #4d2c38;
   --map-blank: #263050; --map-none: #1a2136; --map-hatch: #3a4566; --map-edge: #141b2d;
   --num: "Barlow Condensed", "Arial Narrow", sans-serif;
   --body: "Public Sans", system-ui, sans-serif;
@@ -20,13 +21,13 @@
   :root:not([data-theme="dark"]) {
     --ground: #eef1f7; --raised: #ffffff; --line: #d5dbe8; --text: #151b2c; --muted: #5d6680;
     --peach: #d9774a; --dem: #2563c9; --rep: #c73a32; color-scheme: light;
-    --map-blank: #edf0f6; --map-none: #d9dee8; --map-hatch: #b4bdd1; --map-edge: #ffffff;
+    --dem-muted: #d3dbec; --rep-muted: #efd3d1; --map-blank: #edf0f6; --map-none: #d9dee8; --map-hatch: #b4bdd1; --map-edge: #ffffff;
   }
 }
 :root[data-theme="light"] {
   --ground: #eef1f7; --raised: #ffffff; --line: #d5dbe8; --text: #151b2c; --muted: #5d6680;
   --peach: #d9774a; --dem: #2563c9; --rep: #c73a32; color-scheme: light;
-    --map-blank: #edf0f6; --map-none: #d9dee8; --map-hatch: #b4bdd1; --map-edge: #ffffff;
+    --dem-muted: #d3dbec; --rep-muted: #efd3d1; --map-blank: #edf0f6; --map-none: #d9dee8; --map-hatch: #b4bdd1; --map-edge: #ffffff;
 }
 html.big { font-size: 125%; }
 
@@ -228,3 +229,9 @@ details.group[open] > summary::before { content: "–"; }
   .balance-nums { font-size: .8rem; }
   .balance-nums b { font-size: 1.5rem; }
 }
+
+.legend i.hatch.hD { background: repeating-linear-gradient(135deg, var(--dem-muted) 0 3px, var(--map-hatch) 3px 5px); }
+.legend i.hatch.hR { background: repeating-linear-gradient(135deg, var(--rep-muted) 0 3px, var(--map-hatch) 3px 5px); }
+.flag.held { color: var(--muted); }
+.flag.held::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 6px; }
+.flag.held.D::before { background: var(--dem-muted); } .flag.held.R::before { background: var(--rep-muted); }
