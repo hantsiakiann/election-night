@@ -521,6 +521,22 @@
     store.set("natGroup", "senate");
     render(); scrollTo({ top: 0 });
   });
+  // Narrow screens: hide everything but the title while scrolling down; show it all on scroll up.
+  (() => {
+    const top = $(".top"), h1 = top.querySelector("h1"), narrow = matchMedia("(max-width: 760px)");
+    let lastY = scrollY, ticking = false;
+    const setTitleH = () => top.style.setProperty("--title-h", `${h1.offsetTop + h1.offsetHeight + 10}px`);
+    const update = () => {
+      ticking = false;
+      const y = scrollY, dy = y - lastY;
+      if (!narrow.matches || y < top.offsetHeight || document.activeElement === $("#q")) top.classList.remove("compact");
+      else if (dy > 6) { setTitleH(); top.classList.add("compact"); }
+      else if (dy < -6) top.classList.remove("compact");
+      if (Math.abs(dy) > 6 || y < top.offsetHeight) lastY = y;
+    };
+    addEventListener("scroll", () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } }, { passive: true });
+    narrow.addEventListener?.("change", update);
+  })();
   document.addEventListener("keydown", (e) => { if (e.key === "Escape" && state.tab === "national" && state.pick) unpick(); });
   document.addEventListener("visibilitychange", () => { if (!document.hidden) { load(); schedule(); } });
   window.addEventListener("hashchange", () => { readHash(); render(); });

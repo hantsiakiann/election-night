@@ -126,7 +126,7 @@ details.group[open] > summary::before { content: "–"; }
 .in b { display: block; color: var(--text); font-size: 1.4rem; }
 .cands {
   grid-column: 2 / -1; list-style: none; margin: 4px 0 0; padding: 0;
-  display: grid; grid-template-columns: auto var(--namecol, minmax(8em, max-content)) minmax(6em, 1fr) auto auto; gap: 2px 14px;
+  display: grid; grid-template-columns: auto minmax(0, var(--namecol, max-content)) minmax(0, 1fr) auto auto; gap: 2px 14px;
   font-size: .9rem; font-variant-numeric: tabular-nums; max-width: 640px;
 }
 .cand { display: contents; }
@@ -290,3 +290,25 @@ h1 a:hover { text-decoration: underline; text-decoration-thickness: 2px; text-un
 .gamapbox { margin: 8px 0 16px; max-width: 560px; }
 .gamapbox figcaption { margin-top: 2px; }
 .sldmap path { stroke: var(--ground); stroke-width: .4; }
+/* Narrow screens: scrolling down shrinks the sticky header to just the title (clipped, so the
+   page doesn't shift); scrolling up brings it back. Set by app.js. */
+.top { transition: clip-path .2s ease; }
+.top-line { display: none; }
+@media (max-width: 760px) {
+  .top.compact { clip-path: inset(0 0 calc(100% - var(--title-h, 52px)) 0); }
+  .top.compact .updated { visibility: hidden; }
+  .top.compact .top-line { display: block; position: absolute; left: 0; right: 0; top: calc(var(--title-h, 52px) - 1px);
+    border-top: 1px solid var(--line); }
+}
+@media (prefers-reduced-motion: reduce) { .top { transition: none; } }
+@media (max-width: 760px) {
+  .top > * { min-width: 0; }
+  .tabs { overflow-x: auto; scrollbar-width: none; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tabs button { white-space: nowrap; font-size: 1.05rem; }
+  .search input { box-sizing: border-box; max-width: 100%; }
+}
+@media (max-width: 760px) {
+  /* fixed tracks so party names line up across cards at any width */
+  .cands { grid-template-columns: 10px minmax(0, 1.3fr) minmax(0, 1fr) 7.4em 3.2em; gap: 2px 8px; }
+}
