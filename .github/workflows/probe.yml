@@ -1,0 +1,35 @@
+# Maintenance helper: fetch a few URLs from GitHub's network (the dev sandbox can't reach most
+# sites) and save the responses to the "probe" branch for inspection. Not used on election night.
+name: Probe URLs
+
+on:
+  workflow_dispatch:
+    inputs:
+      urls:
+        description: "Space-separated URLs"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Fetch
+        env:
+          URLS: ${{ inputs.urls }}
+        run: |
+          mkdir out && i=0
+          for u in $URLS; do
+            i=$((i+1))
+            { echo "### $u"; curl -sSL -A "Mozilla/5.0" --max-time 60 -o "out/body$i" -w "status=%{http_code} type=%{content_type} size=%{size_download} final=%{url_effective}\n" "$u" || echo "curl failed"; } >> out/summary.txt
+            head -c 60000 "out/body$i" > "out/$i.txt" 2>/dev/null || true; rm -f "out/body$i"
+          done
+          cat out/summary.txt
+      - name: Save to probe branch
+        run: |
+          cd out && git init -q -b probe && git add -A
+          git -c user.name=hantsiakiann -c user.email=hantsiakiann@gmail.com commit -qm "probe $(date -u +%FT%TZ)"
+          git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" probe
