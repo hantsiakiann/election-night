@@ -79,12 +79,11 @@
     if (r.measure) { label = `${lead.name} +${pct1(r.margin_pct)}`; cls = yesNo(lead) === "var(--yes)" ? "yes" : yesNo(lead) ? "no" : "X"; }
     else if (lead.party === "D" || lead.party === "R") { label = `${lead.party}+${pct1(r.margin_pct)}`; cls = lead.party; }
     else { label = `${lead.name.split(" ").pop()} +${pct1(r.margin_pct)}`; cls = "X"; }
-    return `<div class="margin ${cls}" title="${esc(lead.name)} leads by ${fmt(r.margin_votes)} votes">${esc(label)}</div>`;
+    return `<div class="margin ${cls}">${esc(label)}</div>`;
   }
   function inCell(r) {
     if (r.reporting_pct == null) return `<div class="in">${r.total_votes ? fmt(r.total_votes) + "<br>votes" : ""}</div>`;
-    const pr = r.precincts_total ? `${fmt(r.precincts_reporting)} of ${fmt(r.precincts_total)} precincts reporting (partial counts included)` : "Share reported";
-    return `<div class="in" title="${esc(pr)}"><b>${Math.round(r.reporting_pct)}%</b>in</div>`;
+    return `<div class="in"><b>${Math.round(r.reporting_pct)}%</b>in</div>`;
   }
   function raceRow(r) {
     const cands = orderCands(r);
@@ -95,13 +94,13 @@
       : lead?.party === "D" || lead?.party === "R" ? "lead-" + lead.party : "lead-X";
     const bar = r.total_votes
       ? barOrder(cands.map((c, i) => ({ ...c, _i: i }))).map((c) =>
-        `<span style="width:${c.pct}%;background:${color(c, c._i, partisan)}" title="${esc(c.name)} ${pct1(c.pct)}%"></span>`).join("")
+        `<span style="width:${c.pct}%;background:${color(c, c._i, partisan)}"></span>`).join("")
       : "";
     const shown = cands.length <= 6 ? cands : cands.slice(0, 5);
     const candHtml = shown.map((c, i) => `
       <li class="cand">
         <i class="dot" style="background:${color(c, i, partisan)}"></i>
-        <span class="nm">${esc(c.name)}${c.incumbent ? ' <span class="inc" title="Incumbent">inc.</span>' : ""}</span>
+        <span class="nm">${esc(c.name)}${c.incumbent ? ' <span class="inc">inc.</span>' : ""}</span>
         <span class="pty">${esc(partyName(c.party) || (r.nonpartisan && !r.measure ? "Nonpartisan" : ""))}</span>
         <span class="v">${r.total_votes ? `${fmt(c.votes)} votes` : ""}</span>
         <span class="pct">${r.total_votes ? pct1(c.pct) + "%" : ""}</span>
@@ -121,9 +120,7 @@
     if (r.held === "D" || r.held === "R") flags.push(`<span class="flag held ${r.held}">Now held by ${r.held === "D" ? "Democrats" : "Republicans"}</span>`);
     if (window.ENMaps?.isFlip(r)) flags.push(`<span class="flag flip">Flip from ${r.held === "D" ? "Democrats" : "Republicans"}</span>`);
     if (r.ratings) {
-      const asOf = state.data?.summary?.ratings_as_of || {};
-      const tip = Object.keys(r.ratings).map((k) => `${k}: ${(asOf[`${k} ${r.group}`] || "").replace(/ at .*/, "")}`).join("; ");
-      flags.push(`<span class="flag rating" title="Pre-election ratings, via 270toWin (${esc(tip)})">${Object.entries(r.ratings).map(([k, v]) => `${esc(k)}: ${esc(v)}`).join(" · ")}</span>`);
+      flags.push(`<span class="flag rating">${Object.entries(r.ratings).map(([k, v]) => `${esc(k)}: ${esc(v)}`).join(" · ")}</span>`);
     }
     if (r.note) flags.push(`<span class="flag">${esc(r.note)}</span>`);
     if (r.status === "no-feed" || r.status === "not-found" || r.status === "source-error" || r.status === "manual") {
@@ -144,7 +141,6 @@
       ${cands.length ? `<ol class="cands">${candHtml}</ol>` : ""}
       ${flags.length ? `<div class="flags">${flags.join("")}</div>` : ""}
       ${cmapShown ? `<div class="cmap" data-cmap="${esc(r.id)}"><p class="cmapnote">Loading county map…</p></div>` : ""}
-      <span class="id">${esc(r.id)}</span>
     </li>`;
   }
 
@@ -192,7 +188,7 @@
     const hD = hold.D || 0, hR = hold.R || 0;
     const total = races.length + hD + hR;
     const need = needOpt ?? (g === "senate" ? summary.senate_control || 51 : g === "house" ? summary.house_control || 218 : null);
-    const seg = (n, cls, label) => n ? `<span class="${cls}" style="flex-grow:${n}" title="${label}: ${n}"></span>` : "";
+    const seg = (n, cls, label) => n ? `<span class="${cls}" style="flex-grow:${n}"></span>` : "";
     const word = g === "governor" ? "governorships" : "seats";
     return `<div class="balance">
       <div class="balance-nums"><span class="D"><b>${hD + t.D}</b> Democrats${hD ? ` (${hD} not up)` : ""}</span>

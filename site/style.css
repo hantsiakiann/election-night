@@ -146,8 +146,6 @@ details.group[open] > summary::before { content: "–"; }
 .flag a { text-decoration: underline; }
 .race.nofeed .race-name { color: var(--muted); }
 .race.nofeed .bar { background: var(--map-blank); opacity: .6; }
-.race .id { position: absolute; right: 6px; bottom: 2px; font-size: .65rem; color: var(--muted); opacity: 0; transition: opacity .15s; }
-.race:hover .id, .race:focus-within .id { opacity: .7; }
 .race.fresh { animation: fresh 2.4s ease-out; }
 @keyframes fresh { from { background: color-mix(in srgb, var(--peach) 28%, transparent); } to { background: transparent; } }
 .county-top { margin-top: 14px; }
