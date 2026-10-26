@@ -3,7 +3,7 @@
    Geometry: us-atlas (pre-projected Albers USA, 975x610) and a generated district grid, in geo/. */
 window.ENMaps = (() => {
   "use strict";
-  const PARTY = { D: "var(--dem)", R: "var(--rep)", L: "var(--lib)", G: "var(--grn)" };
+  const PARTY = { D: "var(--dem)", R: "var(--rep)", L: "var(--lib)", G: "var(--grn)", I: "var(--ind)", C: "var(--con)", WF: "var(--wf)" };
   const NEUTRAL = ["var(--np1)", "var(--np2)", "var(--np3)", "var(--np4)", "var(--oth)"];
   const MUTED = { D: "var(--dem-muted)", R: "var(--rep-muted)" };
   const HELD = { D: "Democrat", R: "Republican" };
@@ -194,6 +194,73 @@ window.ENMaps = (() => {
     }, (k) => byId[k] && onPick?.(byId[k].state));
   }
 
+  // ---------------------------------------------------------------- House: real district map
+  /* Districts from geo/districts.json (Census 2024 lines). States listed in newLines redrew for
+     2026, so instead of out-of-date lines they're shaded in bands by share of seats each party
+     leads. If the district file is missing, every state is shaded that way. */
+  async function houseGeo(el, races, states, opts = {}) {
+    const { selected, animate, from, newLines = [], onPick } = opts;
+    const stopo = await loadGeo("states");
+    let dtopo = null;
+    try { dtopo = await loadGeo("districts"); } catch { /* not built yet: fall back to bands */ }
+    const byFips = Object.fromEntries(states.map((s) => [s.fips, s]));
+    const byAbbr = Object.fromEntries(states.map((s) => [s.abbr, s]));
+    const byKey = Object.fromEntries(races.map((r) => [r.id.replace(/^H-/, ""), r]));
+    const path = d3.geoPath();
+    const sfeats = topojson.feature(stopo, stopo.objects.states).features.filter((f) => byFips[f.id]);
+    const featBy = Object.fromEntries(sfeats.map((f) => [byFips[f.id].abbr, f]));
+    const dfeats = dtopo ? topojson.feature(dtopo, dtopo.objects.districts).features : [];
+    const mapped = new Set(dfeats.map((f) => f.id.slice(0, 2)).filter((st) => !newLines.includes(st)));
+    const seatsBy = {};
+    races.forEach((r) => (seatsBy[r.state] ||= []).push(r));
+    const tally = (st) => {
+      const t = { D: 0, R: 0, none: 0 };
+      for (const r of seatsBy[st] || []) {
+        const who = r.call ? r.candidates.find((c) => c.name === r.call)
+          : r.total_votes ? r.candidates[0] : r.decided ? { party: r.decided.party } : null;
+        if (who?.party === "D" || who?.party === "R") t[who.party]++; else t.none++;
+      }
+      return t;
+    };
+    let clips = "", bands = "";
+    for (const f of sfeats) {
+      const st = byFips[f.id].abbr;
+      if (mapped.has(st)) continue;
+      const [[x0, y0], [x1, y1]] = path.bounds(f), w = x1 - x0, t = tally(st), n = t.D + t.R + t.none || 1;
+      clips += `<clipPath id="clip-${st}"><path d="${path(f)}"/></clipPath>`;
+      let x = x0;
+      const band = (cnt, fill) => { if (!cnt) return ""; const bw = (w * cnt) / n; const out = `<rect x="${x}" y="${y0}" width="${bw + 0.3}" height="${y1 - y0}" style="fill:${fill}"/>`; x += bw; return out; };
+      bands += `<g clip-path="url(#clip-${st})" class="bands${selected && selected !== st ? " dim" : ""}" data-k="S:${st}">${band(t.D, "var(--dem)")}${band(t.none, "url(#hatch)")}${band(t.R, "var(--rep)")}</g>`;
+    }
+    const districts = dfeats.filter((f) => mapped.has(f.id.slice(0, 2))).map((f) => {
+      const r = byKey[f.id];
+      return `<path data-k="${f.id}" class="dist${selected && selected !== f.id.slice(0, 2) ? " dim" : ""}" d="${path(f)}" style="fill:${raceFill(r)}"/>`;
+    }).join("");
+    const mesh = path(topojson.mesh(stopo, stopo.objects.states, (a, b) => a !== b));
+    const outline = path(topojson.mesh(stopo, stopo.objects.states, (a, b) => a === b));
+    el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" class="usmap housegeo${selected ? " zoomed" : ""}" role="img"
+        aria-label="House districts on a map; the list below has the same results">
+      ${defs()}<defs>${clips}</defs><g class="world">${bands}<g>${districts}</g>
+      <path class="smesh" d="${mesh}"/><path class="smesh" d="${outline}"/></g></svg>`;
+    const svg = el.querySelector("svg"), world = svg.querySelector(".world");
+    const target = selected && featBy[selected] ? fitTransform(path.bounds(featBy[selected])) : IDENTITY;
+    const start = animate === "in" ? IDENTITY : animate === "out" && from && featBy[from] ? fitTransform(path.bounds(featBy[from])) : target;
+    world.setAttribute("transform", tstr(start));
+    if (start !== target) {
+      d3.select(world).transition().duration(reduceMotion() ? 0 : 750).ease(d3.easeCubicInOut).attr("transform", tstr(target));
+    }
+    bindTips(svg, (k) => {
+      if (k.startsWith("S:")) {
+        const st = k.slice(2), t = tally(st);
+        const why = newLines.includes(st) ? "New district lines for 2026 aren't mapped yet" : "District lines not loaded";
+        return `<b>${esc(byAbbr[st].name)}</b><br>${why}; shaded by seats.<br>${t.D} D leading, ${t.R} R leading, ${t.none} no results`;
+      }
+      const r = byKey[k];
+      return r ? raceTip(r.title, r) : `<b>${esc(k)}</b>`;
+    }, (k) => onPick?.(k.startsWith("S:") ? k.slice(2) : k.slice(0, 2)));
+    return { mappedStates: mapped.size, haveDistricts: !!dtopo };
+  }
+
   // ---------------------------------------------------------------- county map inside a race row
   async function countyMap(el, r, stateFips) {
     const topo = await loadGeo("counties");
@@ -220,5 +287,5 @@ window.ENMaps = (() => {
     bindTips(el.querySelector("svg"), (name) => countyTip(name, r, rows));
   }
 
-  return { usMap, houseGrid, countyMap, raceFill };
+  return { usMap, houseGrid, houseGeo, countyMap, raceFill };
 })();

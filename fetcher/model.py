@@ -16,12 +16,15 @@ PARTY_MAP = {
     "dem": "D", "democrat": "D", "democratic": "D", "d": "D", "dfl": "D",
     "lib": "L", "libertarian": "L", "lp": "L",
     "grn": "G", "green": "G", "gp": "G",
-    "ind": "I", "independent": "I",
+    "ind": "I", "independent": "I", "i": "I", "una": "I", "unaffiliated": "I", "npa": "I",
+    "no party affiliation": "I", "no party preference": "I", "npp": "I", "nonaffiliated": "I",
+    "con": "C", "cst": "C", "constitution": "C", "c": "C",
+    "wfp": "WF", "wf": "WF", "working families": "WF",
     "np": "", "nonpartisan": "", "non-partisan": "", "": "",
 }
 
 # Trailing party marker inside a candidate name: "Jane Doe (Rep)" / "Jane Doe - Dem"
-_NAME_PARTY = re.compile(r"\s*(?:\((rep|dem|lib|grn|ind)\)|-\s*(rep|dem|lib|grn|ind))\s*$", re.I)
+_NAME_PARTY = re.compile(r"\s*(?:\((rep|dem|lib|grn|ind|con|cst|wfp)\)|-\s*(rep|dem|lib|grn|ind|con|cst|wfp))\s*$", re.I)
 # Incumbent marker: "(I)" left after the party marker is removed
 _INCUMBENT = re.compile(r"\s*\(I\)\s*$")
 _YES_NO = {"yes", "no", "for", "against"}

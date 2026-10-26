@@ -9,3 +9,11 @@ races:
   H-NC-11:
     call: "Candidate Eleven-R"
     called_by: "test call"
+  SEN-ME:
+    reporting_pct: 22
+    candidates:
+      - {name: "Test Candidate R", party: R, votes: 61200}
+      - {name: "Test Candidate D", party: D, votes: 64800}
+      - {name: "Test Independent", party: I, votes: 9100}
+      - {name: "Test Green", party: G, votes: 2300}
+      - {name: "Test Libertarian", party: L, votes: 1400}

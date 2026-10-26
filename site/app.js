@@ -1,7 +1,7 @@
 (() => {
   "use strict";
   const DATA_URL = "data/results.json";
-  const PARTY = { D: "var(--dem)", R: "var(--rep)", L: "var(--lib)", G: "var(--grn)" };
+  const PARTY = { D: "var(--dem)", R: "var(--rep)", L: "var(--lib)", G: "var(--grn)", I: "var(--ind)", C: "var(--con)", WF: "var(--wf)" };
   const NEUTRAL = ["var(--np1)", "var(--np2)", "var(--np3)", "var(--np4)", "var(--oth)"];
   const GROUP_NAMES = { senate: "Senate", governor: "Governor", house: "House" };
 
@@ -12,6 +12,7 @@
   const state = {
     data: null, tab: "national", natGroup: store.get("natGroup", "senate"), county: store.get("county", null),
     scope: store.get("scope", { senate: "all", governor: "all", house: "key" }), pick: null,
+    houseView: store.get("houseView", "grid"),
     cmapOpen: new Set(), cmapClosed: new Set(), raceIndex: new Map(),
     closest: store.get("closest", false), big: store.get("big", false), q: "",
     totals: new Map(), fresh: new Set(), open: new Map(), lastOk: 0, refresh: 60,
@@ -65,7 +66,7 @@
     return `<div class="in" title="${esc(pr)}"><b>${Math.round(r.reporting_pct)}%</b>in</div>`;
   }
   function raceRow(r) {
-    const cands = r.candidates || [];
+    const cands = r.total_votes ? [...(r.candidates || [])].sort((a, b) => b.votes - a.votes) : r.candidates || [];
     const partisan = cands.some((c) => c.party);
     const lead = cands[0];
     const leadCls = !r.total_votes ? (r.decided ? "lead-" + r.decided.party : "") : lead?.party === "D" || lead?.party === "R" ? "lead-" + lead.party : "lead-X";
@@ -73,15 +74,14 @@
       ? barOrder(cands.map((c, i) => ({ ...c, _i: i }))).map((c) =>
         `<span style="width:${c.pct}%;background:${color(c, c._i, partisan)}" title="${esc(c.name)} ${pct1(c.pct)}%"></span>`).join("")
       : "";
-    const shown = cands.length <= 4 ? cands : cands.slice(0, 3);
+    const shown = cands.length <= 6 ? cands : cands.slice(0, 5);
     const candHtml = shown.map((c, i) => `
-      <span class="cand${i === 0 && r.total_votes ? " leading" : ""}">
+      <li class="cand${i === 0 && r.total_votes ? " leading" : ""}">
         <i class="dot" style="background:${color(c, i, partisan)}"></i>
-        <span class="nm">${esc(c.name)}${c.party ? ` (${esc(c.party)})` : ""}</span>
-        ${c.incumbent ? '<span class="inc" title="Incumbent">inc.</span>' : ""}
+        <span class="nm">${esc(c.name)}${c.party ? ` (${esc(c.party)})` : ""}${c.incumbent ? ' <span class="inc" title="Incumbent">inc.</span>' : ""}</span>
+        <span class="v">${r.total_votes ? `${fmt(c.votes)} votes` : ""}</span>
         <span class="pct">${r.total_votes ? pct1(c.pct) + "%" : ""}</span>
-        <span class="v">${r.total_votes ? fmt(c.votes) : ""}</span>
-      </span>`).join("") + (cands.length > shown.length ? `<span class="cand v">+${cands.length - shown.length} more</span>` : "");
+      </li>`).join("") + (cands.length > shown.length ? `<li class="cand more">+${cands.length - shown.length} more candidates</li>` : "");
 
     const flags = [];
     if (r.call) flags.push(`<span class="flag called">Called for ${esc(r.call)}${r.called_by ? ` (${esc(r.called_by)})` : ""}</span>`);
@@ -106,7 +106,7 @@
       <div class="bar${partisan && cands.some((c) => c.party === "D") && cands.some((c) => c.party === "R") ? "" : " multi"}" role="img"
         aria-label="${esc(cands.map((c) => `${c.name} ${pct1(c.pct)}%`).join(", ") || "No results yet")}">${bar}</div>
       ${marginCell(r)}${inCell(r)}
-      ${cands.length ? `<div class="cands">${candHtml}</div>` : ""}
+      ${cands.length ? `<ol class="cands">${candHtml}</ol>` : ""}
       ${flags.length ? `<div class="flags">${flags.join("")}</div>` : ""}
       ${cmapShown ? `<div class="cmap" data-cmap="${esc(r.id)}"><p class="cmapnote">Loading county map…</p></div>` : ""}
       <span class="id">${esc(r.id)}</span>
@@ -189,16 +189,20 @@
     return `<div class="subnav" role="group" aria-label="Office">${pills}</div>
       <div class="natmap-wrap">
         ${balanceBar(g, all, d.summary || {})}
-        <div class="mapbox${state.pick && g !== "house" ? " zoomed" : ""}">
+        ${g === "house" ? `<div class="scope viewtoggle" role="group" aria-label="House map style">
+          <button data-hview="grid" aria-pressed="${state.houseView === "grid"}">Equal squares</button>
+          <button data-hview="map" aria-pressed="${state.houseView === "map"}">Geographic</button></div>` : ""}
+        <div class="mapbox${state.pick && zoomable() ? " zoomed" : ""}">
           <div id="natmap"></div>
-          ${state.pick && g !== "house" ? `<div class="mapbar"><button class="mapback" data-unpick>Back to U.S. map</button><span class="mapcap" id="mapcap"></span></div>` : ""}
+          ${state.pick && zoomable() ? `<div class="mapbar"><button class="mapback" data-unpick>Back to U.S. map</button><span class="mapcap" id="mapcap"></span></div>` : ""}
         </div>
         <ul class="legend">
           <li><i style="background:var(--dem)"></i><i style="background:color-mix(in srgb, var(--dem) 55%, var(--map-blank))"></i>Democrat leads (lighter = closer)</li>
           <li><i style="background:var(--rep)"></i><i style="background:color-mix(in srgb, var(--rep) 55%, var(--map-blank))"></i>Republican leads</li>
           <li><i class="hatch"></i>No results yet</li>
           ${g === "house" ? "" : `<li><i style="background:var(--dem-muted)"></i><i style="background:var(--rep-muted)"></i>${g === "senate" ? '<i class="splitsw"></i>' : ""}Not up this year (current ${g === "senate" ? "senators; striped = split" : "governor"})</li>`}
-          <li class="hint">${g === "house" ? "Each square is one district. Click one to see its state." : "Click a state to zoom into its counties."}</li>
+          ${g === "house" && state.houseView === "map" ? `<li><i class="bandsw"></i>New 2026 lines, not mapped: shaded by seats each party leads</li>` : ""}
+          <li class="hint">${g === "house" ? (state.houseView === "map" ? "Click a district to zoom into its state." : "Each square is one district. Click one to see its state.") : "Click a state to zoom into its counties."}</li>
         </ul>
       </div>
       <div class="listbar">${scopes}${pickChip}</div>` +
@@ -258,7 +262,13 @@
       const anim = state.zoomAnim || {};
       state.zoomAnim = null;
       const opts = { selected: state.pick, held, notUp, notUpText, animate: anim.animate, from: anim.from, onPick: (abbr) => pickState(abbr) };
-      if (state.natGroup === "house") ENMaps.houseGrid(nat, races, d.states, opts).catch(fail(nat));
+      if (state.natGroup === "house" && state.houseView === "map") {
+        ENMaps.houseGeo(nat, races, d.states, { ...opts, newLines: d.summary?.house_new_lines || [] }).then((info) => {
+          const cap = $("#mapcap");
+          if (cap && state.pick) cap.textContent = `${d.states.find((s) => s.abbr === state.pick)?.name} districts`;
+          if (!info.haveDistricts) nat.insertAdjacentHTML("beforeend", `<p class="cmapnote">District lines haven't been built yet (run "Build district map" in GitHub Actions); states are shaded by seats.</p>`);
+        }).catch(fail(nat));
+      } else if (state.natGroup === "house") ENMaps.houseGrid(nat, races, d.states, opts).catch(fail(nat));
       else ENMaps.usMap(nat, races, d.states, opts).then((info) => {
         const cap = $("#mapcap");
         if (cap && state.pick) {
@@ -274,16 +284,17 @@
     });
   }
 
+  function zoomable() { return state.natGroup !== "house" || state.houseView === "map"; }
   function pickState(abbr) {
     const prev = state.pick;
     if (prev === abbr) return unpick();
     state.pick = abbr;
-    state.zoomAnim = state.natGroup !== "house" ? { animate: prev ? null : "in" } : null;
+    state.zoomAnim = zoomable() ? { animate: prev ? null : "in" } : null;
     render();
   }
   function unpick() {
     if (!state.pick) return;
-    state.zoomAnim = state.natGroup !== "house" ? { animate: "out", from: state.pick } : null;
+    state.zoomAnim = zoomable() ? { animate: "out", from: state.pick } : null;
     state.pick = null;
     render();
   }
@@ -350,6 +361,8 @@
   $("#panel").addEventListener("click", (e) => {
     const n = e.target.closest("[data-nat]"), c = e.target.closest("[data-county]");
     const sc = e.target.closest("[data-scope]"), tg = e.target.closest("[data-cmap-toggle]");
+    const hv = e.target.closest("[data-hview]");
+    if (hv) { state.houseView = hv.dataset.hview; store.set("houseView", state.houseView); state.pick = null; render(); return; }
     if (e.target.closest("[data-unpick]")) unpick();
     if (sc) { state.scope = { ...state.scope, [state.natGroup]: sc.dataset.scope }; state.pick = null; store.set("scope", state.scope); render(); }
     if (tg) {
