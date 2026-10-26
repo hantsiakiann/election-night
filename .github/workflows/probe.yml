@@ -25,7 +25,7 @@ jobs:
           for u in $URLS; do
             i=$((i+1))
             { echo "### $u"; curl -sSL -A "Mozilla/5.0" --max-time 60 -o "out/body$i" -w "status=%{http_code} type=%{content_type} size=%{size_download} final=%{url_effective}\n" "$u" || echo "curl failed"; } >> out/summary.txt
-            head -c 60000 "out/body$i" > "out/$i.txt" 2>/dev/null || true; rm -f "out/body$i"
+            head -c 8000000 "out/body$i" > "out/$i.txt" 2>/dev/null || true; rm -f "out/body$i"
           done
           cat out/summary.txt
       - name: Save to probe branch
