@@ -1136,12 +1136,14 @@ metro:
         - name: Aaron A. Sampson Jr
           party: D
         - name: Karen Rene
-          party: ''
+          party: I
         - name: Natalie Hall
-          party: ''
+          party: I
         - name: Rohit Malhotra
           party: D
         vote_for: 1
+        special: true
+        note: Special election to replace Mo Ivory, who resigned.
       - title: Fulton County Commissioner, District 5
         candidates:
         - name: Helen Zenobia Willis
@@ -1159,6 +1161,7 @@ metro:
         - name: Zane Placie
           party: ''
         vote_for: 2
+        nonpartisan: true
     measures:
     - title: Education SPLOST
       subtitle: 1% sales tax for Fulton County Schools and Atlanta Public Schools
@@ -1196,12 +1199,14 @@ metro:
         - name: Jan Dunaway
           party: ''
         vote_for: 2
+        nonpartisan: true
       Cities:
       - title: Brookhaven City Council Member, District 2
         candidates:
         - name: Conor Sen
           party: ''
         vote_for: 1
+        special: true
       - title: Doraville City Council Member, District 2, Post 2
         candidates:
         - name: Angie Riley Tooley
@@ -1215,16 +1220,19 @@ metro:
         - name: Tom Hart
           party: ''
         vote_for: 1
+        special: true
       - title: Pine Lake City Council Member
         candidates:
         - name: James Paproski
           party: ''
         vote_for: 1
+        special: true
       - title: Pine Lake Mayor
         candidates:
         - name: Jeff Goldberg
           party: ''
         vote_for: 1
+        special: true
       - title: Stonecrest City Council Member, District 2, Post 2
         candidates:
         - name: Bruce McColumn Sr.
@@ -1234,6 +1242,7 @@ metro:
         - name: Yuvette Hudson
           party: ''
         vote_for: 1
+        special: true
     measures: []
   Cobb:
     sections:
@@ -1283,6 +1292,7 @@ metro:
         - name: John I. Lloyd
           party: ''
         vote_for: 2
+        nonpartisan: true
       - title: Cobb Solicitor General
         candidates:
         - name: Makia Metzger
@@ -1315,6 +1325,7 @@ metro:
         - name: David VanLandingham
           party: ''
         vote_for: 1
+        nonpartisan: true
       - title: Gwinnett Solicitor General
         candidates:
         - name: Lisamarie Bristol
@@ -1358,8 +1369,4 @@ metro:
         - name: Cassandra Brown Henry
           party: D
         vote_for: 1
-      Other county offices:
-      - title: Clayton Soil & Water Conservation District Supervisor
-        candidates: []
-        vote_for: 2
     measures: []

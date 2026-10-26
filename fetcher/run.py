@@ -255,15 +255,21 @@ def build_metro_placeholder(cfg, prelim):
     link = ((cfg.get("national") or {}).get("links") or {}).get("GA")
     top_rx = re.compile((cfg.get("georgia") or {}).get("county_top_of_ticket", "^Governor$"), re.I)
 
-    def race(rid, title, cands, vote_for=1, **extra):
+    def race(rid, title, cands, vote_for=1, nonpartisan=False, **extra):
         contest = {"name": title, "vote_for": vote_for,
                    "candidates": [{"name": c["name"], "party": norm_party(c.get("party", "")), "votes": 0} for c in cands]}
         r = finalize(contest, race_id=rid, title=title, source="georgia", source_url=link,
                      extra={k: v for k, v in extra.items() if v})
         r["status"] = "waiting"
+        if nonpartisan:
+            r["nonpartisan"] = True
         real = [c for c in cands if c["name"] not in ("Yes", "No")]
         if len(real) == 1 and vote_for == 1:
             r["decided"] = {"winner": real[0]["name"], "party": norm_party(real[0].get("party", "")), "reason": "Unopposed"}
+        elif real and len(real) <= vote_for:
+            names = [c["name"] for c in real]
+            who = " and ".join(names) if len(names) == 2 else ", ".join(names[:-1]) + " and " + names[-1]
+            r["decided"] = {"party": "", "reason": f"{who} win automatically: {len(real)} candidates for {vote_for} seats"}
         return r
 
     counties = []
@@ -275,8 +281,10 @@ def build_metro_placeholder(cfg, prelim):
         sections = []
         for name, items in (m.get("sections") or {}).items():
             sections.append({"name": name, "collapsed": False, "races": [
-                race(f"GA-{slug}-{re.sub(r'[^a-z0-9]+', '-', it['title'].lower()).strip('-')}", it["title"],
-                     it["candidates"], it.get("vote_for") or 1) for it in items]})
+                race(f"GA-{slug}-{re.sub(r'[^a-z0-9]+', '-', it['title'].lower()).strip('-')}",
+                     it["title"] + (" (special)" if it.get("special") else ""), it["candidates"],
+                     it.get("vote_for") or 1, nonpartisan=it.get("nonpartisan"), note=it.get("note"))
+                for it in items]})
         if m.get("measures"):
             sections.append({"name": "Ballot questions", "collapsed": False, "races": [
                 race(f"GA-{slug}-q{i}", q["title"], [{"name": "Yes"}, {"name": "No"}],

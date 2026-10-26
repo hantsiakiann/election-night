@@ -69,7 +69,7 @@
   function marginCell(r) {
     if (r.decided && !r.total_votes) {
       const p = r.decided.party;
-      return `<div class="margin ${p === "D" || p === "R" ? p : "X"} small">${r.decided.winner ? "Unopposed" : `${p} seat`}</div>`;
+      return `<div class="margin ${p === "D" || p === "R" ? p : "X"} small">${r.decided.winner ? "Unopposed" : p ? `${p} seat` : "No contest"}</div>`;
     }
     if (!r.candidates?.length || !r.total_votes) return `<div class="margin none">${r.status === "no-feed" ? "No feed" : "No votes"}</div>`;
     if (r.margin_pct == null) return `<div class="margin none">${r.vote_for > 1 ? "Elect " + r.vote_for : ""}</div>`;
@@ -102,7 +102,7 @@
       <li class="cand">
         <i class="dot" style="background:${color(c, i, partisan)}"></i>
         <span class="nm">${esc(c.name)}${c.incumbent ? ' <span class="inc" title="Incumbent">inc.</span>' : ""}</span>
-        <span class="pty">${esc(partyName(c.party))}</span>
+        <span class="pty">${esc(partyName(c.party) || (r.nonpartisan && !r.measure ? "Nonpartisan" : ""))}</span>
         <span class="v">${r.total_votes ? `${fmt(c.votes)} votes` : ""}</span>
         <span class="pct">${r.total_votes ? pct1(c.pct) + "%" : ""}</span>
       </li>`).join("") + (cands.length > shown.length ? `<li class="cand more">+${cands.length - shown.length} more candidates</li>` : "");
@@ -114,7 +114,10 @@
     if (r.status === "manual") flags.push(`<span class="flag">Entered by hand</span>`);
     if (r.needs) flags.push(`<span class="flag">Needs ${esc(r.needs)} to pass</span>`);
     if (r.vote_for > 1) flags.push(`<span class="flag">Top ${r.vote_for} win</span>`);
-    if (r.decided) flags.push(`<span class="flag called">${r.decided.winner ? `${esc(r.decided.winner)} (${esc(r.decided.party)}) is unopposed` : esc(r.decided.reason)}</span>`);
+    if (r.decided) {
+      const p = r.decided.party ? r.decided.party : r.nonpartisan ? "Nonpartisan" : "";
+      flags.push(`<span class="flag called">${r.decided.winner ? `${esc(r.decided.winner)}${p ? ` (${esc(p)})` : ""} is unopposed` : esc(r.decided.reason)}</span>`);
+    }
     if (r.held === "D" || r.held === "R") flags.push(`<span class="flag held ${r.held}">Now held by ${r.held === "D" ? "Democrats" : "Republicans"}</span>`);
     if (window.ENMaps?.isFlip(r)) flags.push(`<span class="flag flip">Flip from ${r.held === "D" ? "Democrats" : "Republicans"}</span>`);
     if (r.ratings) {
