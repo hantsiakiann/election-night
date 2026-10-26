@@ -96,7 +96,7 @@
     const cmapShown = hasCmap && (state.cmapOpen.has(r.id) || (autoOpen && !state.cmapClosed.has(r.id)));
     if (hasCmap) flags.push(`<button class="flag btn" data-cmap-toggle="${esc(r.id)}" aria-expanded="${cmapShown}">${cmapShown ? "Hide" : "Show"} county map</button>`);
     if (cmapShown) state.raceIndex.set(r.id, r);
-    const sub = r.scope || (r.group && r.feed_name && r.feed_name !== r.title ? r.feed_name : "");
+    const sub = r.scope || "";
     return `<li class="race ${leadCls}${r.status === "no-feed" ? " nofeed" : ""}${state.fresh.has(r.id) ? " fresh" : ""}" data-id="${esc(r.id)}">
       <div class="race-name">${esc(r.title)}${sub ? `<small>${esc(sub)}</small>` : ""}</div>
       <div class="bar${partisan && cands.some((c) => c.party === "D") && cands.some((c) => c.party === "R") ? "" : " multi"}" role="img"
