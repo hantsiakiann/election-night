@@ -1,0 +1,14 @@
+{
+  "name": "election-night-tools",
+  "private": true,
+  "type": "module",
+  "description": "Build-time tools for map geometry (not used by the site at runtime)",
+  "dependencies": {
+    "d3-geo": "^3.1.0",
+    "d3-geo-projection": "^4.0.0",
+    "shapefile": "^0.6.6",
+    "topojson-client": "^3.1.0",
+    "topojson-server": "^3.0.1",
+    "topojson-simplify": "^3.0.3"
+  }
+}

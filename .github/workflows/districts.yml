@@ -1,0 +1,50 @@
+# One-time (or occasional) job: download the Census Bureau's congressional district
+# boundaries and commit them as site/geo/districts.json for the House geographic map.
+# Run from the Actions tab: "Build district map" > Run workflow.
+name: Build district map
+
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: "Census cartographic boundary zip (119th Congress, 1:20m)"
+        default: "https://www2.census.gov/geo/tiger/GENZ2024/shp/cb_2024_us_cd119_20m.zip"
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install tools
+        working-directory: tools
+        run: npm install --no-audit --no-fund
+      - name: Download boundaries
+        run: |
+          mkdir -p /tmp/cd && cd /tmp/cd
+          curl -fsSL --retry 3 -o cd.zip "${{ inputs.url }}"
+          unzip -o -q cd.zip
+          ls -la
+      - name: Convert
+        run: |
+          SHP=$(ls /tmp/cd/*.shp | head -1)
+          node tools/build_districts.mjs "$SHP" site/geo/districts.json
+          ls -la site/geo/districts.json
+      - name: Commit
+        run: |
+          git config user.name "hantsiakiann"
+          git config user.email "hantsiakiann@gmail.com"
+          git add site/geo/districts.json
+          if git diff --cached --quiet; then echo "No change."; exit 0; fi
+          git commit -m "Update congressional district boundaries from Census"
+          git push
+          gh workflow run update.yml --ref main
+        env:
+          GH_TOKEN: ${{ github.token }}

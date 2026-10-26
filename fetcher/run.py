@@ -137,6 +137,7 @@ def national_summary(cfg):
             "governor_holdovers": gov_hold if gov else {},
             "governor_party": gov,
             "senate_not_up": ncfg.get("senate_not_up") or {},
+            "house_new_lines": ncfg.get("house_new_lines") or [],
             "senate_control": ncfg.get("senate_control", 51),
             "house_control": ncfg.get("house_control", 218)}
 

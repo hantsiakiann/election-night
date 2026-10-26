@@ -80,6 +80,10 @@ national:
   # Sanders (I-VT) caucuses with Democrats. Source: list of current senators, Oct 2026.
   senate_not_up: {AZ: D, CA: D, CT: D, HI: D, IN: R, MD: D, MO: R, NV: D, NY: D, ND: R, PA: split,
                   UT: R, VT: D, WA: D, WI: split}
+  # States whose 2026 House district lines are new (mid-decade redistricting) and so aren't in
+  # the Census 2024 boundary file. The geographic House map shades these states by seat
+  # share instead of drawing district lines. Source: Ballotpedia, Oct 2026.
+  house_new_lines: [AL, CA, FL, LA, NC, OH, TN, TX, UT]
   # Races settled before Election Day (source: 270toWin uncontested-races list, Sept 2026).
   #   winner + party: only one candidate on the ballot (counted as won)
   #   party only: every candidate on the ballot is from that party (seat counted for the party)

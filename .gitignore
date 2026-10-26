@@ -6,3 +6,4 @@ fixtures/nc/*
 fixtures/mn/*
 !fixtures/**/.gitkeep
 fixtures/races-test.yml
+tools/node_modules/
