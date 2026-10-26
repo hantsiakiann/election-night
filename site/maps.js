@@ -356,5 +356,28 @@ window.ENMaps = (() => {
     bindTips(el.querySelector("svg"), (name) => countyTip(name, r, rows));
   }
 
-  return { usMap, houseGrid, houseGeo, countyMap, raceFill, isFlip, partyName };
+  // ---------------------------------------------------------------- legislative districts (Georgia tab)
+  // file: geo/<file>.json with features whose id is the district number; races: that chamber's
+  // contests; number(r) gives a race's district number; onPick(race) on click.
+  async function districtMap(el, file, races, { number, onPick, label = "District" } = {}) {
+    const topo = await loadGeo(file);
+    const feats = topojson.feature(topo, topo.objects.districts).features;
+    const byNum = {};
+    for (const r of races) { const n = number(r); if (n) byNum[n] = r; }
+    const CW = 560, CH = 560;
+    const proj = d3.geoIdentity().fitExtent([[6, 6], [CW - 6, CH - 6]], { type: "FeatureCollection", features: feats });
+    const path = d3.geoPath(proj);
+    const shapes = feats.map((f) => {
+      const r = byNum[f.id];
+      return `<path data-k="${f.id}" class="${r ? "has" : ""}" d="${path(f)}" style="fill:${r ? raceFill(r) : "var(--map-none)"}"/>`;
+    }).join("");
+    el.innerHTML = `<svg viewBox="0 0 ${CW} ${CH}" class="cmapsvg sldmap" role="img" aria-label="${esc(label)} map; the list below has the same results">${defs()}${shapes}</svg>`;
+    const svg = el.querySelector("svg");
+    for (const f of feats) if (isFlip(byNum[f.id])) svg.insertAdjacentHTML("beforeend", `<path class="flipover" d="${path(f)}" fill="url(#flip)"/>`);
+    bindTips(svg, (k) => { const r = byNum[k]; return r ? raceTip(r.title, r) : `<b>${esc(label)} ${esc(k)}</b><br>Not on this year's ballot or not in the feed`; },
+      (k) => byNum[k] && onPick?.(byNum[k]));
+    return { districts: feats.length, matched: Object.keys(byNum).length };
+  }
+
+  return { usMap, houseGrid, houseGeo, countyMap, districtMap, raceFill, isFlip, partyName };
 })();

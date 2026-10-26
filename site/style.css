@@ -287,3 +287,6 @@ h1 a:hover { text-decoration: underline; text-decoration-thickness: 2px; text-un
 .race.lead-yes { border-left-color: var(--yes); } .race.lead-no { border-left-color: var(--no); }
 .margin.yes, .margin.no { font-size: 1.35rem; line-height: 1.05; white-space: nowrap; }
 .margin.yes { color: var(--yes); } .margin.no { color: var(--no); }
+.gamapbox { margin: 8px 0 16px; max-width: 560px; }
+.gamapbox figcaption { margin-top: 2px; }
+.sldmap path { stroke: var(--ground); stroke-width: .4; }

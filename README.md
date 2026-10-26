@@ -72,6 +72,14 @@ results at all, and Texas's machine-readable feed is a paid subscription. Those 
 If a feed goes down mid-night, its races keep the last numbers received and are marked
 "Feed down".
 
+## Georgia tab
+
+Three sub-tabs: **Statewide** (governor, statewide offices, PSC, ballot measures, courts; with a
+county map shaded by the governor's race), **State Senate** and **State House** (each with a
+district map; click a district to jump to its race). Georgia's U.S. House races are on the
+National tab only. Legislative lines are the Census Bureau's 2024 cartographic boundaries
+(`site/geo/ga_sldu.json`, `ga_sldl.json`), rebuilt by the "Build district map" workflow.
+
 ## Initiatives tab
 
 Key statewide ballot measures, grouped by state, listed in `config/initiatives.yml` (ballot

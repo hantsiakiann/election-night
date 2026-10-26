@@ -182,14 +182,15 @@ national:
 georgia:
   majority_rule: true        # flag leaders under 50% (Georgia general-election runoff Dec 1)
   # Sections, in display order. Each statewide contest goes in the first section whose
-  # pattern matches its name. `tab` picks the Georgia sub-tab (statewide, senate, house);
+  # pattern matches its name. `tab` picks the Georgia sub-tab (statewide, senate, house, or
+  # none to leave it off the Georgia tab);
   # `collapsed: true` sections start folded.
   sections:
     - {name: "U.S. Senate & Governor", match: "^(US|U\\.S\\.) Senate|^Governor$", tab: statewide}
     - {name: "Statewide offices", match: "Lieutenant Governor|Secretary of State|Attorney General|Agriculture|Insurance|Labor|School Superintendent", tab: statewide}
     - {name: "Public Service Commission", match: "Public Service|PSC", tab: statewide}
     - {name: "Ballot measures", match: "Amendment|Referendum|Question|Constitutional|^Statewide", tab: statewide}
-    - {name: "U.S. House", match: "^(US|U\\.S\\.) (House|Rep)", tab: statewide}
+    - {name: "U.S. House", match: "^(US|U\\.S\\.) (House|Rep)", tab: none}   # National tab only
     - {name: "Courts", match: "Supreme Court|Court of Appeals|Justice|Judge", tab: statewide, collapsed: true}
     - {name: "State Senate", match: "^State Senat", tab: senate}
     - {name: "State House", match: "^State (House|Rep)", tab: house}

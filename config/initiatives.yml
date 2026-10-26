@@ -119,10 +119,10 @@ measures:
     needs: 60%
 
   # ---- Idaho
-  - id: ID-REPRO
+  - id: ID-P1
     state: ID
-    title: Reproductive Freedom and Privacy Act
-    name: Abortion rights initiative
+    title: Proposition 1
+    name: Reproductive Freedom and Privacy Act (abortion rights)
     yes_means: Creates a state law right to reproductive decisions, allowing abortion to be regulated after viability except in medical emergencies.
 
   # ---- Indiana
@@ -133,10 +133,10 @@ measures:
     yes_means: Allows courts to deny bail for most offenses when a defendant poses a substantial risk and no release conditions would protect the community.
 
   # ---- Maryland
-  - id: MD-REDIST
+  - id: MD-Q3
     state: MD
-    title: Congressional redistricting amendment
-    name: Redistricting criteria
+    title: Question 3
+    name: Congressional redistricting amendment
     yes_means: Limits the state constitution's redistricting criteria to legislative districts and allows state Supreme Court review of congressional maps.
 
   # ---- Massachusetts
@@ -269,8 +269,8 @@ measures:
     yes_means: Repeals the 9.9% tax on income over $1 million and bars future income taxes.
 
   # ---- Wisconsin
-  - id: WI-DISCRIM
+  - id: WI-Q3
     state: WI
-    title: Anti-discrimination amendment
-    name: Ban race- and sex-based preferences
+    title: Question 3
+    name: Anti-discrimination amendment (race- and sex-based preferences)
     yes_means: Bars government discrimination or preferential treatment based on race, sex, ethnicity or national origin.
