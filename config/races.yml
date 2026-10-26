@@ -110,6 +110,7 @@ national:
   senate_control: 51            # 50 + vice president's tiebreak goes to R; shown as a note
   house_control: 218
   # Key races, shown by default; "All races" lists everything.
+  # Senate/governor races rated Toss-up, Tilt or Lean by any forecaster are added automatically.
   key:
     senate: [GA, NC, MI, ME, OH, TX, IA, AK, NH, MN, NE]
     governor: [GA, MI, NV, OH, AK, AZ, WI, IA, KS, OR, TX]

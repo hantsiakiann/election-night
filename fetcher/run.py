@@ -75,6 +75,13 @@ def find_contest(contests: dict, pattern: str) -> dict | None:
 def national_race_specs(ncfg):
     """Every 2026 Senate, governor and House race, as (group, spec) pairs."""
     key = {g: set(v) for g, v in (ncfg.get("key") or {}).items()}
+    # Senate and governor key races also include any race a forecaster rates Toss-up, Tilt or
+    # Lean (config/ratings.yml), so the list follows the daily ratings refresh.
+    ratings = ncfg.get("ratings") or {}
+    for g in ("senate", "governor"):
+        for rid, by in (ratings.get(g) or {}).items():
+            if any(str(v).split()[0] in ("Toss-up", "Tilt", "Lean") for v in by.values()):
+                key.setdefault(g, set()).add(rid.split("-", 1)[1])
     for abbr in SENATE_2026:
         name = BY_ABBR[abbr][1]
         yield "senate", {"id": f"SEN-{abbr}", "state": abbr, "state_name": name,

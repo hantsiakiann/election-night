@@ -54,7 +54,8 @@ results at all, and Texas's machine-readable feed is a paid subscription. Those 
 - **Add a state feed** if you find one: if it's JSON, add a `json_map` source (template
   in `config/races.yml`; `python -m fetcher.probe <url>` prints the feed's fields), add the
   state to `national.feeds`, and give the source its contest-name `patterns`.
-- **Key races** (shown by default for the House) are listed under `national.key`.
+- **Key races** (shown by default for the House) are listed under `national.key`. Senate and
+  governor races that any forecaster rates Toss-up, Tilt or Lean are added automatically.
 - **Forecaster ratings.** Every race card shows the Cook, Sabato's Crystal Ball and Inside
   Elections rating, from `config/ratings.yml`. The "Update forecaster ratings" workflow rebuilds
   it daily from 270toWin's forecaster maps through Election Day (or run it by hand).
