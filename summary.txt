@@ -1,0 +1,196 @@
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=1
+status=200 type=text/html; charset=utf-8 size=335066 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=1
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=2
+status=200 type=text/html; charset=utf-8 size=334886 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=2
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=3
+status=200 type=text/html; charset=utf-8 size=339737 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=3
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=4
+status=200 type=text/html; charset=utf-8 size=337344 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=4
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=5
+status=200 type=text/html; charset=utf-8 size=333712 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=5
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=6
+status=200 type=text/html; charset=utf-8 size=339843 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=6
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=7
+status=200 type=text/html; charset=utf-8 size=340267 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=7
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=8
+status=200 type=text/html; charset=utf-8 size=340573 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=8
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=9
+status=200 type=text/html; charset=utf-8 size=336407 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=9
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=10
+status=200 type=text/html; charset=utf-8 size=339153 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=10
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=11
+status=200 type=text/html; charset=utf-8 size=340445 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=11
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=12
+status=200 type=text/html; charset=utf-8 size=338715 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=12
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=13
+status=200 type=text/html; charset=utf-8 size=340460 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=13
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=14
+status=200 type=text/html; charset=utf-8 size=341389 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=14
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=15
+status=200 type=text/html; charset=utf-8 size=341498 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=15
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=16
+status=200 type=text/html; charset=utf-8 size=335594 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=16
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=17
+status=200 type=text/html; charset=utf-8 size=342047 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=17
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=18
+status=200 type=text/html; charset=utf-8 size=335986 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=18
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=19
+status=200 type=text/html; charset=utf-8 size=337675 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=19
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=20
+status=200 type=text/html; charset=utf-8 size=342484 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=20
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=21
+status=200 type=text/html; charset=utf-8 size=339057 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=21
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=22
+status=200 type=text/html; charset=utf-8 size=335512 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=22
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=23
+status=200 type=text/html; charset=utf-8 size=338992 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=23
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=24
+status=200 type=text/html; charset=utf-8 size=337919 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=24
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=25
+status=200 type=text/html; charset=utf-8 size=338807 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=25
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=26
+status=200 type=text/html; charset=utf-8 size=349271 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=26
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=27
+status=200 type=text/html; charset=utf-8 size=364818 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=27
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=28
+status=200 type=text/html; charset=utf-8 size=351739 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=28
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=29
+status=200 type=text/html; charset=utf-8 size=359108 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=29
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=30
+status=200 type=text/html; charset=utf-8 size=354529 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=30
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=31
+status=200 type=text/html; charset=utf-8 size=364709 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=31
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=32
+status=200 type=text/html; charset=utf-8 size=353898 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=32
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=33
+status=200 type=text/html; charset=utf-8 size=352558 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=33
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=34
+status=200 type=text/html; charset=utf-8 size=351456 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=34
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=35
+status=200 type=text/html; charset=utf-8 size=354641 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=35
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=36
+status=200 type=text/html; charset=utf-8 size=351845 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=36
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=37
+status=200 type=text/html; charset=utf-8 size=353078 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=37
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=38
+status=200 type=text/html; charset=utf-8 size=350619 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=38
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=39
+status=200 type=text/html; charset=utf-8 size=351539 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=39
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=40
+status=200 type=text/html; charset=utf-8 size=350423 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=40
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=41
+status=200 type=text/html; charset=utf-8 size=350573 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=41
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=42
+status=200 type=text/html; charset=utf-8 size=359856 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=42
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=43
+status=200 type=text/html; charset=utf-8 size=352427 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=43
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=44
+status=200 type=text/html; charset=utf-8 size=351746 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=44
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=45
+status=200 type=text/html; charset=utf-8 size=350660 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=45
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=46
+status=200 type=text/html; charset=utf-8 size=351467 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=46
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=47
+status=200 type=text/html; charset=utf-8 size=353887 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=47
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=48
+status=200 type=text/html; charset=utf-8 size=351025 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=48
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=49
+status=200 type=text/html; charset=utf-8 size=350904 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=49
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=50
+status=200 type=text/html; charset=utf-8 size=348964 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=50
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=51
+status=200 type=text/html; charset=utf-8 size=341318 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=51
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=52
+status=200 type=text/html; charset=utf-8 size=334555 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=52
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=53
+status=200 type=text/html; charset=utf-8 size=332414 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=53
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=54
+status=200 type=text/html; charset=utf-8 size=342879 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=54
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=55
+status=200 type=text/html; charset=utf-8 size=337957 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=55
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=56
+status=200 type=text/html; charset=utf-8 size=334319 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=56
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=57
+status=200 type=text/html; charset=utf-8 size=334843 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=57
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=58
+status=200 type=text/html; charset=utf-8 size=340433 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=58
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=59
+status=200 type=text/html; charset=utf-8 size=326952 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=59
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=60
+status=200 type=text/html; charset=utf-8 size=309082 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=60
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=61
+status=200 type=text/html; charset=utf-8 size=309346 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=61
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=62
+status=200 type=text/html; charset=utf-8 size=308679 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=62
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=63
+status=200 type=text/html; charset=utf-8 size=338311 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=63
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=64
+status=200 type=text/html; charset=utf-8 size=332414 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=64
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=65
+status=200 type=text/html; charset=utf-8 size=335118 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=65
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=66
+status=200 type=text/html; charset=utf-8 size=338501 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=66
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=67
+status=200 type=text/html; charset=utf-8 size=338394 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=67
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=68
+status=200 type=text/html; charset=utf-8 size=333612 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=68
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=69
+status=200 type=text/html; charset=utf-8 size=335896 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=69
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=70
+status=200 type=text/html; charset=utf-8 size=332295 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=70
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=71
+status=200 type=text/html; charset=utf-8 size=333416 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=71
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=72
+status=200 type=text/html; charset=utf-8 size=335135 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=72
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=73
+status=200 type=text/html; charset=utf-8 size=340166 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=73
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=74
+status=200 type=text/html; charset=utf-8 size=337616 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=74
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=75
+status=200 type=text/html; charset=utf-8 size=340509 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=75
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=76
+status=200 type=text/html; charset=utf-8 size=330294 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=76
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=77
+status=200 type=text/html; charset=utf-8 size=332524 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=77
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=78
+status=200 type=text/html; charset=utf-8 size=335761 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=78
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=79
+status=200 type=text/html; charset=utf-8 size=337492 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=79
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=80
+status=200 type=text/html; charset=utf-8 size=337126 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=80
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=81
+status=200 type=text/html; charset=utf-8 size=335532 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=81
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=82
+status=200 type=text/html; charset=utf-8 size=335393 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=82
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=83
+status=200 type=text/html; charset=utf-8 size=332991 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=83
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=84
+status=200 type=text/html; charset=utf-8 size=336343 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=84
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=85
+status=200 type=text/html; charset=utf-8 size=335827 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=85
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=86
+status=200 type=text/html; charset=utf-8 size=335658 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=86
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=87
+status=200 type=text/html; charset=utf-8 size=333931 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=87
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=88
+status=200 type=text/html; charset=utf-8 size=333866 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=88
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=89
+status=200 type=text/html; charset=utf-8 size=347313 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=89
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=90
+status=200 type=text/html; charset=utf-8 size=347774 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=90
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=91
+status=200 type=text/html; charset=utf-8 size=336903 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=91
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=92
+status=200 type=text/html; charset=utf-8 size=337276 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=92
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=93
+status=200 type=text/html; charset=utf-8 size=334547 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=93
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=94
+status=200 type=text/html; charset=utf-8 size=336296 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=94
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=95
+status=200 type=text/html; charset=utf-8 size=334862 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=95
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=96
+status=200 type=text/html; charset=utf-8 size=337290 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=96
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=97
+status=200 type=text/html; charset=utf-8 size=294797 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=97
+### https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=98
+status=200 type=text/html; charset=utf-8 size=256142 final=https://www.branch.vote/elections/state/ga/2026-georgia-general-election/races?racesPage=98
