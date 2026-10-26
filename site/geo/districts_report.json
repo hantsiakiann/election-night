@@ -1,5 +1,5 @@
 {
-  "built": "2026-10-26T06:53:34.467Z",
+  "built": "2026-10-26T07:01:47.236Z",
   "census": 435,
   "overrides": {
     "AL": {
@@ -9,10 +9,9 @@
       "field": "DISTRICT",
       "used": true,
       "fields": [
-        "DISTRICT",
-        "ORDER_IDX"
+        "DISTRICT"
       ],
-      "clipped": true
+      "clipped": false
     },
     "CA": {
       "plan": "Proposition 50 / AB 604",
@@ -20,10 +19,8 @@
       "expected": 52,
       "field": "(feature order)",
       "used": true,
-      "fields": [
-        "ORDER_IDX"
-      ],
-      "clipped": true
+      "fields": [],
+      "clipped": false
     },
     "FL": {
       "plan": "EOGPCRP2026 (enacted May 2026)",
@@ -37,10 +34,9 @@
         "DISTRICT",
         "COLOR",
         "TOTAL",
-        "TARGET_DEV",
-        "ORDER_IDX"
+        "TARGET_DEV"
       ],
-      "clipped": true
+      "clipped": false
     },
     "LA": {
       "plan": "Act 2 (SB 121), 2026 Regular Session",
@@ -56,10 +52,9 @@
         "IDEAL_POP",
         "IS_LOCKED",
         "SHAPE_AREA",
-        "SHAPE_LEN",
-        "ORDER_IDX"
+        "SHAPE_LEN"
       ],
-      "clipped": true
+      "clipped": false
     },
     "NC": {
       "plan": "SB 249 / SL 2025-95",
@@ -67,10 +62,8 @@
       "expected": 14,
       "field": "(feature order)",
       "used": true,
-      "fields": [
-        "ORDER_IDX"
-      ],
-      "clipped": true
+      "fields": [],
+      "clipped": false
     },
     "OH": {
       "plan": "Ohio Redistricting Commission, Oct 2025",
@@ -78,10 +71,8 @@
       "expected": 15,
       "field": "(feature order)",
       "used": true,
-      "fields": [
-        "ORDER_IDX"
-      ],
-      "clipped": true
+      "fields": [],
+      "clipped": false
     },
     "TN": {
       "plan": "Adopted May 7, 2026 (Comptroller 'US Congress New' layer)",
@@ -94,10 +85,9 @@
         "COUNTY",
         "DISTRICT",
         "Shape__Area",
-        "Shape__Length",
-        "ORDER_IDX"
+        "Shape__Length"
       ],
-      "clipped": true
+      "clipped": false
     },
     "TX": {
       "plan": "PLANC2333 (enacted 2025)",
@@ -106,10 +96,9 @@
       "field": "District",
       "used": true,
       "fields": [
-        "District",
-        "ORDER_IDX"
+        "District"
       ],
-      "clipped": true
+      "clipped": false
     },
     "UT": {
       "plan": "Court-adopted Plaintiffs' Map 1",
@@ -117,13 +106,13 @@
       "expected": 4,
       "field": "(feature order)",
       "used": true,
-      "fields": [
-        "ORDER_IDX"
-      ],
-      "clipped": true
+      "fields": [],
+      "clipped": false
     }
   },
   "skipped": 2,
+  "clipped": 435,
+  "clipFailed": [],
   "total": 435,
   "duplicates": []
 }
