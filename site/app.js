@@ -258,8 +258,7 @@
     const t = state.gaTab || "statewide";
     const pills = `<div class="subnav" role="group" aria-label="Georgia races">${Object.entries(GA_TABS).map(([k, v]) =>
       `<button data-gatab="${k}" aria-pressed="${t === k}">${v}</button>`).join("")}</div>`;
-    const cap = t === "statewide" ? "Governor by county" : `${GA_TABS[t]} districts`;
-    const mapbox = `<figure class="gamapbox"><div id="gamap" data-gamap="${t}"></div><figcaption class="cmapnote">${cap}</figcaption></figure>`;
+    const mapbox = `<figure class="gamapbox">${t === "statewide" ? `<h2 class="gamaphead">Governor by county</h2>` : ""}<div id="gamap" data-gamap="${t}"></div></figure>`;
     if (!d.georgia) return pills + mapbox + notice("Georgia results aren't flowing yet.",
       "They start once the Secretary of State posts the November 3 election and its ID is set in <code>config/races.yml</code>.");
     const secs = d.georgia.sections.filter((s) => (s.tab || "statewide") === t);

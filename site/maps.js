@@ -348,9 +348,8 @@ window.ENMaps = (() => {
     }).join("");
     const unmatched = Object.keys(rows).length - matched;
     el.innerHTML = `<svg viewBox="0 0 ${CW} ${CH}" class="cmapsvg" role="img" aria-label="County results for ${esc(r.title)}">${defs()}${shapes}</svg>
-      ${!Object.keys(rows).length ? `<p class="cmapnote">${r.status === "no-feed" || r.status === "manual"
-        ? "No county results: this state isn't in a live feed here."
-        : "Counties fill in as the state reports them."}</p>` : ""}
+      ${!Object.keys(rows).length && (r.status === "no-feed" || r.status === "manual")
+        ? `<p class="cmapnote">No county results: this state isn't in a live feed here.</p>` : ""}
       ${!statewide ? `<p class="cmapnote">Counties this race covers. District lines can split counties, so a county here may be only partly in the district.</p>` : ""}
       ${unmatched > 0 ? `<p class="cmapnote">${unmatched} counties in the feed didn't match a map shape.</p>` : ""}`;
     bindTips(el.querySelector("svg"), (name) => countyTip(name, r, rows));

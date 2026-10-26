@@ -18,6 +18,7 @@
   --yes: #2f9e8f; --no: #d9822b;
   --np1: #9b8ad6; --np2: #4fb3b0; --np3: #d58bb3; --np4: #b0b86a;
   --map-blank: #3a4258; --map-none: #1a2136; --map-hatch: #3a4566; --map-edge: #141b2d;
+  --map-hover: brightness(1.8); --map-border: #44507a;
   --num: "Barlow Condensed", "Arial Narrow", sans-serif;
   --body: "Public Sans", system-ui, sans-serif;
   color-scheme: dark;
@@ -27,9 +28,11 @@
     --ground: #eef1f7; --raised: #ffffff; --line: #d5dbe8; --text: #151b2c; --muted: #5d6680;
     --peach: #d9774a; --dem: #2563c9; --rep: #c73a32; color-scheme: light;
     --map-blank: #e3e7ef; --flip-stripe: rgba(255,255,255,.75); --map-none: #d9dee8; --map-hatch: #b4bdd1; --map-edge: #ffffff;
+    --map-hover: brightness(.82); --map-border: #ffffff;
   }
 }
 :root[data-theme="light"] {
+  --map-hover: brightness(.82); --map-border: #ffffff;
   --ground: #eef1f7; --raised: #ffffff; --line: #d5dbe8; --text: #151b2c; --muted: #5d6680;
   --peach: #d9774a; --dem: #2563c9; --rep: #c73a32; color-scheme: light;
     --map-blank: #e3e7ef; --flip-stripe: rgba(255,255,255,.75); --map-none: #d9dee8; --map-hatch: #b4bdd1; --map-edge: #ffffff;
@@ -287,9 +290,12 @@ h1 a:hover { text-decoration: underline; text-decoration-thickness: 2px; text-un
 .race.lead-yes { border-left-color: var(--yes); } .race.lead-no { border-left-color: var(--no); }
 .margin.yes, .margin.no { font-size: 1.35rem; line-height: 1.05; white-space: nowrap; }
 .margin.yes { color: var(--yes); } .margin.no { color: var(--no); }
-.gamapbox { margin: 8px 0 16px; max-width: 560px; }
-.gamapbox figcaption { margin-top: 2px; }
-.sldmap path { stroke: var(--ground); stroke-width: .4; }
+.gamapbox { margin: 6px auto 18px; max-width: 600px; }
+.gamapbox h2.gamaphead { text-align: center; font-size: 1.15rem; margin: 0 0 6px; }
+.gamapbox svg { width: 100%; height: auto; display: block; }
+.gamapbox path[data-k] { stroke: var(--map-border); stroke-width: 1.1; vector-effect: non-scaling-stroke; transition: filter .1s; }
+.gamapbox path[data-k]:hover { filter: var(--map-hover); }
+.gamapbox .flipover { pointer-events: none; }
 /* Narrow screens: scrolling down shrinks the sticky header to just the title (clipped, so the
    page doesn't shift); scrolling up brings it back. Set by app.js. */
 .top { transition: clip-path .2s ease; }
