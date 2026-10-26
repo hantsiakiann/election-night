@@ -38,8 +38,8 @@ jobs:
           jq -c '.states[]' tools/district_overrides.json | while read -r s; do
             st=$(echo "$s" | jq -r .state); url=$(echo "$s" | jq -r .url); type=$(echo "$s" | jq -r .type)
             echo "== $st ($type) $url"
-            if [ "$type" = "planscore" ]; then
-              curl -fsSL --compressed --retry 3 -o "/tmp/ov/$st.geojson" "$url" || echo "!! $st download failed"
+            if [ "$type" = "planscore" ] || [ "$type" = "arcgis" ]; then
+              curl -fsSL --compressed --retry 3 -A "Mozilla/5.0" -o "/tmp/ov/$st.geojson" "$url" || echo "!! $st download failed"
             else
               mkdir -p "/tmp/ovz/$st" && curl -fsSL --retry 3 -A "Mozilla/5.0" -o "/tmp/ovz/$st.zip" "$url" \
                 && unzip -o -q "/tmp/ovz/$st.zip" -d "/tmp/ovz/$st" || { echo "!! $st download failed"; continue; }
@@ -49,6 +49,19 @@ jobs:
             fi
           done
           ls -la /tmp/ov
+      - name: Clip 2026 maps to the coastline
+        # Plan files often include offshore water (Census blocks extend into it); clip each to the
+        # state's outline from the Census cartographic file so the coast matches the other states.
+        run: |
+          SHP=$(ls /tmp/cd/*.shp | head -1); mkdir -p /tmp/clip
+          for f in /tmp/ov/*.geojson; do
+            st=$(basename "$f" .geojson)
+            fips=$(node -e "const m={AL:'01',AZ:'04',CA:'06',FL:'12',GA:'13',LA:'22',MO:'29',NC:'37',OH:'39',SC:'45',TN:'47',TX:'48',UT:'49',VA:'51'};console.log(m['$st']||'')")
+            [ -z "$fips" ] && { echo "!! no FIPS for $st"; continue; }
+            npx --prefix tools mapshaper -i "$SHP" -filter "STATEFP=='$fips'" -dissolve -proj wgs84 -o "/tmp/clip/$st.json" \
+              && npx --prefix tools mapshaper -i "$f" -each 'ORDER_IDX=this.id' -clip "/tmp/clip/$st.json" -o force "$f" \
+              || echo "!! $st clip failed (unclipped file kept)"
+          done
       - name: Convert
         run: |
           SHP=$(ls /tmp/cd/*.shp | head -1)

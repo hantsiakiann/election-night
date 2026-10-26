@@ -1,17 +1,60 @@
 {
-  "_note": "2026 congressional district maps for states that redrew after the Census 2024 file. type 'shp' = zip with a shapefile (reprojected with mapshaper; district number from 'field', auto-detected if omitted); type 'planscore' = PlanScore geometry.json, features in district order.",
+  "_note": "2026 congressional district maps for states whose lines differ from the Census 2024 file. type 'shp' = zip with a shapefile (reprojected with mapshaper); type 'planscore' = PlanScore geometry.json, features in district order; type 'arcgis' = ArcGIS layer query returning GeoJSON. District number comes from 'field' (auto-detected if omitted) or feature order. Every override is clipped to the state's Census coastline so districts don't extend into the water.",
   "states": [
-    {"state": "TX", "plan": "PLANC2333 (enacted 2025)", "type": "shp",
-     "url": "https://data.capitol.texas.gov/dataset/748c952b-e926-4f44-8d01-a738884b3ec8/resource/5712ebe1-d777-4d4a-b836-0534e17bca01/download/planc2333.zip"},
-    {"state": "FL", "plan": "EOGPCRP2026 (enacted May 2026)", "type": "shp",
-     "url": "https://www.flsenate.gov/PublishedContent/Session/Congressional/EOGPCRP2026.zip"},
-    {"state": "CA", "plan": "Proposition 50 / AB 604", "type": "planscore",
-     "url": "https://planscore.s3.amazonaws.com/uploads/20251109T005753.161170853Z/geometry.json"},
-    {"state": "NC", "plan": "SB 249 / SL 2025-95", "type": "planscore",
-     "url": "https://planscore.s3.amazonaws.com/uploads/20251220T215350.341663516Z/geometry.json"},
-    {"state": "OH", "plan": "Ohio Redistricting Commission, Oct 2025", "type": "planscore",
-     "url": "https://planscore.s3.amazonaws.com/uploads/20251030T231915.464256903Z/geometry.json"},
-    {"state": "UT", "plan": "Court-adopted Plaintiffs' Map 1", "type": "planscore",
-     "url": "https://planscore.s3.amazonaws.com/uploads/20251116T015247.162259523Z/geometry.json"}
+    {
+      "state": "TX",
+      "plan": "PLANC2333 (enacted 2025)",
+      "type": "shp",
+      "url": "https://data.capitol.texas.gov/dataset/748c952b-e926-4f44-8d01-a738884b3ec8/resource/5712ebe1-d777-4d4a-b836-0534e17bca01/download/planc2333.zip"
+    },
+    {
+      "state": "FL",
+      "plan": "EOGPCRP2026 (enacted May 2026)",
+      "type": "shp",
+      "url": "https://www.flsenate.gov/PublishedContent/Session/Congressional/EOGPCRP2026.zip"
+    },
+    {
+      "state": "CA",
+      "plan": "Proposition 50 / AB 604",
+      "type": "planscore",
+      "url": "https://planscore.s3.amazonaws.com/uploads/20251109T005753.161170853Z/geometry.json"
+    },
+    {
+      "state": "NC",
+      "plan": "SB 249 / SL 2025-95",
+      "type": "planscore",
+      "url": "https://planscore.s3.amazonaws.com/uploads/20251220T215350.341663516Z/geometry.json"
+    },
+    {
+      "state": "OH",
+      "plan": "Ohio Redistricting Commission, Oct 2025",
+      "type": "planscore",
+      "url": "https://planscore.s3.amazonaws.com/uploads/20251030T231915.464256903Z/geometry.json"
+    },
+    {
+      "state": "UT",
+      "plan": "Court-adopted Plaintiffs' Map 1",
+      "type": "planscore",
+      "url": "https://planscore.s3.amazonaws.com/uploads/20251116T015247.162259523Z/geometry.json"
+    },
+    {
+      "state": "LA",
+      "plan": "Act 2 (SB 121), 2026 Regular Session",
+      "type": "shp",
+      "url": "https://redist.legis.la.gov/2026_Files/Act2Congress/Shapefile/Shapefile%20-%20Act_2_(2026_RS).zip"
+    },
+    {
+      "state": "AL",
+      "plan": "2023 legislative plan (Act 2023-563), allowed by the Supreme Court June 2026",
+      "type": "arcgis",
+      "field": "DISTRICT",
+      "url": "https://services7.arcgis.com/jF2q3LPxL7PETdYk/arcgis/rest/services/2023_CONG_LEGISLATIVE_PLAN/FeatureServer/0/query?where=1%3D1&outFields=DISTRICT&outSR=4326&geometryPrecision=5&f=geojson"
+    },
+    {
+      "state": "TN",
+      "plan": "Adopted May 7, 2026 (Comptroller 'US Congress New' layer)",
+      "type": "arcgis",
+      "url": "https://services2.arcgis.com/63Ka7QbNqm4NLbeo/arcgis/rest/services/Redistricting_Address_Lookup/FeatureServer/10/query?where=1%3D1&outFields=*&outSR=4326&geometryPrecision=5&f=geojson"
+    }
   ]
 }

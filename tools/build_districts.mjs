@@ -71,6 +71,8 @@ if (overridesDir && existsSync(overridesDir)) {
     const info = manifest.find((m) => m.state === st) || {};
     const fc = JSON.parse(await readFile(`${overridesDir}/${file}`, "utf8"));
     const feats = fc.features.filter((f) => f.geometry && /Polygon/.test(f.geometry.type));
+    // the clip step tags each feature with its original position, so feature order survives it
+    if (feats.every((f) => Number.isInteger(f.properties?.ORDER_IDX))) feats.sort((a, b) => a.properties.ORDER_IDX - b.properties.ORDER_IDX);
     const expected = (byState[st] || []).length;
     let key = info.field || Object.keys(feats[0]?.properties || {}).find((k) => DIST_KEYS.test(k) &&
       feats.every((f) => { const v = parseInt(f.properties[k], 10); return v >= 1 && v <= 60; }));
@@ -78,7 +80,7 @@ if (overridesDir && existsSync(overridesDir)) {
     const nums = new Set(numbered.map((x) => x.n));
     const ok = feats.length === expected && nums.size === expected && Math.max(...nums) === expected;
     report.overrides[st] = { plan: info.plan, features: feats.length, expected, field: key || "(feature order)", used: ok,
-      fields: Object.keys(feats[0]?.properties || {}).slice(0, 12) };
+      fields: Object.keys(feats[0]?.properties || {}).slice(0, 12), clipped: feats.some((f) => "ORDER_IDX" in (f.properties || {})) };
     if (!ok) { console.warn(`${st}: ${feats.length} features / ${nums.size} numbers, expected ${expected}; keeping Census lines`); continue; }
     byState[st] = numbered.map(({ n, f }) => ({
       type: "Feature", id: expected === 1 ? `${st}-AL` : `${st}-${String(n).padStart(2, "0")}`,

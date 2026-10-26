@@ -129,7 +129,7 @@ details.group[open] > summary::before { content: "–"; }
   font-size: .9rem; font-variant-numeric: tabular-nums; max-width: 640px;
 }
 .cand { display: contents; }
-.cand .dot { width: 10px; height: 10px; border-radius: 2px; align-self: center; }
+.cand .dot { width: 10px; height: 10px; border-radius: 2px; align-self: start; margin-top: .4em; margin-top: calc((1lh - 10px) / 2); }
 .cand .nm { min-width: 0; overflow-wrap: anywhere; }
 .cand .v { color: var(--muted); text-align: right; }
 .cand .pct { font: 600 1.05rem var(--num); text-align: right; min-width: 3.2em; }
