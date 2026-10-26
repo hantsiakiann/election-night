@@ -291,6 +291,9 @@ h1 a:hover { text-decoration: underline; text-decoration-thickness: 2px; text-un
 .margin.yes, .margin.no { font-size: 1.35rem; line-height: 1.05; white-space: nowrap; }
 .margin.yes { color: var(--yes); } .margin.no { color: var(--no); }
 .gamapbox { margin: 6px auto 18px; max-width: 600px; }
+.gamaps { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; max-width: 1000px; margin: 0 auto; }
+.gamaps .gamapbox { margin: 6px 0 18px; max-width: none; }
+@media (max-width: 640px) { .gamaps { grid-template-columns: 1fr; gap: 0; } }
 .gamapbox h2.gamaphead { text-align: center; font-size: 1.15rem; margin: 0 0 6px; }
 .gamapbox svg { width: 100%; height: auto; display: block; }
 .gamapbox path[data-k] { stroke: var(--map-border); stroke-width: 1.1; vector-effect: non-scaling-stroke; transition: filter .1s; }

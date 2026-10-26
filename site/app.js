@@ -258,14 +258,18 @@
     const t = state.gaTab || "statewide";
     const pills = `<div class="subnav" role="group" aria-label="Georgia races">${Object.entries(GA_TABS).map(([k, v]) =>
       `<button data-gatab="${k}" aria-pressed="${t === k}">${v}</button>`).join("")}</div>`;
-    const mapbox = `<figure class="gamapbox">${t === "statewide" ? `<h2 class="gamaphead">Governor by county</h2>` : ""}<div id="gamap" data-gamap="${t}"></div></figure>`;
+    const mapbox = t === "statewide"
+      ? `<div class="gamaps">${[["senate", "U.S. Senate"], ["governor", "Governor"]].map(([k, v]) =>
+        `<figure class="gamapbox"><h2 class="gamaphead">${v}</h2><div class="gamap" data-gamap="statewide-${k}"></div></figure>`).join("")}</div>`
+      : `<figure class="gamapbox"><div class="gamap" data-gamap="${t}"></div></figure>`;
+    const wait = d.georgia?.placeholder ? notice("Candidates are listed; numbers start once the Secretary of State's results feed is live.") : "";
     if (!d.georgia) return pills + mapbox + notice("Georgia results aren't flowing yet.",
       "They start once the Secretary of State posts the November 3 election and its ID is set in <code>config/races.yml</code>.");
     const secs = d.georgia.sections.filter((s) => (s.tab || "statewide") === t);
     const body = t === "statewide"
       ? secs.map((s) => group(s.name, s.races, { collapsible: true, collapsed: s.collapsed, key: "ga:" + s.name })).join("")
       : secs.map((s) => group(s.name, s.races)).join("");
-    return pills + mapbox + (body || notice(state.q ? "No races here match the search." : `No ${GA_TABS[t]} contests in the feed yet.`));
+    return pills + mapbox + wait + (body || notice(state.q ? "No races here match the search." : `No ${GA_TABS[t]} contests in the feed yet.`));
   }
   function renderMetro(d) {
     if (!d.metro) return notice("Metro Atlanta results come from the same Georgia feed, which isn't flowing yet.");
@@ -350,8 +354,7 @@
         }
       }).catch(fail(nat));
     }
-    const gm = $("#gamap");
-    if (gm) drawGeorgiaMap(gm, d).catch(fail(gm));
+    document.querySelectorAll(".gamap").forEach((gm) => drawGeorgiaMap(gm, d).catch(fail(gm)));
     document.querySelectorAll("[data-cmap]").forEach((el) => {
       const r = state.raceIndex.get(el.dataset.cmap);
       const st = d.states.find((s) => s.abbr === r?.county_state);
@@ -363,9 +366,10 @@
   const distNum = (r) => { const m = /District\s*0*(\d+)/i.exec(r.feed_name || r.title || ""); return m ? m[1] : null; };
   async function drawGeorgiaMap(el, d) {
     const t = el.dataset.gamap, secs = (d.georgia?.sections || []);
-    if (t === "statewide") {
-      const gov = secs.flatMap((s) => s.races).find((r) => /^governor$/i.test((r.feed_name || r.title || "").trim()));
-      return ENMaps.countyMap(el, gov || { title: "Governor", candidates: [], counties: [], statewide: true, status: "waiting" }, "13");
+    if (t.startsWith("statewide")) {
+      const rx = t === "statewide-senate" ? /^(US|U\.S\.) Senate/i : /^governor$/i;
+      const race = secs.flatMap((s) => s.races).find((r) => rx.test((r.feed_name || r.title || "").trim()));
+      return ENMaps.countyMap(el, race || { title: t, candidates: [], counties: [], statewide: true, status: "waiting" }, "13");
     }
     const races = secs.filter((s) => s.tab === t).flatMap((s) => s.races);
     return ENMaps.districtMap(el, t === "senate" ? "ga_sldu" : "ga_sldl", races, {

@@ -74,10 +74,12 @@ If a feed goes down mid-night, its races keep the last numbers received and are 
 
 ## Georgia tab
 
-Three sub-tabs: **Statewide** (governor, statewide offices, PSC, ballot measures, courts; with a
-county map shaded by the governor's race), **State Senate** and **State House** (each with a
+Three sub-tabs: **Statewide** (U.S. Senate, governor, statewide offices, PSC, amendments, courts;
+with county maps for the U.S. Senate and governor races), **State Senate** and **State House** (each with a
 district map; click a district to jump to its race). Georgia's U.S. House races are on the
-National tab only. Legislative lines are the Census Bureau's 2024 cartographic boundaries
+National tab only. Until the SOS feed is live, the tab lists every statewide, State Senate and
+State House race with its candidates from `config/ga_candidates.yml` (built by
+`tools/build_ga_candidates.py` from branch.vote; unopposed seats are filled in). Legislative lines are the Census Bureau's 2024 cartographic boundaries
 (`site/geo/ga_sldu.json`, `ga_sldl.json`), rebuilt by the "Build district map" workflow.
 
 ## Initiatives tab

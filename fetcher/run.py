@@ -19,7 +19,7 @@ from pathlib import Path
 import requests
 import yaml
 
-from .model import finalize
+from .model import finalize, norm_party
 from .sources import enhanced_voting, json_map, mn_sos, ncsbe
 from .states import BY_ABBR, GOVERNOR_2026, SENATE_2026, SENATE_SPECIAL, house_districts, state_table
 
@@ -190,6 +190,44 @@ def build_initiatives(cfg, loaded, measures):
                        for a, rs in sorted(by_state.items(), key=lambda kv: BY_ABBR[kv[0]][1])]}
 
 
+def build_georgia_placeholder(cfg, prelim):
+    """Before the SOS feed is live: the Georgia tab's races with their candidates and no votes
+    (config/ga_candidates.yml). Sectioned with the same patterns as the feed."""
+    if not prelim:
+        return None
+    gcfg = cfg.get("georgia") or {}
+    sections = [dict(name=s["name"], collapsed=bool(s.get("collapsed")), tab=s.get("tab", "statewide"), races=[],
+                     _rx=re.compile(s["match"], re.I))
+                for s in gcfg.get("sections", [{"name": "All", "match": ".*"}])]
+    link = ((cfg.get("national") or {}).get("links") or {}).get("GA")
+    items = [(f"GA-P{i:02d}", r["title"], r["candidates"], {}) for i, r in enumerate(prelim.get("statewide") or [], 1)]
+    items += [(f"GA-A{i}", m["title"], [{"name": "Yes"}, {"name": "No"}],
+               {"subtitle": m.get("subtitle"), "yes_means": m.get("yes_means")})
+              for i, m in enumerate(prelim.get("amendments") or [], 1)]
+    items += [(f"GA-SS{int(n):02d}", f"State Senate - District {int(n)}", c, {})
+              for n, c in (prelim.get("state_senate") or {}).items()]
+    items += [(f"GA-SH{int(n):03d}", f"State House - District {int(n)}", c, {})
+              for n, c in (prelim.get("state_house") or {}).items()]
+    for rid, title, cands, extra in items:
+        contest = {"name": title, "candidates": [{"name": c["name"], "party": norm_party(c.get("party", "")),
+                                                   "votes": 0} for c in cands]}
+        race = finalize(contest, race_id=rid, title=title, source="georgia", source_url=link,
+                        extra={k: v for k, v in dict(extra, county_state="GA").items() if v})
+        race["status"] = "waiting"
+        real = [c for c in cands if c.get("name") not in ("Yes", "No")]
+        if len(real) == 1:
+            race["decided"] = {"winner": real[0]["name"], "party": norm_party(real[0].get("party", ""))}
+        if title == "Governor" or title == "US Senate":
+            race["counties"], race["statewide"] = [], True
+        for s in sections:
+            if s["_rx"].search(title):
+                s["races"].append(race)
+                break
+    for s in sections:
+        del s["_rx"]
+    return {"page": link, "placeholder": True, "sections": [s for s in sections if s["races"]]}
+
+
 def build_georgia(cfg, ga):
     gcfg = cfg.get("georgia") or {}
     sections = [dict(name=s["name"], collapsed=bool(s.get("collapsed")), tab=s.get("tab", "statewide"), races=[],
@@ -312,7 +350,7 @@ def carry_forward(results, previous, failed_sources):
                 st["measures"][i] = dict(p, stale=True, status="stale")
     if "georgia" in failed_sources:
         for key in ("georgia", "metro"):
-            if previous.get(key) and not results.get(key):
+            if previous.get(key) and not previous[key].get("placeholder") and (not results.get(key) or results[key].get("placeholder")):
                 results[key] = copy.deepcopy(previous[key])
                 for race in iter_races({key: results[key]}):
                     race["stale"], race["status"] = True, "stale"
@@ -348,6 +386,10 @@ def main(argv=None):
     if not cand_path.exists():
         cand_path = Path("config/candidates.yml")
     prelim = (yaml.safe_load(cand_path.read_text()) or {}).get("races", {}) if cand_path.exists() else {}
+    ga_path = Path(args.config).resolve().parent / "ga_candidates.yml"
+    if not ga_path.exists():
+        ga_path = Path("config/ga_candidates.yml")
+    ga_prelim = yaml.safe_load(ga_path.read_text()) if ga_path.exists() else None
     ini_path = Path(args.config).resolve().parent / "initiatives.yml"
     if not ini_path.exists():
         ini_path = Path("config/initiatives.yml")
@@ -393,7 +435,7 @@ def main(argv=None):
         "summary": national_summary(cfg),
         "national": build_national(cfg, loaded, prelim),
         "initiatives": build_initiatives(cfg, loaded, measures),
-        "georgia": build_georgia(cfg, loaded["georgia"]) if "georgia" in loaded else None,
+        "georgia": build_georgia(cfg, loaded["georgia"]) if "georgia" in loaded else build_georgia_placeholder(cfg, ga_prelim),
         "metro": build_metro(cfg, loaded["georgia"]) if "georgia" in loaded else None,
     }
     failed = {n for n, s in status.items() if not s["ok"]}
