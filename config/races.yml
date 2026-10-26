@@ -72,6 +72,33 @@ national:
                    MO: R, MT: R, NE: R, NV: R, NH: R, NJ: D, NM: D, NY: D, NC: D, ND: R, OH: R, OK: R,
                    OR: D, PA: D, RI: D, SC: R, SD: R, TN: R, TX: R, UT: R, VT: R, VA: D, WA: D, WV: R,
                    WI: D, WY: R}
+  # Party holding each Senate seat that's up in 2026 (Cook Political Report seat list).
+  senate_party: {CO: D, DE: D, IL: D, MA: D, NJ: D, NM: D, OR: D, RI: D, VA: D, GA: D, MN: D, NH: D, MI: D,
+                 NC: R, AK: R, IA: R, KS: R, ME: R, OH: R, TX: R, SC: R, MS: R, NE: R, AL: R, AR: R, FL: R,
+                 ID: R, KY: R, LA: R, MT: R, OK: R, SD: R, TN: R, WV: R, WY: R}
+  # Races settled before Election Day (source: 270toWin uncontested-races list, Sept 2026).
+  #   winner + party: only one candidate on the ballot (counted as won)
+  #   party only: every candidate on the ballot is from that party (seat counted for the party)
+  #   note only: shown on the card, not counted
+  decided:
+    H-FL-10: {winner: "Maxwell Frost", party: D, reason: "Unopposed"}
+    H-MA-02: {winner: "James McGovern", party: D, reason: "Unopposed"}
+    H-MA-05: {winner: "Katherine Clark", party: D, reason: "Unopposed"}
+    H-MA-07: {winner: "Ayanna Pressley", party: D, reason: "Unopposed"}
+    H-WI-02: {winner: "Mark Pocan", party: D, reason: "Unopposed"}
+    H-CA-04: {party: D, reason: "Both finalists are Democrats"}
+    H-CA-07: {party: D, reason: "Both finalists are Democrats"}
+    H-CA-11: {party: D, reason: "Both finalists are Democrats"}
+    H-CA-12: {party: D, reason: "Both finalists are Democrats"}
+    H-CA-14: {party: D, reason: "Both finalists are Democrats"}
+    H-CA-29: {party: D, reason: "Both finalists are Democrats"}
+    H-CA-34: {party: D, reason: "Both finalists are Democrats"}
+    H-CA-37: {party: D, reason: "Both finalists are Democrats"}
+    H-CA-40: {party: R, reason: "Both finalists are Republicans"}
+    H-LA-02: {note: "No major-party opponent"}
+    H-MA-01: {note: "No major-party opponent"}
+    H-NJ-08: {note: "No major-party opponent"}
+    H-PA-03: {note: "No major-party opponent"}
   senate_control: 51            # 50 + vice president's tiebreak goes to R; shown as a note
   house_control: 218
   # Key races, shown by default; "All races" lists everything.

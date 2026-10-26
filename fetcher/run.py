@@ -100,8 +100,14 @@ def build_national(cfg, loaded):
         src = feeds.get(abbr, "manual")
         pattern = (patterns.get(src) or {}).get(group)
         meta = dict(spec, group=group, link=links.get(abbr), note=notes.get(abbr), county_state=abbr)
-        if group == "governor":
-            meta["held"] = (ncfg.get("governor_party") or {}).get(abbr)
+        if group in ("governor", "senate"):
+            meta["held"] = (ncfg.get(group + "_party") or {}).get(abbr)
+        dec = (ncfg.get("decided") or {}).get(spec["id"])
+        if dec:
+            if dec.get("party"):
+                meta["decided"] = {k: dec[k] for k in ("winner", "party", "reason") if dec.get(k)}
+            elif dec.get("note"):
+                meta["note"] = dec["note"]
         data = loaded.get(src)
         contest = None
         if data and pattern:

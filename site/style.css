@@ -137,7 +137,8 @@ details.group[open] > summary::before { content: "–"; }
 .flag a { text-decoration: underline; }
 .race.nofeed .race-name { color: var(--muted); }
 .race.nofeed .bar { background: repeating-linear-gradient(135deg, transparent 0 6px, color-mix(in srgb, var(--line) 60%, transparent) 6px 8px); }
-.race .id { position: absolute; right: 6px; bottom: 2px; font-size: .65rem; color: var(--muted); opacity: .6; }
+.race .id { position: absolute; right: 6px; bottom: 2px; font-size: .65rem; color: var(--muted); opacity: 0; transition: opacity .15s; }
+.race:hover .id, .race:focus-within .id { opacity: .7; }
 .race.fresh { animation: fresh 2.4s ease-out; }
 @keyframes fresh { from { background: color-mix(in srgb, var(--peach) 28%, transparent); } to { background: transparent; } }
 .county-top { margin-top: 14px; }
@@ -235,3 +236,25 @@ details.group[open] > summary::before { content: "–"; }
 .flag.held { color: var(--muted); }
 .flag.held::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 6px; }
 .flag.held.D::before { background: var(--dem-muted); } .flag.held.R::before { background: var(--rep-muted); }
+
+.margin.small { font-size: 1.15rem; line-height: 1.1; }
+.mapbox { position: relative; }
+.mapbar { position: absolute; top: 6px; left: 0; display: flex; gap: 12px; align-items: center; }
+.mapback {
+  font: 600 .85rem var(--body); padding: 7px 12px; border-radius: 6px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--raised); color: var(--text);
+}
+.mapcap { font: 600 1.1rem var(--num); color: var(--muted); }
+.usmap path { vector-effect: non-scaling-stroke; }
+.usmap.zoomed .states path.st:not(.sel) { fill: var(--map-none) !important; opacity: .6; }
+.usmap.zoomed .states path.sel { fill: none !important; }
+.usmap .counties path { stroke: var(--map-edge); stroke-width: .7; }
+.usmap .counties path:hover { stroke: var(--text); stroke-width: 1.6; }
+.housegrid rect { cursor: pointer; }
+.housegrid rect.dim { opacity: .3; }
+.housegrid rect:hover { stroke: var(--text); stroke-width: 1.5; }
+.housegrid .borders { fill: none; stroke: var(--ground); stroke-width: 3; stroke-linecap: square; pointer-events: none; }
+.housegrid .labels text {
+  font: 700 8px var(--body); fill: var(--text); text-anchor: middle; pointer-events: none;
+  paint-order: stroke; stroke: var(--ground); stroke-width: 2.4px; stroke-linejoin: round;
+}

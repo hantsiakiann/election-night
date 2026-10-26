@@ -45,6 +45,10 @@
     return d.length && r.length ? [...d, ...rest, ...r] : cands;
   }
   function marginCell(r) {
+    if (r.decided && !r.total_votes) {
+      const p = r.decided.party;
+      return `<div class="margin ${p === "D" || p === "R" ? p : "X"} small">${r.decided.winner ? "Unopposed" : `${p} seat`}</div>`;
+    }
     if (!r.candidates?.length || !r.total_votes) return `<div class="margin none">${r.status === "no-feed" ? "No feed" : "No votes"}</div>`;
     if (r.margin_pct == null) return `<div class="margin none">${r.vote_for > 1 ? "Elect " + r.vote_for : ""}</div>`;
     if (r.margin_votes === 0) return `<div class="margin tie">Tied</div>`;
@@ -64,7 +68,7 @@
     const cands = r.candidates || [];
     const partisan = cands.some((c) => c.party);
     const lead = cands[0];
-    const leadCls = !r.total_votes ? "" : lead?.party === "D" || lead?.party === "R" ? "lead-" + lead.party : "lead-X";
+    const leadCls = !r.total_votes ? (r.decided ? "lead-" + r.decided.party : "") : lead?.party === "D" || lead?.party === "R" ? "lead-" + lead.party : "lead-X";
     const bar = r.total_votes
       ? barOrder(cands.map((c, i) => ({ ...c, _i: i }))).map((c) =>
         `<span style="width:${c.pct}%;background:${color(c, c._i, partisan)}" title="${esc(c.name)} ${pct1(c.pct)}%"></span>`).join("")
@@ -85,6 +89,7 @@
     if (r.stale) flags.push(`<span class="flag warn">Feed down: showing last numbers received</span>`);
     if (r.status === "manual") flags.push(`<span class="flag">Entered by hand</span>`);
     if (r.vote_for > 1) flags.push(`<span class="flag">Top ${r.vote_for} win</span>`);
+    if (r.decided) flags.push(`<span class="flag called">${r.decided.winner ? `${esc(r.decided.winner)} (${esc(r.decided.party)}) is unopposed` : esc(r.decided.reason)}</span>`);
     if (r.held === "D" || r.held === "R") flags.push(`<span class="flag held ${r.held}">Now held by ${r.held === "D" ? "Democrats" : "Republicans"}</span>`);
     if (r.note) flags.push(`<span class="flag">${esc(r.note)}</span>`);
     if (r.status === "no-feed" || r.status === "not-found" || r.status === "source-error" || r.status === "manual") {
@@ -92,12 +97,10 @@
       if (href) flags.push(`<span class="flag"><a href="${esc(href)}" target="_blank" rel="noopener">Official results</a></span>`);
     }
     const hasCmap = r.counties?.length > 1 && r.county_state;
-    const autoOpen = r.statewide && (r.group === "senate" || r.group === "governor" ||
-      /^(us|u\.s\.) senate|^governor$/i.test(r.feed_name || r.title || ""));
-    const cmapShown = hasCmap && (state.cmapOpen.has(r.id) || (autoOpen && !state.cmapClosed.has(r.id)));
+    const cmapShown = hasCmap && state.cmapOpen.has(r.id);
     if (hasCmap) flags.push(`<button class="flag btn" data-cmap-toggle="${esc(r.id)}" aria-expanded="${cmapShown}">${cmapShown ? "Hide" : "Show"} county map</button>`);
     if (cmapShown) state.raceIndex.set(r.id, r);
-    const sub = r.scope || "";
+    const sub = "";
     return `<li class="race ${leadCls}${r.status === "no-feed" ? " nofeed" : ""}${state.fresh.has(r.id) ? " fresh" : ""}" data-id="${esc(r.id)}">
       <div class="race-name">${esc(r.title)}${sub ? `<small>${esc(sub)}</small>` : ""}</div>
       <div class="bar${partisan && cands.some((c) => c.party === "D") && cands.some((c) => c.party === "R") ? "" : " multi"}" role="img"
@@ -139,7 +142,8 @@
   function tally(races) {
     const t = { D: 0, R: 0, O: 0, none: 0 };
     for (const r of races) {
-      const who = r.call ? r.candidates.find((c) => c.name === r.call) : r.total_votes ? r.candidates[0] : null;
+      const who = r.call ? r.candidates.find((c) => c.name === r.call)
+        : r.total_votes ? r.candidates[0] : r.decided ? { party: r.decided.party } : null;
       if (!who) t.none++; else if (who.party === "D" || who.party === "R") t[who.party]++; else t.O++;
     }
     return t;
@@ -161,7 +165,7 @@
         ${seg(t.none, "none", "No results yet")}${seg(t.R, "R", "Republicans leading or called")}${seg(hR, "hR", "Republican seats not up")}
         ${need ? `<i class="mark" style="left:${(100 * need) / total}%"></i>` : ""}
       </div>
-      <p class="balance-note">${need ? `${need} ${word} for a majority${g === "senate" ? "; Republicans need 50 with the vice president's tiebreak" : ""}. ` : ""}Counts leaders in races with votes counted, plus any race marked called. ${t.none} of ${races.length} races have no results yet.</p>
+      <p class="balance-note">${need ? `${need} ${word} for a majority${g === "senate" ? "; Republicans need 50 with the vice president's tiebreak" : ""}. ` : ""}Counts leaders in races with votes counted, plus races called or settled before Election Day. ${t.none} of ${races.length} races have no results yet.</p>
     </div>`;
   }
   function renderNational(d) {
@@ -185,14 +189,18 @@
     return `<div class="subnav" role="group" aria-label="Office">${pills}</div>
       <div class="natmap-wrap">
         ${balanceBar(g, all, d.summary || {})}
-        <div class="mapbox" id="natmap" aria-hidden="false"></div>
+        <div class="mapbox${state.pick && g !== "house" ? " zoomed" : ""}">
+          <div id="natmap"></div>
+          ${state.pick && g !== "house" ? `<div class="mapbar"><button class="mapback" data-unpick>Back to U.S. map</button><span class="mapcap" id="mapcap"></span></div>` : ""}
+        </div>
         <ul class="legend">
           <li><i style="background:var(--dem)"></i><i style="background:color-mix(in srgb, var(--dem) 55%, var(--map-blank))"></i>Democrat leads (lighter = closer)</li>
           <li><i style="background:var(--rep)"></i><i style="background:color-mix(in srgb, var(--rep) 55%, var(--map-blank))"></i>Republican leads</li>
           ${g === "governor" ? `<li><i style="background:var(--dem-muted)"></i><i style="background:var(--rep-muted)"></i>Current holder, not up this year</li>
           <li><i class="hatch hD"></i><i class="hatch hR"></i>Current holder, no results yet</li>`
-          : `<li><i class="hatch"></i>No results yet</li>${g === "house" ? "" : `<li><i style="background:var(--map-none)"></i>No race this year</li>`}`}
-          <li class="hint">Click a ${g === "house" ? "state or district" : "state"} to filter the list.</li>
+          : g === "senate" ? `<li><i class="hatch hD"></i><i class="hatch hR"></i>Current holder, no results yet</li><li><i style="background:var(--map-none)"></i>No race this year</li>`
+          : `<li><i class="hatch"></i>No results yet</li>`}
+          <li class="hint">${g === "house" ? "Each square is one district. Click one to see its state." : "Click a state to zoom into its counties."}</li>
         </ul>
       </div>
       <div class="listbar">${scopes}${pickChip}</div>` +
@@ -240,15 +248,40 @@
     const nat = $("#natmap");
     if (nat) {
       const races = d.national[state.natGroup] || [];
-      const opts = { selected: state.pick, held: state.natGroup === "governor" ? d.summary?.governor_party || {} : {}, onPick: (abbr) => { state.pick = state.pick === abbr ? null : abbr; render(); $(".listbar")?.scrollIntoView({ behavior: "smooth", block: "start" }); } };
-      if (state.natGroup === "house") ENMaps.houseTiles(nat, races, d.states, opts);
-      else ENMaps.usMap(nat, races, d.states, opts).catch(fail(nat));
+      const held = {};
+      if (state.natGroup !== "house") races.forEach((r) => { if (r.held) held[r.state] = r.held; });
+      if (state.natGroup === "governor") Object.assign(held, d.summary?.governor_party || {}, held);
+      const anim = state.zoomAnim || {};
+      state.zoomAnim = null;
+      const opts = { selected: state.pick, held, animate: anim.animate, from: anim.from, onPick: (abbr) => pickState(abbr) };
+      if (state.natGroup === "house") ENMaps.houseGrid(nat, races, d.states, opts).catch(fail(nat));
+      else ENMaps.usMap(nat, races, d.states, opts).then((info) => {
+        const cap = $("#mapcap");
+        if (cap && state.pick) {
+          const nm = d.states.find((s) => s.abbr === state.pick)?.name;
+          cap.textContent = info.hasCounties ? `${nm} by county` : `${nm}: this state's feed has no county results`;
+        }
+      }).catch(fail(nat));
     }
     document.querySelectorAll("[data-cmap]").forEach((el) => {
       const r = state.raceIndex.get(el.dataset.cmap);
       const st = d.states.find((s) => s.abbr === r?.county_state);
       if (r && st) ENMaps.countyMap(el, r, st.fips).catch(fail(el));
     });
+  }
+
+  function pickState(abbr) {
+    const prev = state.pick;
+    if (prev === abbr) return unpick();
+    state.pick = abbr;
+    state.zoomAnim = state.natGroup !== "house" ? { animate: prev ? null : "in" } : null;
+    render();
+  }
+  function unpick() {
+    if (!state.pick) return;
+    state.zoomAnim = state.natGroup !== "house" ? { animate: "out", from: state.pick } : null;
+    state.pick = null;
+    render();
   }
 
   function renderStatus() {
@@ -313,7 +346,7 @@
   $("#panel").addEventListener("click", (e) => {
     const n = e.target.closest("[data-nat]"), c = e.target.closest("[data-county]");
     const sc = e.target.closest("[data-scope]"), tg = e.target.closest("[data-cmap-toggle]");
-    if (e.target.closest("[data-unpick]")) { state.pick = null; render(); }
+    if (e.target.closest("[data-unpick]")) unpick();
     if (sc) { state.scope = { ...state.scope, [state.natGroup]: sc.dataset.scope }; state.pick = null; store.set("scope", state.scope); render(); }
     if (tg) {
       const id = tg.dataset.cmapToggle, open = tg.getAttribute("aria-expanded") === "true";
@@ -331,6 +364,7 @@
   $("#big").addEventListener("click", () => { state.big = !state.big; store.set("big", state.big); render(); });
   let qTimer;
   $("#q").addEventListener("input", (e) => { clearTimeout(qTimer); qTimer = setTimeout(() => { state.q = e.target.value.trim(); render(); }, 120); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && state.tab === "national" && state.pick) unpick(); });
   document.addEventListener("visibilitychange", () => { if (!document.hidden) { load(); schedule(); } });
   window.addEventListener("hashchange", () => { readHash(); render(); });
   setInterval(renderStatus, 30000);
