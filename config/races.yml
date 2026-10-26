@@ -1,0 +1,119 @@
+# Election night tracker config. Edit freely; the fetcher re-reads it on every run.
+#
+# Race `contest:` values are case-insensitive regular expressions matched against the
+# contest names in that source's feed. After changing anything, run
+#   python -m fetcher.run --list-contests
+# to print every contest name each source actually publishes.
+
+election_date: "2026-11-03"
+title: "Election Night 2026"
+# Where the tracker is served. Used to recover last good numbers if a source fails mid-night.
+site_url: "https://hantsiakiann.github.io/election-night"
+refresh_seconds: 60          # how often each open browser re-checks for new data
+
+sources:
+  georgia:
+    type: enhanced_voting
+    # Set this once the Secretary of State posts the Nov 3 election (usually days before).
+    # It's the last part of the URL at results.sos.ga.gov/results/public/Georgia/elections/<ID>
+    # Past IDs for reference: GeneralPrimary51926, 08252026SpecialElectionRunoff
+    election_id: ""
+    base: "https://results.sos.ga.gov/cdn/results/Georgia"
+    page: "https://results.sos.ga.gov/results/public/Georgia/elections/{election_id}"
+  nc:
+    type: ncsbe
+    url: "https://s3.amazonaws.com/dl.ncsbe.gov/ENRS/2026_11_03/results_pct_20261103.zip"
+    page: "https://er.ncsbe.gov/?election_dt=11/03/2026&county_id=0&office=FED&contest=0"
+  mn:
+    type: mn_sos
+    # Unverified for 2026: confirm the path on the MN SOS results site on election day.
+    base: "https://electionresultsfiles.sos.mn.gov/20261103/"
+    files: [ussenate.txt, ushouse.txt, stateoffice.txt]
+    page: "https://electionresults.sos.mn.gov/"
+  # Template for any state that turns out to publish JSON (see fetcher/sources/json_map.py):
+  # az:
+  #   type: json_map
+  #   url: "https://..."
+  #   page: "https://results.arizona.vote/"
+  #   contests: "Contests"
+  #   contest_name: "Name"
+  #   candidates: "Candidates"
+  #   cand_name: "Name"
+  #   cand_votes: "Votes"
+  #   cand_party: "Party"
+  #   precincts_reporting: "PrecinctsReporting"
+  #   precincts_total: "Precincts"
+
+# ---------------------------------------------------------------- National tab
+# source: a key from `sources` above, or `manual` (numbers come from config/manual.yml).
+# link: where the "official results" button goes when there's no feed.
+national:
+  senate:
+    - {id: SEN-GA, title: "Georgia", source: georgia, contest: "^(US|U\\.S\\.) Senate"}
+    - {id: SEN-NC, title: "North Carolina", source: nc, contest: "^US SENATE"}
+    - {id: SEN-MI, title: "Michigan", source: manual, link: "https://www.michigan.gov/sos/elections"}
+    - {id: SEN-ME, title: "Maine", source: manual, link: "https://www.maine.gov/sos/cec/elec/results/index.html", note: "Maine has no state election-night feed"}
+    - {id: SEN-OH, title: "Ohio", source: manual, link: "https://liveresults.ohiosos.gov/"}
+    - {id: SEN-TX, title: "Texas", source: manual, link: "https://results.texas-election.com/races"}
+    - {id: SEN-IA, title: "Iowa", source: manual, link: "https://electionresults.iowa.gov/"}
+    - {id: SEN-AK, title: "Alaska", source: manual, link: "https://www.elections.alaska.gov/"}
+    - {id: SEN-NH, title: "New Hampshire", source: manual, link: "https://www.sos.nh.gov/elections", note: "New Hampshire has no state election-night feed"}
+    - {id: SEN-MN, title: "Minnesota", source: mn, contest: "U\\.?S\\.? Senat"}
+  governor:
+    - {id: GOV-GA, title: "Georgia", source: georgia, contest: "^Governor"}
+    - {id: GOV-MI, title: "Michigan", source: manual, link: "https://www.michigan.gov/sos/elections"}
+    - {id: GOV-NV, title: "Nevada", source: manual, link: "https://silverstateelection.nv.gov/"}
+    - {id: GOV-OH, title: "Ohio", source: manual, link: "https://liveresults.ohiosos.gov/"}
+    - {id: GOV-AK, title: "Alaska", source: manual, link: "https://www.elections.alaska.gov/"}
+    - {id: GOV-AZ, title: "Arizona", source: manual, link: "https://results.arizona.vote/"}
+    - {id: GOV-WI, title: "Wisconsin", source: manual, link: "https://elections.wi.gov/elections/election-results", note: "Wisconsin has no state election-night feed"}
+    - {id: GOV-IA, title: "Iowa", source: manual, link: "https://electionresults.iowa.gov/"}
+    - {id: GOV-KS, title: "Kansas", source: manual, link: "https://sos.ks.gov/elections/elections.html"}
+    - {id: GOV-TX, title: "Texas", source: manual, link: "https://results.texas-election.com/races"}
+    - {id: GOV-OR, title: "Oregon", source: manual, link: "https://results.oregonvotes.gov/"}
+  house:
+    - {id: H-NC-01, title: "NC-01", source: nc, contest: "^US HOUSE OF REPRESENTATIVES DISTRICT 0?1$"}
+    - {id: H-NC-11, title: "NC-11", source: nc, contest: "^US HOUSE OF REPRESENTATIVES DISTRICT 11$"}
+    - {id: H-NY-17, title: "NY-17", source: manual, link: "https://www.elections.ny.gov/"}
+    - {id: H-NY-03, title: "NY-03", source: manual, link: "https://www.elections.ny.gov/"}
+    - {id: H-PA-01, title: "PA-01", source: manual, link: "https://www.electionreturns.pa.gov/"}
+    - {id: H-PA-08, title: "PA-08", source: manual, link: "https://www.electionreturns.pa.gov/"}
+    - {id: H-PA-10, title: "PA-10", source: manual, link: "https://www.electionreturns.pa.gov/"}
+    - {id: H-WA-03, title: "WA-03", source: manual, link: "https://results.vote.wa.gov/"}
+    - {id: H-CA-13, title: "CA-13", source: manual, link: "https://electionresults.sos.ca.gov/"}
+    - {id: H-IA-01, title: "IA-01", source: manual, link: "https://electionresults.iowa.gov/"}
+    - {id: H-NE-02, title: "NE-02", source: manual, link: "https://electionresults.nebraska.gov/"}
+    - {id: H-CO-08, title: "CO-08", source: manual, link: "https://www.sos.state.co.us/pubs/elections/"}
+    - {id: H-OH-09, title: "OH-09", source: manual, link: "https://liveresults.ohiosos.gov/"}
+    - {id: H-OH-10, title: "OH-10", source: manual, link: "https://liveresults.ohiosos.gov/"}
+    - {id: H-OH-15, title: "OH-15", source: manual, link: "https://liveresults.ohiosos.gov/"}
+    - {id: H-TX-28, title: "TX-28", source: manual, link: "https://results.texas-election.com/races"}
+    - {id: H-TX-35, title: "TX-35", source: manual, link: "https://results.texas-election.com/races"}
+    - {id: H-FL-13, title: "FL-13", source: manual, link: "https://results.elections.myflorida.com/"}
+    - {id: H-FL-22, title: "FL-22", source: manual, link: "https://results.elections.myflorida.com/"}
+    - {id: H-FL-25, title: "FL-25", source: manual, link: "https://results.elections.myflorida.com/"}
+    - {id: H-KY-06, title: "KY-06", source: manual, link: "https://elect.ky.gov/results/"}
+    - {id: H-AR-02, title: "AR-02", source: manual, link: "https://www.sos.arkansas.gov/elections/"}
+    - {id: H-AL-02, title: "AL-02", source: manual, link: "https://www.sos.alabama.gov/alabama-votes"}
+
+# ---------------------------------------------------------------- Georgia tab
+georgia:
+  majority_rule: true        # flag leaders under 50% (Georgia general-election runoff Dec 1)
+  # Sections, in display order. Each statewide contest goes in the first section whose
+  # pattern matches its name. `collapsed: true` sections start folded (the legislature).
+  sections:
+    - {name: "U.S. Senate & Governor", match: "^(US|U\\.S\\.) Senate|^Governor$", collapsed: false}
+    - {name: "Statewide offices", match: "Lieutenant Governor|Secretary of State|Attorney General|Agriculture|Insurance|Labor|School Superintendent", collapsed: false}
+    - {name: "U.S. House", match: "^(US|U\\.S\\.) (House|Rep)", collapsed: false}
+    - {name: "Public Service Commission", match: "Public Service|PSC", collapsed: false}
+    - {name: "Ballot measures", match: "Amendment|Referendum|Question|Constitutional|^Statewide", collapsed: false}
+    - {name: "Courts", match: "Supreme Court|Court of Appeals|Justice|Judge", collapsed: true}
+    - {name: "State Senate", match: "^State Senat", collapsed: true}
+    - {name: "State House", match: "^State (House|Rep)", collapsed: true}
+    - {name: "Other", match: ".*", collapsed: true}
+  # Contests whose county-level split is shown at the top of each Metro Atlanta county.
+  county_top_of_ticket: "^(US|U\\.S\\.) Senate|^Governor$|Lieutenant Governor"
+
+# ---------------------------------------------------------------- Metro Atlanta tab
+metro:
+  counties: [Fulton, DeKalb, Cobb, Gwinnett, Clayton]

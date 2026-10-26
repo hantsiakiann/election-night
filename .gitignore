@@ -1,0 +1,8 @@
+_site/
+__pycache__/
+*.pyc
+fixtures/georgia/*
+fixtures/nc/*
+fixtures/mn/*
+!fixtures/**/.gitkeep
+fixtures/races-test.yml

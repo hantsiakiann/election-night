@@ -1,0 +1,72 @@
+# Fetches results, rebuilds data/results.json, and publishes the site to GitHub Pages.
+#
+# Election night: set repository variable TRACKER_LIVE=true (Settings > Secrets and
+# variables > Actions > Variables), then run this workflow once from the Actions tab.
+# Each run re-starts itself about a minute after it finishes, so the site updates every
+# ~2-3 minutes until you set TRACKER_LIVE=false. The schedule below is a safety net in
+# case the chain breaks (GitHub's cron can run late, so don't rely on it alone).
+name: Update results
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ["site/**", "config/**", "fetcher/**", ".github/workflows/update.yml"]
+  schedule:
+    # Every 10 min from 6pm ET Nov 3 through 10am ET Nov 4 (UTC times)
+    - cron: "*/10 22-23 3 11 *"
+    - cron: "*/10 0-15 4 11 *"
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+  actions: write
+
+concurrency:
+  group: results
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Fetch results
+        run: |
+          mkdir -p _site
+          cp -r site/. _site/
+          python -m fetcher.run --out _site/data/results.json
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
+
+  chain:
+    # Keep going on election night: queue the next run after a short pause.
+    needs: deploy
+    if: always() && vars.TRACKER_LIVE == 'true' && github.event_name != 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - run: sleep 45
+      - name: Queue next run (stops on its own after Nov 6 in case TRACKER_LIVE is left on)
+        run: |
+          if [ "$(date -u +%Y%m%d)" -gt 20261106 ]; then echo "Past election week; not chaining."; exit 0; fi
+          gh workflow run update.yml --repo "$GITHUB_REPOSITORY" --ref main
+        env:
+          GH_TOKEN: ${{ github.token }}

@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Election Night 2026</title>
+<meta name="description" content="Live returns for national, Georgia, and metro Atlanta races, from official state results feeds.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <div class="top-row">
+    <h1 id="title">Election Night 2026</h1>
+    <p class="updated" id="updated" aria-live="polite">Loading results…</p>
+  </div>
+  <nav class="tabs" role="tablist" aria-label="Results">
+    <button role="tab" id="tab-national" aria-controls="panel" data-tab="national">National</button>
+    <button role="tab" id="tab-georgia" aria-controls="panel" data-tab="georgia">Georgia</button>
+    <button role="tab" id="tab-metro" aria-controls="panel" data-tab="metro">Metro Atlanta</button>
+  </nav>
+  <div class="tools">
+    <label class="search"><span class="sr">Find a race or candidate</span>
+      <input id="q" type="search" placeholder="Find a race or candidate" autocomplete="off"></label>
+    <button class="toggle" id="closest" aria-pressed="false">Closest first</button>
+    <button class="toggle" id="big" aria-pressed="false">Large text</button>
+  </div>
+</header>
+
+<main id="panel" role="tabpanel" tabindex="-1"></main>
+
+<footer class="foot">
+  <details>
+    <summary>Data sources</summary>
+    <ul id="sources"></ul>
+    <p>Vote counts come straight from each state's official results feed and are unofficial until certified. Nothing here projects winners; "Called" marks only appear when entered by hand.</p>
+  </details>
+</footer>
+<script src="app.js"></script>
+</body>
+</html>

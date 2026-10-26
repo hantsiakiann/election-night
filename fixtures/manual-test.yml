@@ -1,0 +1,11 @@
+# Manual entries used only by the offline test run (python -m fetcher.run --fixtures ...)
+races:
+  SEN-MI:
+    reporting_pct: 38
+    candidates:
+      - {name: "Test Candidate D", party: D, votes: 812345}
+      - {name: "Test Candidate R", party: R, votes: 798001}
+    note: "Detroit absentees not yet in (test note)"
+  H-NC-11:
+    call: "Candidate Eleven-R"
+    called_by: "test call"

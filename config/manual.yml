@@ -1,0 +1,19 @@
+# Manual entries for election night. Edit on GitHub (the pencil icon works from a phone);
+# the next update run picks it up within a few minutes.
+#
+# Key each entry by race id (shown at the bottom of every card, e.g. SEN-MI) or by the
+# exact contest name as shown on the card.
+#
+#   SEN-MI:
+#     reporting_pct: 42          # optional, percent of expected vote / precincts
+#     candidates:
+#       - {name: "Candidate A", party: D, votes: 1234567}
+#       - {name: "Candidate B", party: R, votes: 1200000}
+#     call: "Candidate A"        # optional; shows a CALLED badge (say who called it in `called_by`)
+#     called_by: "AP via TV"
+#     note: "Detroit still counting absentees"
+#
+# `call` / `called_by` / `note` also work on races that have a live feed; manual vote
+# numbers are only used when a race has no feed (set `override: true` to force them).
+
+races: {}
