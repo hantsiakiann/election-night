@@ -17,7 +17,8 @@ import { geoProject } from "d3-geo-projection";
 import * as shapefile from "shapefile";
 import { topology } from "topojson-server";
 import { presimplify, simplify, quantile } from "topojson-simplify";
-import { quantize } from "topojson-client";
+import { quantize, feature as topoFeature } from "topojson-client";
+import polygonClipping from "polygon-clipping";
 
 const FIPS = {
   "01": "AL", "02": "AK", "04": "AZ", "05": "AR", "06": "CA", "08": "CO", "09": "CT", "10": "DE", "12": "FL",
@@ -93,6 +94,26 @@ const features = Object.values(byState).flat();
 const projection = geoAlbersUsa().scale(1300).translate([487.5, 305]);
 const projected = geoProject({ type: "FeatureCollection", features }, projection);
 projected.features = projected.features.filter((f) => f.geometry);
+
+// Clip every district to the same state outline the site draws (site/geo/states.json, already in
+// this projection). Plan files and the Census file follow different coastlines; without this,
+// districts spill into bays and marshes past the drawn coast.
+const statesTopo = JSON.parse(await readFile("site/geo/states.json", "utf8"));
+const outline = {};
+for (const f of topoFeature(statesTopo, statesTopo.objects.states).features) {
+  if (FIPS[f.id]) outline[FIPS[f.id]] = f.geometry.type === "Polygon" ? [f.geometry.coordinates] : f.geometry.coordinates;
+}
+report.clipped = 0; report.clipFailed = [];
+for (const f of projected.features) {
+  const o = outline[f.id.slice(0, 2)];
+  if (!o) continue;
+  const g = f.geometry.type === "Polygon" ? [f.geometry.coordinates] : f.geometry.coordinates;
+  try {
+    const r = polygonClipping.intersection(g, o);
+    if (r.length) { f.geometry = { type: "MultiPolygon", coordinates: r }; report.clipped++; }
+    else report.clipFailed.push(f.id);
+  } catch (e) { report.clipFailed.push(f.id); }
+}
 
 let topo = topology({ districts: projected }, 1e5);
 topo = presimplify(topo);

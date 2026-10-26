@@ -82,7 +82,7 @@ If a feed goes down mid-night, its races keep the last numbers received and are 
 - **House geographic view** (toggle above the House map): real district lines from the Census
   Bureau's 2024 boundaries, with the 2026 maps merged in for Texas, Florida, California,
   North Carolina, Ohio, Utah, Louisiana, Alabama and Tennessee (sources in
-  `tools/district_overrides.json`; each is clipped to the Census coastline). Built by the
+  `tools/district_overrides.json`; every district is clipped to the drawn state outline). Built by the
   "Build district map" workflow into `site/geo/districts.json`; check
   `site/geo/districts_report.json` after a run. If a state redraws again, put its shapefile zip,
   GeoJSON or ArcGIS layer URL in `tools/district_overrides.json` and rerun the workflow. A state

@@ -10,6 +10,7 @@
     "topojson-client": "^3.1.0",
     "topojson-server": "^3.0.1",
     "topojson-simplify": "^3.0.3",
-    "mapshaper": "^0.6.100"
+    "mapshaper": "^0.6.100",
+    "polygon-clipping": "^0.15.7"
   }
 }

@@ -1,5 +1,5 @@
 {
-  "_note": "2026 congressional district maps for states whose lines differ from the Census 2024 file. type 'shp' = zip with a shapefile (reprojected with mapshaper); type 'planscore' = PlanScore geometry.json, features in district order; type 'arcgis' = ArcGIS layer query returning GeoJSON. District number comes from 'field' (auto-detected if omitted) or feature order. Every override is clipped to the state's Census coastline so districts don't extend into the water.",
+  "_note": "2026 congressional district maps for states whose lines differ from the Census 2024 file. type 'shp' = zip with a shapefile (reprojected with mapshaper); type 'planscore' = PlanScore geometry.json, features in district order; type 'arcgis' = ArcGIS layer query returning GeoJSON. District number comes from 'field' (auto-detected if omitted) or feature order. build_districts.mjs clips every district to the state outline the site draws, so districts don't extend into the water.",
   "states": [
     {
       "state": "TX",

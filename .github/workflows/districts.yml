@@ -49,19 +49,6 @@ jobs:
             fi
           done
           ls -la /tmp/ov
-      - name: Clip 2026 maps to the coastline
-        # Plan files often include offshore water (Census blocks extend into it); clip each to the
-        # state's outline from the Census cartographic file so the coast matches the other states.
-        run: |
-          SHP=$(ls /tmp/cd/*.shp | head -1); mkdir -p /tmp/clip
-          for f in /tmp/ov/*.geojson; do
-            st=$(basename "$f" .geojson)
-            fips=$(node -e "const m={AL:'01',AZ:'04',CA:'06',FL:'12',GA:'13',LA:'22',MO:'29',NC:'37',OH:'39',SC:'45',TN:'47',TX:'48',UT:'49',VA:'51'};console.log(m['$st']||'')")
-            [ -z "$fips" ] && { echo "!! no FIPS for $st"; continue; }
-            npx --prefix tools mapshaper -i "$SHP" -filter "STATEFP=='$fips'" -dissolve -proj wgs84 -o "/tmp/clip/$st.json" \
-              && npx --prefix tools mapshaper -i "$f" -each 'ORDER_IDX=this.id' -clip "/tmp/clip/$st.json" -o force "$f" \
-              || echo "!! $st clip failed (unclipped file kept)"
-          done
       - name: Convert
         run: |
           SHP=$(ls /tmp/cd/*.shp | head -1)
