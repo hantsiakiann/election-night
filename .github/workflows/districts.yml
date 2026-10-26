@@ -32,16 +32,33 @@ jobs:
           curl -fsSL --retry 3 -o cd.zip "${{ inputs.url }}"
           unzip -o -q cd.zip
           ls -la
+      - name: Download 2026 maps for redrawn states
+        run: |
+          mkdir -p /tmp/ov
+          jq -c '.states[]' tools/district_overrides.json | while read -r s; do
+            st=$(echo "$s" | jq -r .state); url=$(echo "$s" | jq -r .url); type=$(echo "$s" | jq -r .type)
+            echo "== $st ($type) $url"
+            if [ "$type" = "planscore" ]; then
+              curl -fsSL --compressed --retry 3 -o "/tmp/ov/$st.geojson" "$url" || echo "!! $st download failed"
+            else
+              mkdir -p "/tmp/ovz/$st" && curl -fsSL --retry 3 -A "Mozilla/5.0" -o "/tmp/ovz/$st.zip" "$url" \
+                && unzip -o -q "/tmp/ovz/$st.zip" -d "/tmp/ovz/$st" || { echo "!! $st download failed"; continue; }
+              shp=$(find "/tmp/ovz/$st" -iname '*.shp' | head -1)
+              [ -n "$shp" ] && npx --prefix tools mapshaper -i "$shp" -proj wgs84 -o format=geojson "/tmp/ov/$st.geojson" \
+                || echo "!! $st conversion failed"
+            fi
+          done
+          ls -la /tmp/ov
       - name: Convert
         run: |
           SHP=$(ls /tmp/cd/*.shp | head -1)
-          node tools/build_districts.mjs "$SHP" site/geo/districts.json
+          node tools/build_districts.mjs "$SHP" /tmp/ov site/geo/districts.json
           ls -la site/geo/districts.json
       - name: Commit
         run: |
           git config user.name "hantsiakiann"
           git config user.email "hantsiakiann@gmail.com"
-          git add site/geo/districts.json
+          git add site/geo/districts.json site/geo/districts_report.json
           if git diff --cached --quiet; then echo "No change."; exit 0; fi
           git commit -m "Update congressional district boundaries from Census"
           git push

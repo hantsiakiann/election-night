@@ -1,0 +1,17 @@
+{
+  "_note": "2026 congressional district maps for states that redrew after the Census 2024 file. type 'shp' = zip with a shapefile (reprojected with mapshaper; district number from 'field', auto-detected if omitted); type 'planscore' = PlanScore geometry.json, features in district order.",
+  "states": [
+    {"state": "TX", "plan": "PLANC2333 (enacted 2025)", "type": "shp",
+     "url": "https://data.capitol.texas.gov/dataset/748c952b-e926-4f44-8d01-a738884b3ec8/resource/5712ebe1-d777-4d4a-b836-0534e17bca01/download/planc2333.zip"},
+    {"state": "FL", "plan": "EOGPCRP2026 (enacted May 2026)", "type": "shp",
+     "url": "https://www.flsenate.gov/PublishedContent/Session/Congressional/EOGPCRP2026.zip"},
+    {"state": "CA", "plan": "Proposition 50 / AB 604", "type": "planscore",
+     "url": "https://planscore.s3.amazonaws.com/uploads/20251109T005753.161170853Z/geometry.json"},
+    {"state": "NC", "plan": "SB 249 / SL 2025-95", "type": "planscore",
+     "url": "https://planscore.s3.amazonaws.com/uploads/20251220T215350.341663516Z/geometry.json"},
+    {"state": "OH", "plan": "Ohio Redistricting Commission, Oct 2025", "type": "planscore",
+     "url": "https://planscore.s3.amazonaws.com/uploads/20251030T231915.464256903Z/geometry.json"},
+    {"state": "UT", "plan": "Court-adopted Plaintiffs' Map 1", "type": "planscore",
+     "url": "https://planscore.s3.amazonaws.com/uploads/20251116T015247.162259523Z/geometry.json"}
+  ]
+}

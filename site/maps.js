@@ -222,7 +222,9 @@ window.ENMaps = (() => {
     const sfeats = topojson.feature(stopo, stopo.objects.states).features.filter((f) => byFips[f.id]);
     const featBy = Object.fromEntries(sfeats.map((f) => [byFips[f.id].abbr, f]));
     const dfeats = dtopo ? topojson.feature(dtopo, dtopo.objects.districts).features : [];
-    const mapped = new Set(dfeats.map((f) => f.id.slice(0, 2)).filter((st) => !newLines.includes(st)));
+    // states drawn with district lines: Census lines still in use, or 2026 lines loaded for a redrawn state
+    const mapped = new Set(dfeats.filter((f) => !newLines.includes(f.id.slice(0, 2)) || f.properties?.src === "2026")
+      .map((f) => f.id.slice(0, 2)));
     const seatsBy = {};
     races.forEach((r) => (seatsBy[r.state] ||= []).push(r));
     const tally = (st) => {
