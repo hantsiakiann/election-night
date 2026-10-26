@@ -76,6 +76,10 @@ national:
   senate_party: {CO: D, DE: D, IL: D, MA: D, NJ: D, NM: D, OR: D, RI: D, VA: D, GA: D, MN: D, NH: D, MI: D,
                  NC: R, AK: R, IA: R, KS: R, ME: R, OH: R, TX: R, SC: R, MS: R, NE: R, AL: R, AR: R, FL: R,
                  ID: R, KY: R, LA: R, MT: R, OK: R, SD: R, TN: R, WV: R, WY: R}
+  # States with no Senate race in 2026: party of their two senators (split = one of each).
+  # Sanders (I-VT) caucuses with Democrats. Source: list of current senators, Oct 2026.
+  senate_not_up: {AZ: D, CA: D, CT: D, HI: D, IN: R, MD: D, MO: R, NV: D, NY: D, ND: R, PA: split,
+                  UT: R, VT: D, WA: D, WI: split}
   # Races settled before Election Day (source: 270toWin uncontested-races list, Sept 2026).
   #   winner + party: only one candidate on the ballot (counted as won)
   #   party only: every candidate on the ballot is from that party (seat counted for the party)

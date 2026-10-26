@@ -147,6 +147,30 @@ def in_one_piece(grid, a, removed=None):
     return len(seen) == len(mine)
 
 
+def exterior(grid):
+    """Empty cells connected to the outside of the map (anything else empty is a hole)."""
+    xs = [i for i, _ in grid]
+    ys = [j for _, j in grid]
+    x0, x1, y0, y1 = min(xs) - 1, max(xs) + 1, min(ys) - 1, max(ys) + 1
+    seen, q = {(x0, y0)}, deque([(x0, y0)])
+    while q:
+        i, j = q.popleft()
+        for di, dj in N4:
+            n = (i + di, j + dj)
+            if x0 <= n[0] <= x1 and y0 <= n[1] <= y1 and n not in grid and n not in seen:
+                seen.add(n)
+                q.append(n)
+    return seen
+
+
+def holes(grid):
+    ext = exterior(grid)
+    xs = [i for i, _ in grid]
+    ys = [j for _, j in grid]
+    return [(i, j) for i in range(min(xs), max(xs) + 1) for j in range(min(ys), max(ys) + 1)
+            if (i, j) not in grid and (i, j) not in ext]
+
+
 def balance(grid, states, max_steps=5000):
     count = {a: 0 for a in states}
     for v in grid.values():
@@ -172,6 +196,7 @@ def balance(grid, states, max_steps=5000):
 
     def candidates():
         out = []
+        ext = exterior(grid)
         for cell, a in list(grid.items()):
             for di, dj in N4:
                 n = (cell[0] + di, cell[1] + dj)
@@ -179,9 +204,9 @@ def balance(grid, states, max_steps=5000):
                 if b == a:
                     continue
                 if b is None:
-                    if ex(a) >= 1:  # grow into empty space; prefer filling notches
-                        out.append((ex(a) + 0.2 * own_nbrs(n, a), "claim", n, a, None))
-                    if ex(a) <= -1:  # shrink at the map edge; prefer cells sticking out
+                    if ex(a) >= 1:  # grow into empty space; holes first, then notches
+                        out.append((ex(a) + 0.2 * own_nbrs(n, a) + (3 if n not in ext else 0), "claim", n, a, None))
+                    if ex(a) <= -1 and n in ext:  # shrink only at the outer edge (never opens a hole)
                         out.append((-ex(a) - 0.2 * own_nbrs(cell, a), "release", cell, a, None))
                 elif ex(b) - ex(a) >= 2:  # give to a needier neighbor; >= 2 so it can't bounce back
                     out.append((ex(b) - ex(a) - 0.2 * own_nbrs(cell, a) + 0.2 * own_nbrs(cell, b), "move", cell, a, b))
@@ -227,12 +252,14 @@ def balance(grid, states, max_steps=5000):
             apply("claim", n, b)
             return True
         opts = []
+        ext = exterior(grid) if b == EMPTY else set()
         for cell, v in grid.items():
             if v != a:
                 continue
             for di, dj in N4:
-                nb = grid.get((cell[0] + di, cell[1] + dj), EMPTY)
-                if nb == b:
+                n = (cell[0] + di, cell[1] + dj)
+                nb = grid.get(n, EMPTY)
+                if nb == b and (b != EMPTY or n in ext):
                     opts.append((own_nbrs(cell, a) - (own_nbrs(cell, b) if b != EMPTY else 0), cell))
                     break
         for _, cell in sorted(opts):
@@ -293,6 +320,18 @@ def main():
     u = math.sqrt(area / target)
     grid = rasterize(shapes, lower48, u)
     steps = balance(grid, lower48)
+    for _round in range(60):  # fill interior gaps: a neighbor claims each hole, then rebalance
+        hs = holes(grid)
+        if not hs:
+            break
+        for h in hs:
+            if h in grid:
+                continue
+            nbrs = [grid.get((h[0] + di, h[1] + dj)) for di, dj in N4]
+            nbrs = [n for n in nbrs if n]
+            if nbrs:
+                grid[h] = max(set(nbrs), key=nbrs.count)
+        steps = balance(grid, lower48)
     counts = {a: sum(1 for v in grid.values() if v == a) for a in lower48}
     bad = {a: (counts[a], SEATS[a]) for a in lower48 if counts[a] != SEATS[a]}
     broken = [a for a in lower48 if not in_one_piece(grid, a)]
@@ -300,8 +339,14 @@ def main():
     j0 = min(j for _, j in grid)
     H = max(j for _, j in grid) - j0 + 1
     cells = [{"s": a, "x": i - i0, "y": j - j0} for (i, j), a in grid.items()]
-    cells += [{"s": "AK", "x": 0, "y": H}, {"s": "HI", "x": 2, "y": H}, {"s": "HI", "x": 3, "y": H}]
-    return cells, {"steps": steps, "unbalanced": bad, "broken": broken}
+    # Alaska and Hawaii: just below the West Coast's southern edge, not the bottom of the map
+    west = [c for c in cells if c["x"] <= 5]
+    yi = max(c["y"] for c in west) + 2
+    taken = {(c["x"], c["y"]) for c in cells}
+    while any((x, yi) in taken for x in range(0, 4)):
+        yi += 1
+    cells += [{"s": "AK", "x": 0, "y": yi}, {"s": "HI", "x": 2, "y": yi}, {"s": "HI", "x": 3, "y": yi}]
+    return cells, {"steps": steps, "unbalanced": bad, "broken": broken, "holes": len(holes(grid))}
 
 
 def write(cells):
@@ -319,7 +364,7 @@ def write(cells):
 if __name__ == "__main__":
     cells, info = main()
     print(len(cells), "cells", info)
-    if not info["unbalanced"] and not info["broken"] and len(cells) == 435:
+    if not info["unbalanced"] and not info["broken"] and not info["holes"] and len(cells) == 435:
         print("wrote", write(cells))
     else:
         sys.exit("layout not valid; not written")

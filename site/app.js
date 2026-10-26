@@ -77,7 +77,7 @@
     const candHtml = shown.map((c, i) => `
       <span class="cand${i === 0 && r.total_votes ? " leading" : ""}">
         <i class="dot" style="background:${color(c, i, partisan)}"></i>
-        <span class="nm">${esc(c.name)}${c.party && c.party !== "D" && c.party !== "R" ? ` (${esc(c.party)})` : ""}</span>
+        <span class="nm">${esc(c.name)}${c.party ? ` (${esc(c.party)})` : ""}</span>
         ${c.incumbent ? '<span class="inc" title="Incumbent">inc.</span>' : ""}
         <span class="pct">${r.total_votes ? pct1(c.pct) + "%" : ""}</span>
         <span class="v">${r.total_votes ? fmt(c.votes) : ""}</span>
@@ -196,10 +196,8 @@
         <ul class="legend">
           <li><i style="background:var(--dem)"></i><i style="background:color-mix(in srgb, var(--dem) 55%, var(--map-blank))"></i>Democrat leads (lighter = closer)</li>
           <li><i style="background:var(--rep)"></i><i style="background:color-mix(in srgb, var(--rep) 55%, var(--map-blank))"></i>Republican leads</li>
-          ${g === "governor" ? `<li><i style="background:var(--dem-muted)"></i><i style="background:var(--rep-muted)"></i>Current holder, not up this year</li>
-          <li><i class="hatch hD"></i><i class="hatch hR"></i>Current holder, no results yet</li>`
-          : g === "senate" ? `<li><i class="hatch hD"></i><i class="hatch hR"></i>Current holder, no results yet</li><li><i style="background:var(--map-none)"></i>No race this year</li>`
-          : `<li><i class="hatch"></i>No results yet</li>`}
+          <li><i class="hatch"></i>No results yet</li>
+          ${g === "house" ? "" : `<li><i style="background:var(--dem-muted)"></i><i style="background:var(--rep-muted)"></i>${g === "senate" ? '<i class="splitsw"></i>' : ""}Not up this year (current ${g === "senate" ? "senators; striped = split" : "governor"})</li>`}
           <li class="hint">${g === "house" ? "Each square is one district. Click one to see its state." : "Click a state to zoom into its counties."}</li>
         </ul>
       </div>
@@ -248,12 +246,18 @@
     const nat = $("#natmap");
     if (nat) {
       const races = d.national[state.natGroup] || [];
-      const held = {};
-      if (state.natGroup !== "house") races.forEach((r) => { if (r.held) held[r.state] = r.held; });
-      if (state.natGroup === "governor") Object.assign(held, d.summary?.governor_party || {}, held);
+      const held = {}, notUp = {};
+      const up = new Set(races.map((r) => r.state));
+      races.forEach((r) => { if (r.held) held[r.state] = r.held; });
+      if (state.natGroup === "senate") Object.assign(notUp, d.summary?.senate_not_up || {});
+      if (state.natGroup === "governor") for (const [st, p] of Object.entries(d.summary?.governor_party || {})) if (!up.has(st)) notUp[st] = p;
+      const word = { D: "Democrats", R: "Republicans" };
+      const notUpText = (st) => !notUp[st] ? "" : state.natGroup === "senate"
+        ? (notUp[st] === "split" ? "One Democratic and one Republican senator" : `Both senators are ${word[notUp[st]]}`)
+        : `Governor is a ${notUp[st] === "D" ? "Democrat" : "Republican"}`;
       const anim = state.zoomAnim || {};
       state.zoomAnim = null;
-      const opts = { selected: state.pick, held, animate: anim.animate, from: anim.from, onPick: (abbr) => pickState(abbr) };
+      const opts = { selected: state.pick, held, notUp, notUpText, animate: anim.animate, from: anim.from, onPick: (abbr) => pickState(abbr) };
       if (state.natGroup === "house") ENMaps.houseGrid(nat, races, d.states, opts).catch(fail(nat));
       else ENMaps.usMap(nat, races, d.states, opts).then((info) => {
         const cap = $("#mapcap");

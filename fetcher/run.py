@@ -136,6 +136,7 @@ def national_summary(cfg):
     return {"senate_holdovers": ncfg.get("senate_holdovers") or {},
             "governor_holdovers": gov_hold if gov else {},
             "governor_party": gov,
+            "senate_not_up": ncfg.get("senate_not_up") or {},
             "senate_control": ncfg.get("senate_control", 51),
             "house_control": ncfg.get("house_control", 218)}
 

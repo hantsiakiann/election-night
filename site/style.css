@@ -253,8 +253,9 @@ details.group[open] > summary::before { content: "–"; }
 .housegrid rect { cursor: pointer; }
 .housegrid rect.dim { opacity: .3; }
 .housegrid rect:hover { stroke: var(--text); stroke-width: 1.5; }
-.housegrid .borders { fill: none; stroke: var(--ground); stroke-width: 3; stroke-linecap: square; pointer-events: none; }
+.housegrid .borders { fill: none; stroke: var(--text); stroke-width: 1.6; stroke-linecap: square; opacity: .85; pointer-events: none; }
 .housegrid .labels text {
   font: 700 8px var(--body); fill: var(--text); text-anchor: middle; pointer-events: none;
   paint-order: stroke; stroke: var(--ground); stroke-width: 2.4px; stroke-linejoin: round;
 }
+.legend i.splitsw { background: repeating-linear-gradient(135deg, var(--dem-muted) 0 4px, var(--rep-muted) 4px 8px); }

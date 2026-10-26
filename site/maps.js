@@ -24,15 +24,16 @@ window.ENMaps = (() => {
     const strength = Math.round(55 + Math.min(1, Math.abs(margin) / 20) * 40); // 55%..95%
     return `color-mix(in srgb, ${base} ${strength}%, var(--map-blank))`;
   }
-  function raceFill(r, held) {
-    if (!r) return MUTED[held] || "var(--map-none)";               // no race this year
+  // notUp: for states with no race this year, the party holding the seat(s): D, R or "split"
+  function raceFill(r, notUp) {
+    if (!r) return notUp === "split" ? "url(#split)" : MUTED[notUp] || "var(--map-none)";
     if (r.call) {
       const c = r.candidates.find((x) => x.name === r.call);
       if (c) return PARTY[c.party] || "var(--oth)";
     }
     if (!r.total_votes) {
       if (r.decided) return PARTY[r.decided.party] || "var(--oth)";  // settled before Election Day
-      return held && MUTED[held] ? `url(#hatch${held})` : "url(#hatch)";
+      return "url(#hatch)";                                            // contested, no votes yet
     }
     const lead = r.candidates[0];
     return leadFill(PARTY[lead.party] || "var(--oth)", r.margin_pct ?? 0, false);
@@ -59,9 +60,9 @@ window.ENMaps = (() => {
     tip.style.transform = `translate(${Math.max(8, x)}px, ${Math.max(8, y)}px)`;
   }
   const hideTip = () => { if (tip) tip.hidden = true; };
-  function raceTip(title, r, held) {
+  function raceTip(title, r, held, notUpText) {
     const h = held && HELD[held] ? `<br>Held by a ${HELD[held]} now` : "";
-    if (!r) return `<b>${esc(title)}</b><br>No race this year${h}`;
+    if (!r) return `<b>${esc(title)}</b><br>No race this year${notUpText ? `<br>${esc(notUpText)}` : ""}`;
     const dec = r.decided ? `<br>${esc(r.decided.winner ? `${r.decided.winner} (${r.decided.party}), unopposed` : r.decided.reason)}` : "";
     if (!r.total_votes) return `<b>${esc(title)}</b>${h}${dec}${dec ? "" : `<br>${r.status === "no-feed" ? "No live feed; see official results" : "No votes counted yet"}`}`;
     const rows = r.candidates.slice(0, 3).map((c) =>
@@ -75,12 +76,14 @@ window.ENMaps = (() => {
     const tot = row[2].reduce((a, b) => a + b, 0);
     if (!tot) return `<b>${esc(name)}</b><br>No votes counted yet`;
     const lines = r.candidates.map((c, i) => [c, row[2][i]]).sort((a, b) => b[1] - a[1]).slice(0, 3)
-      .map(([c, v]) => `<tr><td>${esc(c.name)}</td><td>${pct1(100 * v / tot)}%</td><td>${v.toLocaleString("en-US")}</td></tr>`).join("");
+      .map(([c, v]) => `<tr><td>${esc(c.name)}${c.party ? ` (${esc(c.party)})` : ""}</td><td>${pct1(100 * v / tot)}%</td><td>${v.toLocaleString("en-US")}</td></tr>`).join("");
     return `<b>${esc(name)}</b><table>${lines}</table>${row[1] != null ? `${Math.round(row[1])}% of precincts reporting` : ""}`;
   }
   const pat = (id, bg) => `<pattern id="${id}" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
       <rect width="6" height="6" fill="${bg}"/><line x1="0" y1="0" x2="0" y2="6" stroke="var(--map-hatch)" stroke-width="2"/></pattern>`;
-  const defs = (scale = 1) => `<defs>${pat("hatch", "var(--map-blank)")}${pat("hatchD", "var(--dem-muted)")}${pat("hatchR", "var(--rep-muted)")}</defs>`;
+  const split = `<pattern id="split" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="5" height="10" fill="var(--dem-muted)"/><rect x="5" width="5" height="10" fill="var(--rep-muted)"/></pattern>`;
+  const defs = () => `<defs>${pat("hatch", "var(--map-blank)")}${split}</defs>`;
 
   function bindTips(svg, html, click) {
     svg.addEventListener("pointermove", (e) => {
@@ -104,7 +107,7 @@ window.ENMaps = (() => {
   /* opts: selected (abbr to show zoomed), animate ("in" | "out" | null), from (abbr zoomed before
      zooming out), held ({abbr: party}), onPick(abbr) */
   async function usMap(el, races, states, opts = {}) {
-    const { selected, animate, from, held = {}, onPick } = opts;
+    const { selected, animate, from, held = {}, notUp = {}, notUpText = () => "", onPick } = opts;
     const topo = await loadGeo("states");
     const byFips = Object.fromEntries(states.map((s) => [s.fips, s]));
     const byAbbr = Object.fromEntries(states.map((s) => [s.abbr, s]));
@@ -114,7 +117,7 @@ window.ENMaps = (() => {
     const path = d3.geoPath();
     const shapes = feats.map((f) => {
       const s = byFips[f.id], r = raceBy[s.abbr];
-      return `<path data-k="${s.abbr}" class="st${r ? " has" : ""}${selected === s.abbr ? " sel" : ""}" d="${path(f)}" style="fill:${raceFill(r, held[s.abbr])}"/>`;
+      return `<path data-k="${s.abbr}" class="st${r ? " has" : ""}${selected === s.abbr ? " sel" : ""}" d="${path(f)}" style="fill:${raceFill(r, notUp[s.abbr])}"/>`;
     }).join("");
     const mesh = path(topojson.mesh(topo, topo.objects.states, (a, b) => a !== b));
     const focus = selected || (animate === "out" ? from : null);
@@ -131,7 +134,7 @@ window.ENMaps = (() => {
       const cfeats = topojson.feature(ctopo, ctopo.objects.counties).features.filter((f) => f.id.startsWith(fips));
       rows = Object.fromEntries((focusRace?.counties || []).map((row) => [norm(row[0]), row]));
       const partisan = focusRace?.candidates?.some((c) => c.party);
-      const baseFill = MUTED[held[focus]] || "var(--map-blank)";
+      const baseFill = "var(--map-blank)";
       svg.querySelector(".counties").innerHTML = cfeats.map((f) => {
         const row = rows[norm(f.properties.name)];
         const fill = row ? countyFill(row, focusRace.candidates, partisan) : baseFill;
@@ -150,7 +153,7 @@ window.ENMaps = (() => {
     }
 
     bindTips(svg, (k) => k.startsWith("c:") ? countyTip(k.slice(2), focusRace, rows)
-      : raceTip(byAbbr[k].name + (raceBy[k]?.special ? " (special)" : ""), raceBy[k], held[k]),
+      : raceTip(byAbbr[k].name + (raceBy[k]?.special ? " (special)" : ""), raceBy[k], held[k], notUpText(k)),
     (k) => { if (!k.startsWith("c:") && raceBy[k]) onPick?.(k); });
     return { hasCounties: !!focusRace?.counties?.length };
   }
@@ -194,8 +197,11 @@ window.ENMaps = (() => {
   // ---------------------------------------------------------------- county map inside a race row
   async function countyMap(el, r, stateFips) {
     const topo = await loadGeo("counties");
-    const feats = topojson.feature(topo, topo.objects.counties).features.filter((f) => f.id.startsWith(stateFips));
-    if (!feats.length) { el.textContent = "No county shapes for this state."; return; }
+    const rowNames = new Set((r.counties || []).map((row) => norm(row[0])));
+    let feats = topojson.feature(topo, topo.objects.counties).features.filter((f) => f.id.startsWith(stateFips));
+    // district or other partial-state races: only the counties the race covers
+    if (!r.statewide) feats = feats.filter((f) => rowNames.has(norm(f.properties.name)));
+    if (!feats.length) { el.textContent = "No county shapes for this race."; return; }
     const CW = 560, CH = 420;
     const proj = d3.geoIdentity().fitExtent([[6, 6], [CW - 6, CH - 6]], { type: "FeatureCollection", features: feats });
     const path = d3.geoPath(proj);
@@ -209,6 +215,7 @@ window.ENMaps = (() => {
     }).join("");
     const unmatched = Object.keys(rows).length - matched;
     el.innerHTML = `<svg viewBox="0 0 ${CW} ${CH}" class="cmapsvg" role="img" aria-label="County results for ${esc(r.title)}">${defs()}${shapes}</svg>
+      ${!r.statewide ? `<p class="cmapnote">Counties this race covers. District lines can split counties, so a county here may be only partly in the district.</p>` : ""}
       ${unmatched > 0 ? `<p class="cmapnote">${unmatched} counties in the feed didn't match a map shape.</p>` : ""}`;
     bindTips(el.querySelector("svg"), (name) => countyTip(name, r, rows));
   }
