@@ -85,6 +85,13 @@ State House race with its candidates from `config/ga_candidates.yml` (built by
 `tools/build_ga_candidates.py` from branch.vote; unopposed seats are filled in). Legislative lines are the Census Bureau's 2024 cartographic boundaries
 (`site/geo/ga_sldu.json`, `ga_sldl.json`), rebuilt by the "Build district map" workflow.
 
+## Metro Atlanta tab
+
+Until the SOS feed is live, each of the five counties lists its local races (county commission,
+board of education, other county offices, cities) with candidates from branch.vote and its county
+referendums (Fulton's education and transportation SPLOSTs, Cobb's SPLOST, Gwinnett's school
+homestead exemption), all in `config/ga_candidates.yml`. The feed replaces them once it's live.
+
 ## Initiatives tab
 
 Key statewide ballot measures, grouped by state, listed in `config/initiatives.yml` (ballot

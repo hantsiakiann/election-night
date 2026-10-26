@@ -247,6 +247,45 @@ def build_georgia(cfg, ga):
             "sections": [s for s in sections if s["races"]]}
 
 
+def build_metro_placeholder(cfg, prelim):
+    """Before the SOS feed is live: each metro county's local races and county referendums with
+    their candidates (config/ga_candidates.yml), plus the top of the ticket."""
+    if not prelim or not prelim.get("metro"):
+        return None
+    link = ((cfg.get("national") or {}).get("links") or {}).get("GA")
+    top_rx = re.compile((cfg.get("georgia") or {}).get("county_top_of_ticket", "^Governor$"), re.I)
+
+    def race(rid, title, cands, vote_for=1, **extra):
+        contest = {"name": title, "vote_for": vote_for,
+                   "candidates": [{"name": c["name"], "party": norm_party(c.get("party", "")), "votes": 0} for c in cands]}
+        r = finalize(contest, race_id=rid, title=title, source="georgia", source_url=link,
+                     extra={k: v for k, v in extra.items() if v})
+        r["status"] = "waiting"
+        real = [c for c in cands if c["name"] not in ("Yes", "No")]
+        if len(real) == 1 and vote_for == 1:
+            r["decided"] = {"winner": real[0]["name"], "party": norm_party(real[0].get("party", "")), "reason": "Unopposed"}
+        return r
+
+    counties = []
+    for want in (cfg.get("metro") or {}).get("counties", []):
+        m = prelim["metro"].get(want) or {}
+        slug = re.sub(r"[^a-z]", "", want.lower())
+        top = [race(f"GA-P{i:02d}-{slug}", r["title"], r["candidates"], scope=f"{want} County only")
+               for i, r in enumerate(prelim.get("statewide") or [], 1) if top_rx.search(r["title"])]
+        sections = []
+        for name, items in (m.get("sections") or {}).items():
+            sections.append({"name": name, "collapsed": False, "races": [
+                race(f"GA-{slug}-{re.sub(r'[^a-z0-9]+', '-', it['title'].lower()).strip('-')}", it["title"],
+                     it["candidates"], it.get("vote_for") or 1) for it in items]})
+        if m.get("measures"):
+            sections.append({"name": "Ballot questions", "collapsed": False, "races": [
+                race(f"GA-{slug}-q{i}", q["title"], [{"name": "Yes"}, {"name": "No"}],
+                     subtitle=q.get("subtitle"), yes_means=q.get("yes_means"))
+                for i, q in enumerate(m["measures"], 1)]})
+        counties.append({"name": want, "top": top, "sections": sections})
+    return {"page": link, "placeholder": True, "counties": counties}
+
+
 def build_metro(cfg, ga):
     gcfg, mcfg = cfg.get("georgia") or {}, cfg.get("metro") or {}
     top_rx = re.compile(gcfg.get("county_top_of_ticket", "^Governor$"), re.I)
@@ -436,7 +475,7 @@ def main(argv=None):
         "national": build_national(cfg, loaded, prelim),
         "initiatives": build_initiatives(cfg, loaded, measures),
         "georgia": build_georgia(cfg, loaded["georgia"]) if "georgia" in loaded else build_georgia_placeholder(cfg, ga_prelim),
-        "metro": build_metro(cfg, loaded["georgia"]) if "georgia" in loaded else None,
+        "metro": build_metro(cfg, loaded["georgia"]) if "georgia" in loaded else build_metro_placeholder(cfg, ga_prelim),
     }
     failed = {n for n, s in status.items() if not s["ok"]}
     carry_forward(results, load_previous(args.previous, None if args.fixtures else cfg.get("site_url")), failed)

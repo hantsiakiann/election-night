@@ -83,7 +83,7 @@ national:
   # States whose 2026 House district lines are new (mid-decade redistricting) and so aren't in
   # the Census 2024 boundary file. The geographic House map shades these states by seat
   # share instead of drawing district lines. Source: Ballotpedia, Oct 2026.
-  house_new_lines: [AL, CA, FL, LA, NC, OH, TN, TX, UT]
+  house_new_lines: []   # all redrawn states now have 2026 lines (tools/district_overrides.json)
   # Forecaster ratings for every race are in config/ratings.yml (tools/build_ratings.py).
   # Races settled before Election Day (source: 270toWin uncontested-races list, Sept 2026).
   #   winner + party: only one candidate on the ballot (counted as won)

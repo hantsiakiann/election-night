@@ -1106,3 +1106,260 @@ state_house:
   180:
   - name: Steven Sainz
     party: R
+metro:
+  Fulton:
+    sections:
+      County Commission:
+      - title: Fulton County Commission Chair
+        candidates:
+        - name: Eric J. Tatum
+          party: R
+        - name: Mo Ivory
+          party: D
+        vote_for: 1
+      - title: Fulton County Commissioner, District 1
+        candidates:
+        - name: Bridget Thorne
+          party: R
+        - name: Maggie Goldman
+          party: D
+        vote_for: 1
+      - title: Fulton County Commissioner, District 3
+        candidates:
+        - name: Jodi Merriday
+          party: D
+        - name: Paul Burton
+          party: R
+        vote_for: 1
+      - title: Fulton County Commissioner, District 4
+        candidates:
+        - name: Aaron A. Sampson Jr
+          party: D
+        - name: Karen Rene
+          party: ''
+        - name: Natalie Hall
+          party: ''
+        - name: Rohit Malhotra
+          party: D
+        vote_for: 1
+      - title: Fulton County Commissioner, District 5
+        candidates:
+        - name: Helen Zenobia Willis
+          party: D
+        - name: Tiffany A. Henyard
+          party: R
+        vote_for: 1
+      Other county offices:
+      - title: Fulton Soil & Water Conservation District Supervisor
+        candidates:
+        - name: Jason Ulseth
+          party: ''
+        - name: Walter S. Rekuc Jr.
+          party: ''
+        - name: Zane Placie
+          party: ''
+        vote_for: 2
+    measures:
+    - title: Education SPLOST
+      subtitle: 1% sales tax for Fulton County Schools and Atlanta Public Schools
+      yes_means: Renews the 1% education sales tax from July 2027 for up to five years (up to $2.1 billion for Fulton County Schools and APS) and approves up to $350 million in APS bonds.
+    - title: Transportation SPLOST
+      subtitle: 0.75% sales tax for roads outside Atlanta
+      yes_means: Adds a 0.75% sales tax in Fulton County outside the City of Atlanta for transportation projects, April 2027 through March 2032.
+  DeKalb:
+    sections:
+      County Commission:
+      - title: DeKalb County Commissioner, District 2
+        candidates:
+        - name: Ben Pepper
+          party: R
+        - name: Michelle Long Spears
+          party: D
+        vote_for: 1
+      - title: DeKalb County Commissioner, District 3
+        candidates:
+        - name: Andrea Bass Smith
+          party: R
+        - name: Keyanna Jones Moore
+          party: D
+        vote_for: 1
+      - title: DeKalb County Commissioner, District 7
+        candidates:
+        - name: LaDena Bolton
+          party: D
+        vote_for: 1
+      Other county offices:
+      - title: DeKalb Soil & Water Conservation District Supervisor
+        candidates:
+        - name: Carol Hayes
+          party: ''
+        - name: Jan Dunaway
+          party: ''
+        vote_for: 2
+      Cities:
+      - title: Brookhaven City Council Member, District 2
+        candidates:
+        - name: Conor Sen
+          party: ''
+        vote_for: 1
+      - title: Doraville City Council Member, District 2, Post 2
+        candidates:
+        - name: Angie Riley Tooley
+          party: ''
+        - name: Brian Kyser
+          party: ''
+        - name: Schuyler "Sky" Clark
+          party: ''
+        - name: Tammi Bailey Fults
+          party: ''
+        - name: Tom Hart
+          party: ''
+        vote_for: 1
+      - title: Pine Lake City Council Member
+        candidates:
+        - name: James Paproski
+          party: ''
+        vote_for: 1
+      - title: Pine Lake Mayor
+        candidates:
+        - name: Jeff Goldberg
+          party: ''
+        vote_for: 1
+      - title: Stonecrest City Council Member, District 2, Post 2
+        candidates:
+        - name: Bruce McColumn Sr.
+          party: ''
+        - name: Telessa Ammons
+          party: ''
+        - name: Yuvette Hudson
+          party: ''
+        vote_for: 1
+    measures: []
+  Cobb:
+    sections:
+      County Commission:
+      - title: Cobb County Commissioner, District 1
+        candidates:
+        - name: Keli Ann Gambrill
+          party: R
+        vote_for: 1
+      - title: Cobb County Commissioner, District 3
+        candidates:
+        - name: Joann Kannan Birrell
+          party: R
+        - name: Kevin Matthew Redmon
+          party: D
+        vote_for: 1
+      Board of Education:
+      - title: Cobb County Board of Education Member, District 2
+        candidates:
+        - name: Rebecca Ladner Sayler
+          party: D
+        vote_for: 1
+      - title: Cobb County Board of Education Member, District 4
+        candidates:
+        - name: David F. Chastain III
+          party: R
+        - name: Micheal Andrew Garza
+          party: D
+        vote_for: 1
+      - title: Cobb County Board of Education Member, District 6
+        candidates:
+        - name: Nichelle Annmarie Davis
+          party: D
+        vote_for: 1
+      Other county offices:
+      - title: Cobb County Surveyor
+        candidates:
+        - name: Chris Evans
+          party: R
+        vote_for: 1
+      - title: Cobb Soil & Water Conservation District Supervisor
+        candidates:
+        - name: Brad A. Whitfield
+          party: ''
+        - name: Frank Wigington
+          party: ''
+        - name: John I. Lloyd
+          party: ''
+        vote_for: 2
+      - title: Cobb Solicitor General
+        candidates:
+        - name: Makia Metzger
+          party: D
+        vote_for: 1
+    measures:
+    - title: SPLOST
+      subtitle: Renew the 1% county sales tax (2028)
+      yes_means: Renews Cobb's 1-cent sales tax starting in 2028 (about $1.15 billion) for a new state court building, fire stations, parks, libraries, roads and sidewalks.
+  Gwinnett:
+    sections:
+      County Commission:
+      - title: Gwinnett County Commissioner, District 2
+        candidates:
+        - name: Ben Ku
+          party: D
+        - name: Rodolfo Ochoa
+          party: R
+        vote_for: 1
+      - title: Gwinnett County Commissioner, District 4
+        candidates:
+        - name: Benjamin L. Culberson
+          party: D
+        - name: Matthew Holtkamp
+          party: R
+        vote_for: 1
+      Other county offices:
+      - title: Gwinnett Soil & Water Conservation District Supervisor
+        candidates:
+        - name: David VanLandingham
+          party: ''
+        vote_for: 1
+      - title: Gwinnett Solicitor General
+        candidates:
+        - name: Lisamarie Bristol
+          party: D
+        vote_for: 1
+    measures:
+    - title: School homestead exemption (HB 540)
+      subtitle: Expand the extra $2,000 school-tax homestead exemption
+      yes_means: Extends the additional $2,000 homestead exemption from school taxes to disabled veterans and all Gwinnett and Buford school district employees.
+  Clayton:
+    sections:
+      County Commission:
+      - title: Clayton County Commissioner, District 1
+        candidates:
+        - name: Demeitrice Lashun Collins
+          party: D
+        vote_for: 1
+      - title: Clayton County Commissioner, District 4
+        candidates:
+        - name: DeMont Davis
+          party: D
+        vote_for: 1
+      Board of Education:
+      - title: Clayton County Board of Education Member, District 1
+        candidates:
+        - name: Monica Denise Hooker
+          party: D
+        vote_for: 1
+      - title: Clayton County Board of Education Member, District 4
+        candidates:
+        - name: Victoria Irwin Williams
+          party: D
+        vote_for: 1
+      - title: Clayton County Board of Education Member, District 8
+        candidates:
+        - name: Joy Tellis Cooper
+          party: D
+        vote_for: 1
+      - title: Clayton County Board of Education Member, District 9
+        candidates:
+        - name: Cassandra Brown Henry
+          party: D
+        vote_for: 1
+      Other county offices:
+      - title: Clayton Soil & Water Conservation District Supervisor
+        candidates: []
+        vote_for: 2
+    measures: []

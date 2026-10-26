@@ -200,7 +200,7 @@
         ${seg(t.none, "none", "Not called yet")}${seg(t.R, "R", "Called for Republicans")}${seg(hR, "hR", "Republican seats not up")}
         ${need ? `<i class="mark" style="left:${(100 * need) / total}%"></i>` : ""}
       </div>
-      <p class="balance-note">${need ? `${need} ${word} for a majority${senateNote ? "; Republicans need 50 with the vice president's tiebreak" : ""}. ` : ""}Counts only races the AP has called, plus races settled before Election Day; a candidate leading the count isn't counted. ${t.none} of ${races.length} races not called yet.</p>
+
     </div>`;
   }
   function renderNational(d) {
@@ -212,7 +212,7 @@
     const pills = groups.map((x) => `<button data-nat="${x}" aria-pressed="${g === x}">${GROUP_NAMES[x] || x}</button>`).join("");
     const scopes = `<div class="scope" role="group" aria-label="Which races">
       <button data-scope="key" aria-pressed="${scope === "key"}">Key races (${keyCount})</button>
-      <button data-scope="all" aria-pressed="${scope === "all"}">All ${all.length}</button></div>`;
+      <button data-scope="all" aria-pressed="${scope === "all"}">All (${all.length})</button></div>`;
     let list = scope === "key" && !state.pick ? all.filter((r) => r.key) : all;
     let pickChip = "";
     if (state.pick) {
@@ -237,14 +237,12 @@
             <button class="mapback" data-unpick-all>Back to U.S. map</button><span class="mapcap" id="mapcap"></span></div>` : ""}
         </div>
         <ul class="legend">
-          <li><i style="background:var(--dem)"></i><i style="background:color-mix(in srgb, var(--dem) 55%, var(--map-blank))"></i>Democrat leads (lighter = closer)</li>
+          <li><i style="background:var(--dem)"></i><i style="background:color-mix(in srgb, var(--dem) 55%, var(--map-blank))"></i>Democrat leads</li>
           <li><i style="background:var(--rep)"></i><i style="background:color-mix(in srgb, var(--rep) 55%, var(--map-blank))"></i>Republican leads</li>
           <li><i style="background:var(--map-blank)"></i>No results yet</li>
           ${g === "house" ? "" : `<li><i class="flipsw"></i>Striped: seat would flip</li>
           ${g === "senate" && state.senView === "up" ? `<li><i style="background:var(--map-none)"></i>No Senate race this year</li>`
             : `<li><i style="background:var(--dem)"></i><i style="background:var(--rep)"></i>${g === "senate" ? '<i style="background:var(--split)"></i>' : ""}Not up this year: current ${g === "senate" ? "senators (purple = one of each party)" : "governor"}</li>`}`}
-          ${g === "house" && state.houseView === "map" ? `<li><i class="bandsw"></i>New 2026 lines, not mapped: shaded by seats each party leads</li>` : ""}
-          <li class="hint">${g === "house" ? (state.houseView === "map" ? "Click a state to zoom in, then a district for its results." : "Each square is one district. Click a state, then a district.") : "Click a state to zoom into its counties."}</li>
         </ul>
       </div>
       <div class="listbar">${scopes}${pickChip}</div>` +
@@ -255,7 +253,7 @@
     if (!states.length) return notice("No ballot measures are listed yet.", "Add them in <code>config/initiatives.yml</code>.");
     const html = states.map((s) => group(s.name, s.measures, { unit: "measure" })).join("");
     return (html || (state.q ? "" : notice("No ballot measures match."))) +
-      `<p class="cmapnote">Only North Carolina's measures come from a live feed here; the rest show "No feed" with a link to official results unless numbers are entered by hand.</p>`;
+      "";
   }
   function renderGeorgia(d) {
     const t = state.gaTab || "statewide";
@@ -265,7 +263,7 @@
       ? `<div class="gamaps">${[["senate", "U.S. Senate"], ["governor", "Governor"]].map(([k, v]) =>
         `<figure class="gamapbox"><h2 class="gamaphead">${v}</h2><div class="gamap" data-gamap="statewide-${k}"></div></figure>`).join("")}</div>`
       : `<figure class="gamapbox"><div class="gamap" data-gamap="${t}"></div></figure>`;
-    const wait = d.georgia?.placeholder ? notice("Candidates are listed; numbers start once the Secretary of State's results feed is live.") : "";
+    const wait = "";
     if (!d.georgia) return pills + mapbox + notice("Georgia results aren't flowing yet.",
       "They start once the Secretary of State posts the November 3 election and its ID is set in <code>config/races.yml</code>.");
     const secs = d.georgia.sections.filter((s) => (s.tab || "statewide") === t);
@@ -440,7 +438,7 @@
     $("#updated").innerHTML = mins >= 10
       ? `<span class="stale">Last update ${mins} minutes ago (${time}).</span> Numbers may be behind.`
       : `Updated ${time}. Checks for new numbers every ${state.refresh >= 120 ? Math.round(state.refresh / 60) + " minutes" : "minute"}.`;
-    $("#sources").innerHTML = Object.entries(d.sources || {}).map(([k, s]) =>
+    if ($("#sources")) $("#sources").innerHTML = Object.entries(d.sources || {}).map(([k, s]) =>
       `<li>${esc(k)}: ${s.ok ? `${s.contests} contests` : `<span class="bad">not responding (${esc(s.error)})</span>`}${s.page ? `, <a href="${esc(s.page)}" target="_blank" rel="noopener">official site</a>` : ""}</li>`).join("");
   }
 
