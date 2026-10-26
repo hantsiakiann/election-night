@@ -9,8 +9,9 @@
 #     candidates:
 #       - {name: "Candidate A", party: D, votes: 1234567}
 #       - {name: "Candidate B", party: R, votes: 1200000}
-#     call: "Candidate A"        # optional; shows a CALLED badge (say who called it in `called_by`)
-#     called_by: "AP via TV"
+#     call: "Candidate A"        # when the AP calls the race; shows a CALLED badge and is the only
+#                                # way a race counts toward a party in the seat tallies
+#     called_by: "AP"
 #     note: "Detroit still counting absentees"
 #
 # `call` / `called_by` / `note` also work on races that have a live feed; manual vote

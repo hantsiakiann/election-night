@@ -174,8 +174,11 @@
   function tally(races) {
     const t = { D: 0, R: 0, O: 0, none: 0 };
     for (const r of races) {
-      const who = r.call ? r.candidates.find((c) => c.name === r.call)
-        : r.total_votes ? r.candidates[0] : r.decided ? { party: r.decided.party } : null;
+      // Only races called (entered in manual.yml from the AP's call) or settled before Election Day
+      // count toward a party; leading in the count doesn't.
+      // (A call naming someone not in the race counts as not called, so typos don't skew the tally.)
+      const who = r.call ? r.candidates.find((c) => c.name.toLowerCase() === String(r.call).toLowerCase()) || null
+        : r.decided ? { party: r.decided.party } : null;
       if (!who) t.none++; else if (who.party === "D" || who.party === "R") t[who.party]++; else t.O++;
     }
     return t;
@@ -192,12 +195,12 @@
       <div class="balance-nums"><span class="D"><b>${hD + t.D}</b> Democrats${hD ? ` (${hD} not up)` : ""}</span>
         ${t.O ? `<span class="O"><b>${t.O}</b> other</span>` : ""}
         <span class="R">Republicans <b>${hR + t.R}</b>${hR ? ` (${hR} not up)` : ""}</span></div>
-      <div class="balance-bar" role="img" aria-label="${hD + t.D} Democratic, ${hR + t.R} Republican, ${t.none} without results, of ${total} ${word}">
-        ${seg(hD, "hD", "Democratic seats not up")}${seg(t.D, "D", "Democrats leading or called")}${seg(t.O, "O", "Others leading")}
-        ${seg(t.none, "none", "No results yet")}${seg(t.R, "R", "Republicans leading or called")}${seg(hR, "hR", "Republican seats not up")}
+      <div class="balance-bar" role="img" aria-label="${hD + t.D} Democratic, ${hR + t.R} Republican, ${t.none} not called, of ${total} ${word}">
+        ${seg(hD, "hD", "Democratic seats not up")}${seg(t.D, "D", "Called for Democrats")}${seg(t.O, "O", "Called for others")}
+        ${seg(t.none, "none", "Not called yet")}${seg(t.R, "R", "Called for Republicans")}${seg(hR, "hR", "Republican seats not up")}
         ${need ? `<i class="mark" style="left:${(100 * need) / total}%"></i>` : ""}
       </div>
-      <p class="balance-note">${need ? `${need} ${word} for a majority${g === "senate" ? "; Republicans need 50 with the vice president's tiebreak" : ""}. ` : ""}Counts leaders in races with votes counted, plus races called or settled before Election Day. ${t.none} of ${races.length} races have no results yet.</p>
+      <p class="balance-note">${need ? `${need} ${word} for a majority${g === "senate" ? "; Republicans need 50 with the vice president's tiebreak" : ""}. ` : ""}Counts only races the AP has called, plus races settled before Election Day; a candidate leading the count isn't counted. ${t.none} of ${races.length} races not called yet.</p>
     </div>`;
   }
   function renderNational(d) {

@@ -67,6 +67,9 @@ results at all, and Texas's machine-readable feed is a paid subscription. Those 
    acts as a backup if the chain stops, and chaining shuts itself off after Nov 6.
 2. To post a call or hand-entered numbers, edit `config/manual.yml` on GitHub (the pencil
    icon works on a phone). Every card shows its id in the corner (e.g. `SEN-MI`).
+   The Senate, House and governor seat tallies count only races with a `call` (enter the AP's
+   calls there) plus races settled before Election Day; a candidate who is merely leading isn't
+   counted.
 3. When you're done, set `TRACKER_LIVE` = `false`.
 
 If a feed goes down mid-night, its races keep the last numbers received and are marked
