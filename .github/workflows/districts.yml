@@ -54,11 +54,23 @@ jobs:
           SHP=$(ls /tmp/cd/*.shp | head -1)
           node tools/build_districts.mjs "$SHP" /tmp/ov site/geo/districts.json
           ls -la site/geo/districts.json
+      - name: Georgia legislative districts
+        run: |
+          mkdir -p /tmp/sld && cd /tmp/sld
+          for ch in sldu sldl; do
+            curl -fsSL --retry 3 -o $ch.zip "https://www2.census.gov/geo/tiger/GENZ2024/shp/cb_2024_13_${ch}_500k.zip" \
+              && mkdir -p $ch && unzip -o -q $ch.zip -d $ch || echo "!! GA $ch download failed"
+          done
+          cd "$GITHUB_WORKSPACE"
+          for ch in sldu sldl; do
+            shp=$(ls /tmp/sld/$ch/*.shp 2>/dev/null | head -1)
+            [ -n "$shp" ] && node tools/build_sld.mjs "$shp" site/geo/ga_$ch.json || echo "!! GA $ch build failed"
+          done
       - name: Commit
         run: |
           git config user.name "hantsiakiann"
           git config user.email "hantsiakiann@gmail.com"
-          git add site/geo/districts.json site/geo/districts_report.json
+          git add site/geo/*.json
           if git diff --cached --quiet; then echo "No change."; exit 0; fi
           git commit -m "Update congressional district boundaries from Census"
           git push
