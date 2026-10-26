@@ -15,7 +15,7 @@ PARTY_MAP = {
     "rep": "R", "republican": "R", "r": "R",
     "dem": "D", "democrat": "D", "democratic": "D", "d": "D", "dfl": "D",
     "lib": "L", "libertarian": "L", "lp": "L",
-    "grn": "G", "green": "G", "gp": "G",
+    "grn": "G", "green": "G", "gp": "G", "gre": "G", "g": "G",
     "ind": "I", "independent": "I", "i": "I", "una": "I", "unaffiliated": "I", "npa": "I",
     "no party affiliation": "I", "no party preference": "I", "npp": "I", "nonaffiliated": "I",
     "con": "C", "cst": "C", "constitution": "C", "c": "C",
@@ -65,6 +65,9 @@ def finalize(contest: dict, *, race_id: str, title: str | None = None,
         c["pct"] = round(100 * c["votes"] / total, 2) if total else 0.0
     if total:
         cands.sort(key=lambda c: (-c["votes"], c["order"]))
+    else:  # before votes: Democrat, Republican, other parties, independents last
+        rank = {"D": 0, "R": 1, "I": 3}
+        cands.sort(key=lambda c: (rank.get(c.get("party"), 2), c["order"]))
     measure = is_measure(contest)
     vote_for = contest.get("vote_for") or 1
 

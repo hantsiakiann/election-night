@@ -91,7 +91,6 @@ national:
   decided:
     H-FL-10: {winner: "Maxwell Frost", party: D, reason: "Unopposed"}
     H-MA-02: {winner: "James McGovern", party: D, reason: "Unopposed"}
-    H-MA-05: {winner: "Katherine Clark", party: D, reason: "Unopposed"}
     H-MA-07: {winner: "Ayanna Pressley", party: D, reason: "Unopposed"}
     H-WI-02: {winner: "Mark Pocan", party: D, reason: "Unopposed"}
     H-CA-04: {party: D, reason: "Both finalists are Democrats"}

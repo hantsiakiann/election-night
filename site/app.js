@@ -4,6 +4,16 @@
   const PARTY = { D: "var(--dem)", R: "var(--rep)", L: "var(--lib)", G: "var(--grn)", I: "var(--ind)", C: "var(--con)", WF: "var(--wf)" };
   const NEUTRAL = ["var(--np1)", "var(--np2)", "var(--np3)", "var(--np4)", "var(--oth)"];
   const GROUP_NAMES = { senate: "Senate", governor: "Governor", house: "House" };
+  const PARTY_NAME = { D: "Democrat", R: "Republican", L: "Libertarian", G: "Green", I: "Independent", C: "Constitution", WF: "Working Families" };
+  const partyName = (p) => PARTY_NAME[p] || p || "";
+  // Before votes arrive: Democrat and Republican first, other parties next, independents last.
+  const PRE_RANK = (p) => (p === "D" ? 0 : p === "R" ? 1 : p === "I" ? 3 : 2);
+  function orderCands(r) {
+    const list = (r.candidates || []).map((c, i) => ({ ...c, _o: i }));
+    return r.total_votes
+      ? list.sort((a, b) => b.votes - a.votes || a._o - b._o)
+      : list.sort((a, b) => PRE_RANK(a.party) - PRE_RANK(b.party) || a._o - b._o);
+  }
 
   const store = {
     get(k, d) { try { const v = localStorage.getItem("en26:" + k); return v === null ? d : JSON.parse(v); } catch { return d; } },
@@ -13,8 +23,9 @@
     data: null, tab: "national", natGroup: store.get("natGroup", "senate"), county: store.get("county", null),
     scope: store.get("scope", { senate: "all", governor: "all", house: "key" }), pick: null,
     houseView: store.get("houseView", "grid"),
+    senView: store.get("senView", "up"),
     cmapOpen: new Set(), cmapClosed: new Set(), raceIndex: new Map(),
-    closest: store.get("closest", false), big: store.get("big", false), q: "",
+    closest: store.get("closest", false), theme: store.get("theme", null), q: "",
     totals: new Map(), fresh: new Set(), open: new Map(), lastOk: 0, refresh: 60,
   };
 
@@ -25,6 +36,7 @@
 
   // ------------------------------------------------------------------ routing
   function readHash() {
+    if (!location.hash.replace(/^#/, "")) { state.tab = "national"; state.natGroup = "senate"; return; }  // default view
     const [tab, sub] = location.hash.replace(/^#/, "").split("/");
     if (["national", "georgia", "metro"].includes(tab)) state.tab = tab;
     if (tab === "national" && sub && GROUP_NAMES[sub]) state.natGroup = sub;
@@ -66,7 +78,7 @@
     return `<div class="in" title="${esc(pr)}"><b>${Math.round(r.reporting_pct)}%</b>in</div>`;
   }
   function raceRow(r) {
-    const cands = r.total_votes ? [...(r.candidates || [])].sort((a, b) => b.votes - a.votes) : r.candidates || [];
+    const cands = orderCands(r);
     const partisan = cands.some((c) => c.party);
     const lead = cands[0];
     const leadCls = !r.total_votes ? (r.decided ? "lead-" + r.decided.party : "") : lead?.party === "D" || lead?.party === "R" ? "lead-" + lead.party : "lead-X";
@@ -76,9 +88,10 @@
       : "";
     const shown = cands.length <= 6 ? cands : cands.slice(0, 5);
     const candHtml = shown.map((c, i) => `
-      <li class="cand${i === 0 && r.total_votes ? " leading" : ""}">
+      <li class="cand">
         <i class="dot" style="background:${color(c, i, partisan)}"></i>
-        <span class="nm">${esc(c.name)}${c.party ? ` (${esc(c.party)})` : ""}${c.incumbent ? ' <span class="inc" title="Incumbent">inc.</span>' : ""}</span>
+        <span class="nm">${esc(c.name)}${c.incumbent ? ' <span class="inc" title="Incumbent">inc.</span>' : ""}</span>
+        <span class="pty">${esc(partyName(c.party))}</span>
         <span class="v">${r.total_votes ? `${fmt(c.votes)} votes` : ""}</span>
         <span class="pct">${r.total_votes ? pct1(c.pct) + "%" : ""}</span>
       </li>`).join("") + (cands.length > shown.length ? `<li class="cand more">+${cands.length - shown.length} more candidates</li>` : "");
@@ -91,6 +104,7 @@
     if (r.vote_for > 1) flags.push(`<span class="flag">Top ${r.vote_for} win</span>`);
     if (r.decided) flags.push(`<span class="flag called">${r.decided.winner ? `${esc(r.decided.winner)} (${esc(r.decided.party)}) is unopposed` : esc(r.decided.reason)}</span>`);
     if (r.held === "D" || r.held === "R") flags.push(`<span class="flag held ${r.held}">Now held by ${r.held === "D" ? "Democrats" : "Republicans"}</span>`);
+    if (window.ENMaps?.isFlip(r)) flags.push(`<span class="flag flip">Flip from ${r.held === "D" ? "Democrats" : "Republicans"}</span>`);
     if (r.note) flags.push(`<span class="flag">${esc(r.note)}</span>`);
     if (r.status === "no-feed" || r.status === "not-found" || r.status === "source-error" || r.status === "manual") {
       const href = r.link || r.source_url;
@@ -189,6 +203,9 @@
     return `<div class="subnav" role="group" aria-label="Office">${pills}</div>
       <div class="natmap-wrap">
         ${balanceBar(g, all, d.summary || {})}
+        ${g === "senate" ? `<div class="scope viewtoggle" role="group" aria-label="Which Senate seats to color">
+          <button data-sview="up" aria-pressed="${state.senView === "up"}">Seats up this year</button>
+          <button data-sview="all" aria-pressed="${state.senView === "all"}">All seats</button></div>` : ""}
         ${g === "house" ? `<div class="scope viewtoggle" role="group" aria-label="House map style">
           <button data-hview="grid" aria-pressed="${state.houseView === "grid"}">Equal squares</button>
           <button data-hview="map" aria-pressed="${state.houseView === "map"}">Geographic</button></div>` : ""}
@@ -199,8 +216,10 @@
         <ul class="legend">
           <li><i style="background:var(--dem)"></i><i style="background:color-mix(in srgb, var(--dem) 55%, var(--map-blank))"></i>Democrat leads (lighter = closer)</li>
           <li><i style="background:var(--rep)"></i><i style="background:color-mix(in srgb, var(--rep) 55%, var(--map-blank))"></i>Republican leads</li>
-          <li><i class="hatch"></i>No results yet</li>
-          ${g === "house" ? "" : `<li><i style="background:var(--dem-muted)"></i><i style="background:var(--rep-muted)"></i>${g === "senate" ? '<i class="splitsw"></i>' : ""}Not up this year (current ${g === "senate" ? "senators; striped = split" : "governor"})</li>`}
+          <li><i style="background:var(--map-blank)"></i>No results yet</li>
+          ${g === "house" ? "" : `<li><i class="flipsw"></i>Striped: seat would flip</li>
+          ${g === "senate" && state.senView === "up" ? `<li><i style="background:var(--map-none)"></i>No Senate race this year</li>`
+            : `<li><i style="background:var(--dem)"></i><i style="background:var(--rep)"></i>${g === "senate" ? '<i style="background:var(--split)"></i>' : ""}Not up this year: current ${g === "senate" ? "senators (purple = one of each party)" : "governor"}</li>`}`}
           ${g === "house" && state.houseView === "map" ? `<li><i class="bandsw"></i>New 2026 lines, not mapped: shaded by seats each party leads</li>` : ""}
           <li class="hint">${g === "house" ? (state.houseView === "map" ? "Click a district to zoom into its state." : "Each square is one district. Click one to see its state.") : "Click a state to zoom into its counties."}</li>
         </ul>
@@ -232,8 +251,7 @@
     const d = state.data;
     document.querySelectorAll(".tabs button").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.tab === state.tab)));
     $("#closest").setAttribute("aria-pressed", String(state.closest));
-    $("#big").setAttribute("aria-pressed", String(state.big));
-    document.documentElement.classList.toggle("big", state.big);
+    applyTheme();
     if (!d) return;
     state.raceIndex.clear();
     const html = state.tab === "national" ? renderNational(d) : state.tab === "georgia" ? renderGeorgia(d) : renderMetro(d);
@@ -253,7 +271,7 @@
       const held = {}, notUp = {};
       const up = new Set(races.map((r) => r.state));
       races.forEach((r) => { if (r.held) held[r.state] = r.held; });
-      if (state.natGroup === "senate") Object.assign(notUp, d.summary?.senate_not_up || {});
+      if (state.natGroup === "senate" && state.senView === "all") Object.assign(notUp, d.summary?.senate_not_up || {});
       if (state.natGroup === "governor") for (const [st, p] of Object.entries(d.summary?.governor_party || {})) if (!up.has(st)) notUp[st] = p;
       const word = { D: "Democrats", R: "Republicans" };
       const notUpText = (st) => !notUp[st] ? "" : state.natGroup === "senate"
@@ -297,6 +315,17 @@
     state.zoomAnim = zoomable() ? { animate: "out", from: state.pick } : null;
     state.pick = null;
     render();
+  }
+
+  function currentTheme() {
+    return state.theme || (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
+  }
+  function applyTheme() {
+    if (state.theme) document.documentElement.dataset.theme = state.theme;
+    else delete document.documentElement.dataset.theme;
+    const next = currentTheme() === "dark" ? "Light mode" : "Dark mode";
+    $("#theme").textContent = next;
+    $("#theme").setAttribute("aria-label", `Switch to ${next.toLowerCase()}`);
   }
 
   function renderStatus() {
@@ -361,7 +390,8 @@
   $("#panel").addEventListener("click", (e) => {
     const n = e.target.closest("[data-nat]"), c = e.target.closest("[data-county]");
     const sc = e.target.closest("[data-scope]"), tg = e.target.closest("[data-cmap-toggle]");
-    const hv = e.target.closest("[data-hview]");
+    const hv = e.target.closest("[data-hview]"), sv = e.target.closest("[data-sview]");
+    if (sv) { state.senView = sv.dataset.sview; store.set("senView", state.senView); render(); return; }
     if (hv) { state.houseView = hv.dataset.hview; store.set("houseView", state.houseView); state.pick = null; render(); return; }
     if (e.target.closest("[data-unpick]")) unpick();
     if (sc) { state.scope = { ...state.scope, [state.natGroup]: sc.dataset.scope }; state.pick = null; store.set("scope", state.scope); render(); }
@@ -378,9 +408,19 @@
     if (det.matches?.("details.group") && !state.q) state.open.set(det.dataset.key, det.open);
   }, true);
   $("#closest").addEventListener("click", () => { state.closest = !state.closest; store.set("closest", state.closest); render(); });
-  $("#big").addEventListener("click", () => { state.big = !state.big; store.set("big", state.big); render(); });
+  $("#theme").addEventListener("click", () => {
+    state.theme = currentTheme() === "dark" ? "light" : "dark";
+    store.set("theme", state.theme);
+    applyTheme();
+  });
   let qTimer;
   $("#q").addEventListener("input", (e) => { clearTimeout(qTimer); qTimer = setTimeout(() => { state.q = e.target.value.trim(); render(); }, 120); });
+  $("#title").addEventListener("click", (e) => {  // home: Senate, un-zoomed, no filters
+    e.preventDefault();
+    state.tab = "national"; state.natGroup = "senate"; state.pick = null; state.q = ""; $("#q").value = "";
+    store.set("natGroup", "senate");
+    render(); scrollTo({ top: 0 });
+  });
   document.addEventListener("keydown", (e) => { if (e.key === "Escape" && state.tab === "national" && state.pick) unpick(); });
   document.addEventListener("visibilitychange", () => { if (!document.hidden) { load(); schedule(); } });
   window.addEventListener("hashchange", () => { readHash(); render(); });

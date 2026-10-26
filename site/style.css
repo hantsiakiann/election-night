@@ -11,11 +11,12 @@
   --grn: #3f9e60;
   --oth: #b0855a;   /* other named parties */
   --ind: #8f95a6;   /* independents / unaffiliated */
-  --con: #9a6fc2;   /* Constitution */
+  --con: #e07b39;   /* Constitution */
+  --split: #8b5fc7; /* one senator from each party */
+  --flip-stripe: rgba(20, 27, 45, .55);
   --wf: #3fa6a0;    /* Working Families */
   --np1: #9b8ad6; --np2: #4fb3b0; --np3: #d58bb3; --np4: #b0b86a;
-  --dem-muted: #2a3756; --rep-muted: #4d2c38;
-  --map-blank: #263050; --map-none: #1a2136; --map-hatch: #3a4566; --map-edge: #141b2d;
+  --map-blank: #3a4258; --map-none: #1a2136; --map-hatch: #3a4566; --map-edge: #141b2d;
   --num: "Barlow Condensed", "Arial Narrow", sans-serif;
   --body: "Public Sans", system-ui, sans-serif;
   color-scheme: dark;
@@ -24,15 +25,14 @@
   :root:not([data-theme="dark"]) {
     --ground: #eef1f7; --raised: #ffffff; --line: #d5dbe8; --text: #151b2c; --muted: #5d6680;
     --peach: #d9774a; --dem: #2563c9; --rep: #c73a32; color-scheme: light;
-    --dem-muted: #d3dbec; --rep-muted: #efd3d1; --map-blank: #edf0f6; --map-none: #d9dee8; --map-hatch: #b4bdd1; --map-edge: #ffffff;
+    --map-blank: #e3e7ef; --flip-stripe: rgba(255,255,255,.75); --map-none: #d9dee8; --map-hatch: #b4bdd1; --map-edge: #ffffff;
   }
 }
 :root[data-theme="light"] {
   --ground: #eef1f7; --raised: #ffffff; --line: #d5dbe8; --text: #151b2c; --muted: #5d6680;
   --peach: #d9774a; --dem: #2563c9; --rep: #c73a32; color-scheme: light;
-    --dem-muted: #d3dbec; --rep-muted: #efd3d1; --map-blank: #edf0f6; --map-none: #d9dee8; --map-hatch: #b4bdd1; --map-edge: #ffffff;
+    --map-blank: #e3e7ef; --flip-stripe: rgba(255,255,255,.75); --map-none: #d9dee8; --map-hatch: #b4bdd1; --map-edge: #ffffff;
 }
-html.big { font-size: 125%; }
 
 * { box-sizing: border-box; }
 body {
@@ -125,7 +125,7 @@ details.group[open] > summary::before { content: "–"; }
 .in b { display: block; color: var(--text); font-size: 1.4rem; }
 .cands {
   grid-column: 2 / -1; list-style: none; margin: 4px 0 0; padding: 0;
-  display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; gap: 2px 14px;
+  display: grid; grid-template-columns: auto minmax(8em, max-content) minmax(6em, 1fr) auto auto; gap: 2px 14px;
   font-size: .9rem; font-variant-numeric: tabular-nums; max-width: 640px;
 }
 .cand { display: contents; }
@@ -133,7 +133,6 @@ details.group[open] > summary::before { content: "–"; }
 .cand .nm { min-width: 0; }
 .cand .v { color: var(--muted); text-align: right; }
 .cand .pct { font: 600 1.05rem var(--num); text-align: right; min-width: 3.2em; }
-.cand.leading .nm { font-weight: 700; }
 .cand.more { display: list-item; grid-column: 2 / -1; color: var(--muted); font-size: .82rem; }
 .inc { font-size: .72rem; color: var(--muted); border: 1px solid var(--line); border-radius: 3px; padding: 0 3px; }
 .flags { grid-column: 1 / -1; display: flex; gap: 8px; flex-wrap: wrap; font-size: .82rem; }
@@ -142,7 +141,7 @@ details.group[open] > summary::before { content: "–"; }
 .flag.warn { background: color-mix(in srgb, var(--peach) 25%, transparent); }
 .flag a { text-decoration: underline; }
 .race.nofeed .race-name { color: var(--muted); }
-.race.nofeed .bar { background: repeating-linear-gradient(135deg, transparent 0 6px, color-mix(in srgb, var(--line) 60%, transparent) 6px 8px); }
+.race.nofeed .bar { background: var(--map-blank); opacity: .6; }
 .race .id { position: absolute; right: 6px; bottom: 2px; font-size: .65rem; color: var(--muted); opacity: 0; transition: opacity .15s; }
 .race:hover .id, .race:focus-within .id { opacity: .7; }
 .race.fresh { animation: fresh 2.4s ease-out; }
@@ -200,12 +199,12 @@ details.group[open] > summary::before { content: "–"; }
 .balance-nums .O { color: var(--muted); }
 .balance-bar { position: relative; display: flex; height: 18px; margin: 6px 0 4px; border-radius: 3px; overflow: visible; background: var(--map-blank); }
 .balance-bar span { height: 100%; min-width: 1px; }
-.balance-bar .hD { background: color-mix(in srgb, var(--dem) 45%, var(--map-blank)); }
+.balance-bar .hD { background: var(--dem); box-shadow: inset -2px 0 0 var(--ground); }
 .balance-bar .D { background: var(--dem); }
 .balance-bar .O { background: var(--oth); }
-.balance-bar .none { background: repeating-linear-gradient(135deg, var(--map-blank) 0 4px, var(--map-hatch) 4px 6px); }
+.balance-bar .none { background: var(--map-blank); }
 .balance-bar .R { background: var(--rep); }
-.balance-bar .hR { background: color-mix(in srgb, var(--rep) 45%, var(--map-blank)); }
+.balance-bar .hR { background: var(--rep); box-shadow: inset 2px 0 0 var(--ground); }
 .balance-bar .mark { position: absolute; top: -5px; bottom: -5px; width: 2px; margin-left: -1px; background: var(--text); }
 .balance-note { margin: 0; font-size: .8rem; color: var(--muted); }
 
@@ -237,11 +236,9 @@ details.group[open] > summary::before { content: "–"; }
   .balance-nums b { font-size: 1.5rem; }
 }
 
-.legend i.hatch.hD { background: repeating-linear-gradient(135deg, var(--dem-muted) 0 3px, var(--map-hatch) 3px 5px); }
-.legend i.hatch.hR { background: repeating-linear-gradient(135deg, var(--rep-muted) 0 3px, var(--map-hatch) 3px 5px); }
 .flag.held { color: var(--muted); }
 .flag.held::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 6px; }
-.flag.held.D::before { background: var(--dem-muted); } .flag.held.R::before { background: var(--rep-muted); }
+.flag.held.D::before { background: var(--dem); } .flag.held.R::before { background: var(--rep); }
 
 .margin.small { font-size: 1.15rem; line-height: 1.1; }
 .mapbox { position: relative; }
@@ -264,7 +261,7 @@ details.group[open] > summary::before { content: "–"; }
   font: 700 8px var(--body); fill: var(--text); text-anchor: middle; pointer-events: none;
   paint-order: stroke; stroke: var(--ground); stroke-width: 2.4px; stroke-linejoin: round;
 }
-.legend i.splitsw { background: repeating-linear-gradient(135deg, var(--dem-muted) 0 4px, var(--rep-muted) 4px 8px); }
+.legend i.flipsw { background: repeating-linear-gradient(135deg, var(--dem) 0 3px, var(--flip-stripe) 3px 5px, var(--rep) 5px 8px, var(--flip-stripe) 8px 10px); }
 
 .viewtoggle { margin-top: 14px; }
 .housegeo path.dist { stroke: var(--map-edge); stroke-width: .5; cursor: pointer; }
@@ -274,3 +271,10 @@ details.group[open] > summary::before { content: "–"; }
 .housegeo .bands { cursor: pointer; }
 .housegeo .smesh { fill: none; stroke: var(--text); stroke-width: 1.1; opacity: .8; pointer-events: none; }
 .legend i.bandsw { width: 24px; background: linear-gradient(90deg, var(--dem) 0 33%, var(--map-hatch) 33% 66%, var(--rep) 66%); }
+.cand .pty { color: var(--muted); }
+.cand.more { grid-column: 2 / -1; }
+.flipover { pointer-events: none; }
+.flag.flip { background: color-mix(in srgb, var(--peach) 30%, transparent); font-weight: 600; }
+.maptip td.pty { color: var(--muted); }
+h1 a { color: inherit; text-decoration: none; }
+h1 a:hover { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 4px; }

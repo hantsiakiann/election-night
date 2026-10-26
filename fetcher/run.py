@@ -90,7 +90,8 @@ def national_race_specs(ncfg):
                         "at_large": at_large, "title": label, "key": label in key.get("house", ())}
 
 
-def build_national(cfg, loaded):
+def build_national(cfg, loaded, prelim=None):
+    prelim = prelim or {}
     ncfg = cfg.get("national") or {}
     feeds, patterns = ncfg.get("feeds") or {}, ncfg.get("patterns") or {}
     links, notes = ncfg.get("links") or {}, ncfg.get("notes") or {}
@@ -120,7 +121,15 @@ def build_national(cfg, loaded):
         else:
             status = ("no-feed" if src == "manual" or not pattern
                       else "source-error" if src not in loaded else "not-found")
-            race = dict(meta, candidates=[], total_votes=0, source=src, source_url=links.get(abbr), status=status)
+            listed = prelim.get(spec["id"]) or []
+            if listed:  # candidates on the ballot, shown with no votes until results arrive
+                race = finalize({"name": spec["title"], "candidates": [
+                    {"name": c["name"], "party": c.get("party", ""), "votes": 0, "incumbent": False} for c in listed]},
+                    race_id=spec["id"], title=spec["title"], source=src, source_url=links.get(abbr))
+                race.update({k: v for k, v in meta.items() if v is not None and k not in ("id", "title")})
+                race.update(source_url=links.get(abbr), status=status)
+            else:
+                race = dict(meta, candidates=[], total_votes=0, source=src, source_url=links.get(abbr), status=status)
             if status == "not-found":
                 race["note"] = "Not in the state feed yet"
         out[group].append(race)
@@ -288,6 +297,10 @@ def main(argv=None):
 
     cfg = yaml.safe_load(Path(args.config).read_text())
     manual = yaml.safe_load(Path(args.manual).read_text()) if Path(args.manual).exists() else {}
+    cand_path = Path(args.config).resolve().parent / "candidates.yml"
+    if not cand_path.exists():
+        cand_path = Path("config/candidates.yml")
+    prelim = (yaml.safe_load(cand_path.read_text()) or {}).get("races", {}) if cand_path.exists() else {}
 
     loaded, status = {}, {}
     for name, scfg in (cfg.get("sources") or {}).items():
@@ -321,7 +334,7 @@ def main(argv=None):
         "sources": status,
         "states": state_table(),
         "summary": national_summary(cfg),
-        "national": build_national(cfg, loaded),
+        "national": build_national(cfg, loaded, prelim),
         "georgia": build_georgia(cfg, loaded["georgia"]) if "georgia" in loaded else None,
         "metro": build_metro(cfg, loaded["georgia"]) if "georgia" in loaded else None,
     }

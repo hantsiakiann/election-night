@@ -92,6 +92,11 @@ under `national.decided` in `config/races.yml` and count toward the control bars
 
 ## Page features
 
+Candidates on the ballot are listed before results arrive (`config/candidates.yml`, built by
+`tools/build_candidates.py`); feeds and `manual.yml` replace them as numbers come in. Before
+votes, Democrats and Republicans are listed first and independents last; once votes arrive,
+candidates sort by votes. The header has a light/dark switch.
+
 Closest-first sort, search by race or candidate, large-text mode for a TV, a brief
 highlight on rows whose count just moved, a "Leader under 50%" flag for Georgia's runoff
 rule, and deep links (`#georgia`, `#metro/Fulton`, `#national/senate`).

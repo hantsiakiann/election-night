@@ -5,7 +5,8 @@ window.ENMaps = (() => {
   "use strict";
   const PARTY = { D: "var(--dem)", R: "var(--rep)", L: "var(--lib)", G: "var(--grn)", I: "var(--ind)", C: "var(--con)", WF: "var(--wf)" };
   const NEUTRAL = ["var(--np1)", "var(--np2)", "var(--np3)", "var(--np4)", "var(--oth)"];
-  const MUTED = { D: "var(--dem-muted)", R: "var(--rep-muted)" };
+  const PARTY_NAME = { D: "Democrat", R: "Republican", L: "Libertarian", G: "Green", I: "Independent", C: "Constitution", WF: "Working Families" };
+  const partyName = (p) => PARTY_NAME[p] || p || "";
   const HELD = { D: "Democrat", R: "Republican" };
   const W = 975, H = 610;
   const cache = {};
@@ -24,23 +25,30 @@ window.ENMaps = (() => {
     const strength = Math.round(55 + Math.min(1, Math.abs(margin) / 20) * 40); // 55%..95%
     return `color-mix(in srgb, ${base} ${strength}%, var(--map-blank))`;
   }
+  // Party currently ahead: the called winner, the vote leader, or a party settled before Election Day.
+  function leadParty(r) {
+    if (!r) return null;
+    if (r.call) { const c = r.candidates.find((x) => x.name === r.call); if (c) return c.party; }
+    if (r.total_votes) return r.candidates[0]?.party || null;
+    return r.decided?.party || null;
+  }
+  // A flip: the party ahead differs from the party holding the seat now (D/R only).
+  function isFlip(r) {
+    const p = leadParty(r);
+    return !!(r?.held && (p === "D" || p === "R") && (r.held === "D" || r.held === "R") && p !== r.held);
+  }
   // notUp: for states with no race this year, the party holding the seat(s): D, R or "split"
   function raceFill(r, notUp) {
-    if (!r) return notUp === "split" ? "url(#split)" : MUTED[notUp] || "var(--map-none)";
-    if (r.call) {
-      const c = r.candidates.find((x) => x.name === r.call);
-      if (c) return PARTY[c.party] || "var(--oth)";
-    }
-    if (!r.total_votes) {
-      if (r.decided) return PARTY[r.decided.party] || "var(--oth)";  // settled before Election Day
-      return "url(#hatch)";                                            // contested, no votes yet
-    }
-    const lead = r.candidates[0];
-    return leadFill(PARTY[lead.party] || "var(--oth)", r.margin_pct ?? 0, false);
+    if (!r) return notUp === "split" ? "var(--split)" : PARTY[notUp] || "var(--map-none)";
+    const p = leadParty(r);
+    if (!p) return "var(--map-blank)";                                // no results yet: plain gray
+    const base = PARTY[p] || "var(--oth)";
+    if (r.call || (!r.total_votes && r.decided)) return base;         // called / settled: full color
+    return leadFill(base, r.margin_pct ?? 0, false);
   }
   function countyFill(row, cands, partisan) {
     const v = row[2], tot = v.reduce((a, b) => a + b, 0);
-    if (!tot) return "url(#hatch)";
+    if (!tot) return "var(--map-blank)";
     const order = v.map((n, i) => [n, i]).sort((a, b) => b[0] - a[0]);
     const [first, second = [0]] = order, i = first[1];
     const base = partisan ? (PARTY[cands[i]?.party] || "var(--oth)") : NEUTRAL[i % NEUTRAL.length];
@@ -64,11 +72,12 @@ window.ENMaps = (() => {
     const h = held && HELD[held] ? `<br>Held by a ${HELD[held]} now` : "";
     if (!r) return `<b>${esc(title)}</b><br>No race this year${notUpText ? `<br>${esc(notUpText)}` : ""}`;
     const dec = r.decided ? `<br>${esc(r.decided.winner ? `${r.decided.winner} (${r.decided.party}), unopposed` : r.decided.reason)}` : "";
-    if (!r.total_votes) return `<b>${esc(title)}</b>${h}${dec}${dec ? "" : `<br>${r.status === "no-feed" ? "No live feed; see official results" : "No votes counted yet"}`}`;
+    const flip = isFlip(r) ? `<br><b>Flip</b> from ${HELD[r.held]}s` : "";
+    if (!r.total_votes) return `<b>${esc(title)}</b>${h}${dec}${flip}${dec ? "" : `<br>${r.status === "no-feed" ? "No live feed; see official results" : "No votes counted yet"}`}`;
     const rows = r.candidates.slice(0, 3).map((c) =>
-      `<tr><td>${esc(c.name)}${c.party ? ` (${esc(c.party)})` : ""}</td><td>${pct1(c.pct)}%</td></tr>`).join("");
+      `<tr><td>${esc(c.name)}</td><td class="pty">${esc(partyName(c.party))}</td><td>${pct1(c.pct)}%</td></tr>`).join("");
     const rep = r.reporting_pct != null ? `${Math.round(r.reporting_pct)}% reporting` : "";
-    return `<b>${esc(title)}</b>${r.call ? `<br>Called for ${esc(r.call)}` : ""}<table>${rows}</table>${rep}`;
+    return `<b>${esc(title)}</b>${r.call ? `<br>Called for ${esc(r.call)}` : ""}${flip}<table>${rows}</table>${rep}`;
   }
   function countyTip(name, r, rows) {
     const row = rows[norm(name)];
@@ -76,14 +85,15 @@ window.ENMaps = (() => {
     const tot = row[2].reduce((a, b) => a + b, 0);
     if (!tot) return `<b>${esc(name)}</b><br>No votes counted yet`;
     const lines = r.candidates.map((c, i) => [c, row[2][i]]).sort((a, b) => b[1] - a[1]).slice(0, 3)
-      .map(([c, v]) => `<tr><td>${esc(c.name)}${c.party ? ` (${esc(c.party)})` : ""}</td><td>${pct1(100 * v / tot)}%</td><td>${v.toLocaleString("en-US")}</td></tr>`).join("");
+      .map(([c, v]) => `<tr><td>${esc(c.name)}</td><td class="pty">${esc(partyName(c.party))}</td><td>${pct1(100 * v / tot)}%</td><td>${v.toLocaleString("en-US")}</td></tr>`).join("");
     return `<b>${esc(name)}</b><table>${lines}</table>${row[1] != null ? `${Math.round(row[1])}% of precincts reporting` : ""}`;
   }
   const pat = (id, bg) => `<pattern id="${id}" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
       <rect width="6" height="6" fill="${bg}"/><line x1="0" y1="0" x2="0" y2="6" stroke="var(--map-hatch)" stroke-width="2"/></pattern>`;
-  const split = `<pattern id="split" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-      <rect width="5" height="10" fill="var(--dem-muted)"/><rect x="5" width="5" height="10" fill="var(--rep-muted)"/></pattern>`;
-  const defs = () => `<defs>${pat("hatch", "var(--map-blank)")}${split}</defs>`;
+  // stripes laid over a party color to mark a flipped seat
+  const flipPat = `<pattern id="flip" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <line x1="0" y1="0" x2="0" y2="7" stroke="var(--flip-stripe)" stroke-width="2.6"/></pattern>`;
+  const defs = () => `<defs>${pat("hatch", "var(--map-blank)")}${flipPat}</defs>`;
 
   function bindTips(svg, html, click) {
     svg.addEventListener("pointermove", (e) => {
@@ -117,7 +127,9 @@ window.ENMaps = (() => {
     const path = d3.geoPath();
     const shapes = feats.map((f) => {
       const s = byFips[f.id], r = raceBy[s.abbr];
-      return `<path data-k="${s.abbr}" class="st${r ? " has" : ""}${selected === s.abbr ? " sel" : ""}" d="${path(f)}" style="fill:${raceFill(r, notUp[s.abbr])}"/>`;
+      const d = path(f);
+      return `<path data-k="${s.abbr}" class="st${r ? " has" : ""}${selected === s.abbr ? " sel" : ""}" d="${d}" style="fill:${raceFill(r, notUp[s.abbr])}"/>` +
+        (isFlip(r) ? `<path class="flipover" d="${d}" fill="url(#flip)"/>` : "");
     }).join("");
     const mesh = path(topojson.mesh(topo, topo.objects.states, (a, b) => a !== b));
     const focus = selected || (animate === "out" ? from : null);
@@ -230,7 +242,7 @@ window.ENMaps = (() => {
       clips += `<clipPath id="clip-${st}"><path d="${path(f)}"/></clipPath>`;
       let x = x0;
       const band = (cnt, fill) => { if (!cnt) return ""; const bw = (w * cnt) / n; const out = `<rect x="${x}" y="${y0}" width="${bw + 0.3}" height="${y1 - y0}" style="fill:${fill}"/>`; x += bw; return out; };
-      bands += `<g clip-path="url(#clip-${st})" class="bands${selected && selected !== st ? " dim" : ""}" data-k="S:${st}">${band(t.D, "var(--dem)")}${band(t.none, "url(#hatch)")}${band(t.R, "var(--rep)")}</g>`;
+      bands += `<g clip-path="url(#clip-${st})" class="bands${selected && selected !== st ? " dim" : ""}" data-k="S:${st}">${band(t.D, "var(--dem)")}${band(t.none, "var(--map-blank)")}${band(t.R, "var(--rep)")}</g>`;
     }
     const districts = dfeats.filter((f) => mapped.has(f.id.slice(0, 2))).map((f) => {
       const r = byKey[f.id];
@@ -287,5 +299,5 @@ window.ENMaps = (() => {
     bindTips(el.querySelector("svg"), (name) => countyTip(name, r, rows));
   }
 
-  return { usMap, houseGrid, houseGeo, countyMap, raceFill };
+  return { usMap, houseGrid, houseGeo, countyMap, raceFill, isFlip, partyName };
 })();
