@@ -1,0 +1,66 @@
+{
+  "built": "2026-10-26T06:10:06.755Z",
+  "census": 435,
+  "overrides": {
+    "CA": {
+      "plan": "Proposition 50 / AB 604",
+      "features": 52,
+      "expected": 52,
+      "field": "(feature order)",
+      "used": true,
+      "fields": []
+    },
+    "FL": {
+      "plan": "EOGPCRP2026 (enacted May 2026)",
+      "features": 28,
+      "expected": 28,
+      "field": "DISTRICT",
+      "used": true,
+      "fields": [
+        "LONGNAME",
+        "SHORTNAME",
+        "DISTRICT",
+        "COLOR",
+        "TOTAL",
+        "TARGET_DEV"
+      ]
+    },
+    "NC": {
+      "plan": "SB 249 / SL 2025-95",
+      "features": 14,
+      "expected": 14,
+      "field": "(feature order)",
+      "used": true,
+      "fields": []
+    },
+    "OH": {
+      "plan": "Ohio Redistricting Commission, Oct 2025",
+      "features": 15,
+      "expected": 15,
+      "field": "(feature order)",
+      "used": true,
+      "fields": []
+    },
+    "TX": {
+      "plan": "PLANC2333 (enacted 2025)",
+      "features": 38,
+      "expected": 38,
+      "field": "District",
+      "used": true,
+      "fields": [
+        "District"
+      ]
+    },
+    "UT": {
+      "plan": "Court-adopted Plaintiffs' Map 1",
+      "features": 4,
+      "expected": 4,
+      "field": "(feature order)",
+      "used": true,
+      "fields": []
+    }
+  },
+  "skipped": 2,
+  "total": 435,
+  "duplicates": []
+}
