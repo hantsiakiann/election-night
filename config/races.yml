@@ -84,70 +84,7 @@ national:
   # the Census 2024 boundary file. The geographic House map shades these states by seat
   # share instead of drawing district lines. Source: Ballotpedia, Oct 2026.
   house_new_lines: [AL, CA, FL, LA, NC, OH, TN, TX, UT]
-  # Forecaster House ratings (toss-up, tilt and lean races), via 270toWin, Oct 15-23 2026.
-  house_ratings:
-    H-AK-AL: {"Cook": "Lean R"}
-    H-AL-02: {"Cook": "Lean R", "Sabato": "Lean R", "Inside Elections": "Lean R"}
-    H-AZ-01: {"Cook": "Lean D", "Sabato": "Lean D", "Inside Elections": "Tilt D"}
-    H-AZ-02: {"Cook": "Lean R"}
-    H-AZ-06: {"Cook": "Lean D", "Sabato": "Lean D", "Inside Elections": "Toss-up"}
-    H-CA-06: {"Inside Elections": "Lean D"}
-    H-CA-13: {"Inside Elections": "Tilt D"}
-    H-CA-22: {"Cook": "Toss-up", "Sabato": "Lean D", "Inside Elections": "Toss-up"}
-    H-CA-48: {"Cook": "Lean D", "Inside Elections": "Tilt D"}
-    H-CO-04: {"Cook": "Lean R", "Sabato": "Lean R"}
-    H-CO-05: {"Cook": "Lean R", "Sabato": "Lean R", "Inside Elections": "Tilt R"}
-    H-CO-08: {"Cook": "Lean D", "Sabato": "Lean D", "Inside Elections": "Toss-up"}
-    H-FL-13: {"Cook": "Lean R", "Inside Elections": "Lean R"}
-    H-FL-14: {"Cook": "Toss-up", "Sabato": "Toss-up", "Inside Elections": "Toss-up"}
-    H-FL-22: {"Cook": "Toss-up", "Sabato": "Toss-up", "Inside Elections": "Tilt R"}
-    H-FL-25: {"Cook": "Lean D", "Sabato": "Lean D", "Inside Elections": "Toss-up"}
-    H-FL-27: {"Cook": "Lean R", "Sabato": "Lean R", "Inside Elections": "Lean R"}
-    H-IA-01: {"Cook": "Lean D", "Sabato": "Lean D", "Inside Elections": "Tilt D"}
-    H-IA-02: {"Cook": "Toss-up", "Sabato": "Lean D", "Inside Elections": "Toss-up"}
-    H-IA-03: {"Cook": "Lean D", "Sabato": "Lean D", "Inside Elections": "Tilt D"}
-    H-KY-06: {"Cook": "Toss-up", "Sabato": "Lean R", "Inside Elections": "Tilt R"}
-    H-ME-02: {"Cook": "Lean R", "Sabato": "Lean R", "Inside Elections": "Lean R"}
-    H-MI-04: {"Cook": "Toss-up", "Sabato": "Toss-up", "Inside Elections": "Tilt R"}
-    H-MI-07: {"Cook": "Toss-up", "Sabato": "Toss-up", "Inside Elections": "Toss-up"}
-    H-MI-10: {"Cook": "Toss-up", "Sabato": "Toss-up", "Inside Elections": "Tilt R"}
-    H-MN-01: {"Cook": "Lean R", "Sabato": "Lean R", "Inside Elections": "Lean R"}
-    H-MO-02: {"Sabato": "Lean R"}
-    H-MT-01: {"Cook": "Toss-up", "Sabato": "Lean R", "Inside Elections": "Tilt R"}
-    H-NC-01: {"Cook": "Toss-up", "Sabato": "Lean D", "Inside Elections": "Toss-up"}
-    H-NC-11: {"Cook": "Lean D", "Sabato": "Lean D", "Inside Elections": "Toss-up"}
-    H-NE-02: {"Inside Elections": "Lean D"}
-    H-NH-01: {"Inside Elections": "Lean D"}
-    H-NJ-07: {"Cook": "Lean D", "Sabato": "Lean D", "Inside Elections": "Tilt D"}
-    H-NM-02: {"Cook": "Lean D", "Sabato": "Lean D", "Inside Elections": "Tilt D"}
-    H-NV-01: {"Inside Elections": "Lean D"}
-    H-NV-02: {"Cook": "Lean R", "Sabato": "Lean R", "Inside Elections": "Lean R"}
-    H-NV-03: {"Inside Elections": "Lean D"}
-    H-NY-03: {"Sabato": "Lean D", "Inside Elections": "Lean D"}
-    H-NY-04: {"Inside Elections": "Tilt D"}
-    H-NY-17: {"Cook": "Toss-up", "Sabato": "Toss-up", "Inside Elections": "Toss-up"}
-    H-NY-21: {"Cook": "Lean R", "Sabato": "Lean R", "Inside Elections": "Lean R"}
-    H-OH-01: {"Inside Elections": "Tilt D"}
-    H-OH-07: {"Cook": "Toss-up", "Sabato": "Toss-up", "Inside Elections": "Toss-up"}
-    H-OH-09: {"Cook": "Toss-up", "Sabato": "Toss-up", "Inside Elections": "Toss-up"}
-    H-OH-10: {"Cook": "Lean R"}
-    H-OH-15: {"Cook": "Lean R"}
-    H-PA-01: {"Cook": "Lean R", "Sabato": "Lean R", "Inside Elections": "Lean R"}
-    H-PA-07: {"Cook": "Lean D", "Sabato": "Lean D", "Inside Elections": "Tilt D"}
-    H-PA-08: {"Cook": "Toss-up", "Sabato": "Toss-up", "Inside Elections": "Tilt D"}
-    H-PA-10: {"Cook": "Lean D", "Sabato": "Lean D", "Inside Elections": "Toss-up"}
-    H-SC-01: {"Cook": "Lean R", "Sabato": "Lean R", "Inside Elections": "Lean R"}
-    H-TX-15: {"Cook": "Toss-up", "Sabato": "Toss-up", "Inside Elections": "Toss-up"}
-    H-TX-23: {"Cook": "Lean R", "Sabato": "Lean R"}
-    H-TX-28: {"Sabato": "Lean D", "Inside Elections": "Tilt D"}
-    H-TX-34: {"Cook": "Lean D", "Sabato": "Lean D", "Inside Elections": "Toss-up"}
-    H-TX-35: {"Cook": "Toss-up", "Sabato": "Toss-up", "Inside Elections": "Lean R"}
-    H-VA-01: {"Cook": "Toss-up", "Sabato": "Toss-up", "Inside Elections": "Lean R"}
-    H-VA-02: {"Cook": "Lean D", "Sabato": "Lean D", "Inside Elections": "Toss-up"}
-    H-VA-05: {"Sabato": "Lean R"}
-    H-WA-03: {"Cook": "Lean D", "Sabato": "Lean D", "Inside Elections": "Toss-up"}
-    H-WI-01: {"Cook": "Lean R", "Sabato": "Lean R"}
-    H-WI-03: {"Cook": "Lean D", "Sabato": "Lean D", "Inside Elections": "Toss-up"}
+  # Forecaster ratings for every race are in config/ratings.yml (tools/build_ratings.py).
   # Races settled before Election Day (source: 270toWin uncontested-races list, Sept 2026).
   #   winner + party: only one candidate on the ballot (counted as won)
   #   party only: every candidate on the ballot is from that party (seat counted for the party)

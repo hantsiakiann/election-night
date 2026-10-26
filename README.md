@@ -55,6 +55,9 @@ results at all, and Texas's machine-readable feed is a paid subscription. Those 
   in `config/races.yml`; `python -m fetcher.probe <url>` prints the feed's fields), add the
   state to `national.feeds`, and give the source its contest-name `patterns`.
 - **Key races** (shown by default for the House) are listed under `national.key`.
+- **Forecaster ratings.** Every race card shows the Cook, Sabato's Crystal Ball and Inside
+  Elections rating, from `config/ratings.yml`. The "Update forecaster ratings" workflow rebuilds
+  it daily from 270toWin's forecaster maps through Election Day (or run it by hand).
 
 ## Election night
 

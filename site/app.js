@@ -105,7 +105,11 @@
     if (r.decided) flags.push(`<span class="flag called">${r.decided.winner ? `${esc(r.decided.winner)} (${esc(r.decided.party)}) is unopposed` : esc(r.decided.reason)}</span>`);
     if (r.held === "D" || r.held === "R") flags.push(`<span class="flag held ${r.held}">Now held by ${r.held === "D" ? "Democrats" : "Republicans"}</span>`);
     if (window.ENMaps?.isFlip(r)) flags.push(`<span class="flag flip">Flip from ${r.held === "D" ? "Democrats" : "Republicans"}</span>`);
-    if (r.ratings) flags.push(`<span class="flag rating">${Object.entries(r.ratings).map(([k, v]) => `${esc(k)}: ${esc(v)}`).join(", ")}</span>`);
+    if (r.ratings) {
+      const asOf = state.data?.summary?.ratings_as_of || {};
+      const tip = Object.keys(r.ratings).map((k) => `${k}: ${(asOf[`${k} ${r.group}`] || "").replace(/ at .*/, "")}`).join("; ");
+      flags.push(`<span class="flag rating" title="Pre-election ratings, via 270toWin (${esc(tip)})">${Object.entries(r.ratings).map(([k, v]) => `${esc(k)}: ${esc(v)}`).join(" · ")}</span>`);
+    }
     if (r.note) flags.push(`<span class="flag">${esc(r.note)}</span>`);
     if (r.status === "no-feed" || r.status === "not-found" || r.status === "source-error" || r.status === "manual") {
       const href = r.link || r.source_url;

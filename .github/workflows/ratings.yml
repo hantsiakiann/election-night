@@ -1,0 +1,46 @@
+# Refreshes config/ratings.yml (Cook, Sabato's Crystal Ball and Inside Elections ratings for every
+# race, read from 270toWin) once a day until Election Day, then republishes the site.
+name: Update forecaster ratings
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 13 * 10,11 *"
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  ratings:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Stop after Election Day
+        id: gate
+        run: |
+          if [ "${{ github.event_name }}" = "schedule" ] && [ "$(date -u +%Y%m%d)" -gt 20261103 ]; then echo "skip=1" >> "$GITHUB_OUTPUT"; fi
+      - uses: actions/checkout@v4
+        if: steps.gate.outputs.skip != '1'
+      - uses: actions/setup-python@v5
+        if: steps.gate.outputs.skip != '1'
+        with:
+          python-version: "3.12"
+      - name: Build ratings
+        if: steps.gate.outputs.skip != '1'
+        run: |
+          pip install -q pyyaml
+          python tools/build_ratings.py
+      - name: Commit and republish
+        if: steps.gate.outputs.skip != '1'
+        run: |
+          git config user.name "hantsiakiann"
+          git config user.email "hantsiakiann@gmail.com"
+          # ignore the timestamp line when deciding whether anything changed
+          if git diff --quiet -I '^built:' config/ratings.yml; then echo "No rating changes."; exit 0; fi
+          git add config/ratings.yml
+          git commit -m "Update forecaster ratings"
+          git push
+          gh workflow run update.yml --ref main
+        env:
+          GH_TOKEN: ${{ github.token }}

@@ -103,7 +103,7 @@ def build_national(cfg, loaded, prelim=None):
         meta = dict(spec, group=group, link=links.get(abbr), note=notes.get(abbr), county_state=abbr)
         if group in ("governor", "senate"):
             meta["held"] = (ncfg.get(group + "_party") or {}).get(abbr)
-        rating = (ncfg.get("house_ratings") or {}).get(spec["id"]) if group == "house" else None
+        rating = ((ncfg.get("ratings") or {}).get(group) or {}).get(spec["id"])
         if rating:
             meta["ratings"] = rating
         dec = (ncfg.get("decided") or {}).get(spec["id"])
@@ -150,6 +150,7 @@ def national_summary(cfg):
             "governor_party": gov,
             "senate_not_up": ncfg.get("senate_not_up") or {},
             "house_new_lines": ncfg.get("house_new_lines") or [],
+            "ratings_as_of": (ncfg.get("ratings") or {}).get("as_of") or {},
             "senate_control": ncfg.get("senate_control", 51),
             "house_control": ncfg.get("house_control", 218)}
 
@@ -304,6 +305,12 @@ def main(argv=None):
     if not cand_path.exists():
         cand_path = Path("config/candidates.yml")
     prelim = (yaml.safe_load(cand_path.read_text()) or {}).get("races", {}) if cand_path.exists() else {}
+    # forecaster ratings (tools/build_ratings.py), kept beside races.yml like candidates.yml
+    rat_path = Path(args.config).resolve().parent / "ratings.yml"
+    if not rat_path.exists():
+        rat_path = Path("config/ratings.yml")
+    if rat_path.exists():
+        cfg.setdefault("national", {})["ratings"] = yaml.safe_load(rat_path.read_text()) or {}
 
     loaded, status = {}, {}
     for name, scfg in (cfg.get("sources") or {}).items():
