@@ -10,7 +10,9 @@
     set(k, v) { try { localStorage.setItem("en26:" + k, JSON.stringify(v)); } catch { /* storage unavailable */ } },
   };
   const state = {
-    data: null, tab: "national", natGroup: store.get("natGroup", "all"), county: store.get("county", null),
+    data: null, tab: "national", natGroup: store.get("natGroup", "senate"), county: store.get("county", null),
+    scope: store.get("scope", { senate: "all", governor: "all", house: "key" }), pick: null,
+    cmapOpen: new Set(), cmapClosed: new Set(), raceIndex: new Map(),
     closest: store.get("closest", false), big: store.get("big", false), q: "",
     totals: new Map(), fresh: new Set(), open: new Map(), lastOk: 0, refresh: 60,
   };
@@ -24,11 +26,11 @@
   function readHash() {
     const [tab, sub] = location.hash.replace(/^#/, "").split("/");
     if (["national", "georgia", "metro"].includes(tab)) state.tab = tab;
-    if (tab === "national" && sub) state.natGroup = sub;
+    if (tab === "national" && sub && GROUP_NAMES[sub]) state.natGroup = sub;
     if (tab === "metro" && sub) state.county = decodeURIComponent(sub);
   }
   function writeHash() {
-    const sub = state.tab === "national" && state.natGroup !== "all" ? "/" + state.natGroup
+    const sub = state.tab === "national" ? "/" + state.natGroup
       : state.tab === "metro" && state.county ? "/" + encodeURIComponent(state.county) : "";
     history.replaceState(null, "", "#" + state.tab + sub);
   }
@@ -88,7 +90,13 @@
       const href = r.link || r.source_url;
       if (href) flags.push(`<span class="flag"><a href="${esc(href)}" target="_blank" rel="noopener">Official results</a></span>`);
     }
-    const sub = r.scope || (r.feed_name && r.feed_name !== r.title && r.group ? r.feed_name : "");
+    const hasCmap = r.counties?.length > 1 && r.county_state;
+    const autoOpen = r.statewide && (r.group === "senate" || r.group === "governor" ||
+      /^(us|u\.s\.) senate|^governor$/i.test(r.feed_name || r.title || ""));
+    const cmapShown = hasCmap && (state.cmapOpen.has(r.id) || (autoOpen && !state.cmapClosed.has(r.id)));
+    if (hasCmap) flags.push(`<button class="flag btn" data-cmap-toggle="${esc(r.id)}" aria-expanded="${cmapShown}">${cmapShown ? "Hide" : "Show"} county map</button>`);
+    if (cmapShown) state.raceIndex.set(r.id, r);
+    const sub = r.scope || (r.group && r.feed_name && r.feed_name !== r.title ? r.feed_name : "");
     return `<li class="race ${leadCls}${r.status === "no-feed" ? " nofeed" : ""}${state.fresh.has(r.id) ? " fresh" : ""}" data-id="${esc(r.id)}">
       <div class="race-name">${esc(r.title)}${sub ? `<small>${esc(sub)}</small>` : ""}</div>
       <div class="bar${partisan && cands.some((c) => c.party === "D") && cands.some((c) => c.party === "R") ? "" : " multi"}" role="img"
@@ -96,6 +104,7 @@
       ${marginCell(r)}${inCell(r)}
       ${cands.length ? `<div class="cands">${candHtml}</div>` : ""}
       ${flags.length ? `<div class="flags">${flags.join("")}</div>` : ""}
+      ${cmapShown ? `<div class="cmap" data-cmap="${esc(r.id)}"><p class="cmapnote">Loading county map…</p></div>` : ""}
       <span class="id">${esc(r.id)}</span>
     </li>`;
   }
@@ -104,7 +113,8 @@
   function matches(r) {
     if (!state.q) return true;
     const q = state.q.toLowerCase();
-    return [r.title, r.feed_name, r.id, ...(r.candidates || []).map((c) => c.name)].some((s) => s && s.toLowerCase().includes(q));
+    return [r.title, r.feed_name, r.id, r.state_name, ...(r.candidates || []).map((c) => c.name)]
+      .some((s) => s && s.toLowerCase().includes(q)) || (r.state && r.state.toLowerCase() === q);
   }
   function arrange(races) {
     const live = (r) => (r.candidates?.length ? 0 : 1);
@@ -125,13 +135,66 @@
   const notice = (...lines) => `<div class="notice">${lines.map((l) => `<p>${l}</p>`).join("")}</div>`;
 
   // ------------------------------------------------------------------ tabs
+  function tally(races) {
+    const t = { D: 0, R: 0, O: 0, none: 0 };
+    for (const r of races) {
+      const who = r.call ? r.candidates.find((c) => c.name === r.call) : r.total_votes ? r.candidates[0] : null;
+      if (!who) t.none++; else if (who.party === "D" || who.party === "R") t[who.party]++; else t.O++;
+    }
+    return t;
+  }
+  function balanceBar(g, races, summary) {
+    const t = tally(races);
+    const hold = g === "senate" ? summary.senate_holdovers || {} : {};
+    const hD = hold.D || 0, hR = hold.R || 0;
+    const total = races.length + hD + hR;
+    const need = g === "senate" ? summary.senate_control || 51 : g === "house" ? summary.house_control || 218 : null;
+    const seg = (n, cls, label) => n ? `<span class="${cls}" style="flex-grow:${n}" title="${label}: ${n}"></span>` : "";
+    const word = g === "governor" ? "governorships" : "seats";
+    return `<div class="balance">
+      <div class="balance-nums"><span class="D"><b>${hD + t.D}</b> Democrats${hD ? ` (${hD} not up)` : ""}</span>
+        ${t.O ? `<span class="O"><b>${t.O}</b> other</span>` : ""}
+        <span class="R">Republicans <b>${hR + t.R}</b>${hR ? ` (${hR} not up)` : ""}</span></div>
+      <div class="balance-bar" role="img" aria-label="${hD + t.D} Democratic, ${hR + t.R} Republican, ${t.none} without results, of ${total} ${word}">
+        ${seg(hD, "hD", "Democratic seats not up")}${seg(t.D, "D", "Democrats leading or called")}${seg(t.O, "O", "Others leading")}
+        ${seg(t.none, "none", "No results yet")}${seg(t.R, "R", "Republicans leading or called")}${seg(hR, "hR", "Republican seats not up")}
+        ${need ? `<i class="mark" style="left:${(100 * need) / total}%"></i>` : ""}
+      </div>
+      <p class="balance-note">${need ? `${need} ${word} for a majority${g === "senate" ? "; Republicans need 50 with the vice president's tiebreak" : ""}. ` : ""}Counts leaders in races with votes counted, plus any race marked called. ${t.none} of ${races.length} races have no results yet.</p>
+    </div>`;
+  }
   function renderNational(d) {
     const groups = Object.keys(d.national || {});
-    const pills = ["all", ...groups].map((g) =>
-      `<button data-nat="${g}" aria-pressed="${state.natGroup === g}">${g === "all" ? "All" : GROUP_NAMES[g] || g}</button>`).join("");
-    const shown = state.natGroup === "all" ? groups : groups.filter((g) => g === state.natGroup);
-    return `<div class="subnav" role="group" aria-label="Office">${pills}</div>` +
-      shown.map((g) => group(GROUP_NAMES[g] || g, d.national[g])).join("");
+    if (!groups.includes(state.natGroup)) state.natGroup = groups[0];
+    const g = state.natGroup, all = d.national[g] || [];
+    const keyCount = all.filter((r) => r.key).length;
+    const scope = state.scope[g] || "all";
+    const pills = groups.map((x) => `<button data-nat="${x}" aria-pressed="${g === x}">${GROUP_NAMES[x] || x}</button>`).join("");
+    const scopes = `<div class="scope" role="group" aria-label="Which races">
+      <button data-scope="key" aria-pressed="${scope === "key"}">Key races (${keyCount})</button>
+      <button data-scope="all" aria-pressed="${scope === "all"}">All ${all.length}</button></div>`;
+    let list = scope === "key" && !state.pick ? all.filter((r) => r.key) : all;
+    let pickChip = "";
+    if (state.pick) {
+      list = list.filter((r) => r.state === state.pick);
+      const nm = d.states.find((s) => s.abbr === state.pick)?.name || state.pick;
+      pickChip = `<button class="pick" data-unpick>${esc(nm)} only <span aria-hidden="true">✕</span><span class="sr">Show all states</span></button>`;
+    }
+    const title = state.pick ? `${GROUP_NAMES[g]}: ${d.states.find((s) => s.abbr === state.pick)?.name}` : `${GROUP_NAMES[g]}${scope === "key" ? ": key races" : ""}`;
+    return `<div class="subnav" role="group" aria-label="Office">${pills}</div>
+      <div class="natmap-wrap">
+        ${balanceBar(g, all, d.summary || {})}
+        <div class="mapbox" id="natmap" aria-hidden="false"></div>
+        <ul class="legend">
+          <li><i style="background:var(--dem)"></i><i style="background:color-mix(in srgb, var(--dem) 35%, var(--map-blank))"></i>Democrat leads (lighter = closer)</li>
+          <li><i style="background:var(--rep)"></i><i style="background:color-mix(in srgb, var(--rep) 35%, var(--map-blank))"></i>Republican leads</li>
+          <li><i class="hatch"></i>No results yet</li>
+          ${g === "house" ? "" : `<li><i style="background:var(--map-none)"></i>No race this year</li>`}
+          <li class="hint">Click a ${g === "house" ? "state or district" : "state"} to filter the list.</li>
+        </ul>
+      </div>
+      <div class="listbar">${scopes}${pickChip}</div>` +
+      (group(title, list) || notice("No races match."));
   }
   function renderGeorgia(d) {
     if (!d.georgia) return notice("Georgia results aren't flowing yet.",
@@ -160,11 +223,30 @@
     $("#big").setAttribute("aria-pressed", String(state.big));
     document.documentElement.classList.toggle("big", state.big);
     if (!d) return;
+    state.raceIndex.clear();
     const html = state.tab === "national" ? renderNational(d) : state.tab === "georgia" ? renderGeorgia(d) : renderMetro(d);
     $("#panel").innerHTML = html.trim() ? html : "";
+    drawMaps(d);
     if (state.q && !$("#panel .race")) $("#panel").insertAdjacentHTML("beforeend", `<p class="empty-search">No races match “${esc(state.q)}”. Try a last name or a district number.</p>`);
     writeHash();
     renderStatus();
+  }
+
+  function drawMaps(d) {
+    if (!window.ENMaps || !window.d3 || !window.topojson) return;
+    const fail = (el) => (e) => { el.innerHTML = `<p class="cmapnote">Map unavailable (${esc(e.message)}).</p>`; };
+    const nat = $("#natmap");
+    if (nat) {
+      const races = d.national[state.natGroup] || [];
+      const opts = { selected: state.pick, onPick: (abbr) => { state.pick = state.pick === abbr ? null : abbr; render(); $(".listbar")?.scrollIntoView({ behavior: "smooth", block: "start" }); } };
+      if (state.natGroup === "house") ENMaps.houseTiles(nat, races, d.states, opts);
+      else ENMaps.usMap(nat, races, d.states, opts).catch(fail(nat));
+    }
+    document.querySelectorAll("[data-cmap]").forEach((el) => {
+      const r = state.raceIndex.get(el.dataset.cmap);
+      const st = d.states.find((s) => s.abbr === r?.county_state);
+      if (r && st) ENMaps.countyMap(el, r, st.fips).catch(fail(el));
+    });
   }
 
   function renderStatus() {
@@ -228,7 +310,15 @@
   });
   $("#panel").addEventListener("click", (e) => {
     const n = e.target.closest("[data-nat]"), c = e.target.closest("[data-county]");
-    if (n) { state.natGroup = n.dataset.nat; store.set("natGroup", state.natGroup); render(); }
+    const sc = e.target.closest("[data-scope]"), tg = e.target.closest("[data-cmap-toggle]");
+    if (e.target.closest("[data-unpick]")) { state.pick = null; render(); }
+    if (sc) { state.scope = { ...state.scope, [state.natGroup]: sc.dataset.scope }; state.pick = null; store.set("scope", state.scope); render(); }
+    if (tg) {
+      const id = tg.dataset.cmapToggle, open = tg.getAttribute("aria-expanded") === "true";
+      if (open) { state.cmapOpen.delete(id); state.cmapClosed.add(id); } else { state.cmapClosed.delete(id); state.cmapOpen.add(id); }
+      render();
+    }
+    if (n) { state.natGroup = n.dataset.nat; state.pick = null; store.set("natGroup", state.natGroup); render(); }
     if (c) { state.county = c.dataset.county; store.set("county", state.county); render(); }
   });
   $("#panel").addEventListener("toggle", (e) => {

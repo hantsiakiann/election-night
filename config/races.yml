@@ -45,56 +45,91 @@ sources:
   #   precincts_total: "Precincts"
 
 # ---------------------------------------------------------------- National tab
-# source: a key from `sources` above, or `manual` (numbers come from config/manual.yml).
-# link: where the "official results" button goes when there's no feed.
+# Every 2026 Senate (35), governor (36) and House (435) race is generated automatically.
+# A state's races pull from a feed only if the state is listed under `feeds`; all others
+# show a link to `links` and can be filled in through config/manual.yml.
 national:
-  senate:
-    - {id: SEN-GA, title: "Georgia", source: georgia, contest: "^(US|U\\.S\\.) Senate"}
-    - {id: SEN-NC, title: "North Carolina", source: nc, contest: "^US SENATE"}
-    - {id: SEN-MI, title: "Michigan", source: manual, link: "https://www.michigan.gov/sos/elections"}
-    - {id: SEN-ME, title: "Maine", source: manual, link: "https://www.maine.gov/sos/cec/elec/results/index.html", note: "Maine has no state election-night feed"}
-    - {id: SEN-OH, title: "Ohio", source: manual, link: "https://liveresults.ohiosos.gov/"}
-    - {id: SEN-TX, title: "Texas", source: manual, link: "https://results.texas-election.com/races"}
-    - {id: SEN-IA, title: "Iowa", source: manual, link: "https://electionresults.iowa.gov/"}
-    - {id: SEN-AK, title: "Alaska", source: manual, link: "https://www.elections.alaska.gov/"}
-    - {id: SEN-NH, title: "New Hampshire", source: manual, link: "https://www.sos.nh.gov/elections", note: "New Hampshire has no state election-night feed"}
-    - {id: SEN-MN, title: "Minnesota", source: mn, contest: "U\\.?S\\.? Senat"}
-  governor:
-    - {id: GOV-GA, title: "Georgia", source: georgia, contest: "^Governor"}
-    - {id: GOV-MI, title: "Michigan", source: manual, link: "https://www.michigan.gov/sos/elections"}
-    - {id: GOV-NV, title: "Nevada", source: manual, link: "https://silverstateelection.nv.gov/"}
-    - {id: GOV-OH, title: "Ohio", source: manual, link: "https://liveresults.ohiosos.gov/"}
-    - {id: GOV-AK, title: "Alaska", source: manual, link: "https://www.elections.alaska.gov/"}
-    - {id: GOV-AZ, title: "Arizona", source: manual, link: "https://results.arizona.vote/"}
-    - {id: GOV-WI, title: "Wisconsin", source: manual, link: "https://elections.wi.gov/elections/election-results", note: "Wisconsin has no state election-night feed"}
-    - {id: GOV-IA, title: "Iowa", source: manual, link: "https://electionresults.iowa.gov/"}
-    - {id: GOV-KS, title: "Kansas", source: manual, link: "https://sos.ks.gov/elections/elections.html"}
-    - {id: GOV-TX, title: "Texas", source: manual, link: "https://results.texas-election.com/races"}
-    - {id: GOV-OR, title: "Oregon", source: manual, link: "https://results.oregonvotes.gov/"}
-  house:
-    - {id: H-NC-01, title: "NC-01", source: nc, contest: "^US HOUSE OF REPRESENTATIVES DISTRICT 0?1$"}
-    - {id: H-NC-11, title: "NC-11", source: nc, contest: "^US HOUSE OF REPRESENTATIVES DISTRICT 11$"}
-    - {id: H-NY-17, title: "NY-17", source: manual, link: "https://www.elections.ny.gov/"}
-    - {id: H-NY-03, title: "NY-03", source: manual, link: "https://www.elections.ny.gov/"}
-    - {id: H-PA-01, title: "PA-01", source: manual, link: "https://www.electionreturns.pa.gov/"}
-    - {id: H-PA-08, title: "PA-08", source: manual, link: "https://www.electionreturns.pa.gov/"}
-    - {id: H-PA-10, title: "PA-10", source: manual, link: "https://www.electionreturns.pa.gov/"}
-    - {id: H-WA-03, title: "WA-03", source: manual, link: "https://results.vote.wa.gov/"}
-    - {id: H-CA-13, title: "CA-13", source: manual, link: "https://electionresults.sos.ca.gov/"}
-    - {id: H-IA-01, title: "IA-01", source: manual, link: "https://electionresults.iowa.gov/"}
-    - {id: H-NE-02, title: "NE-02", source: manual, link: "https://electionresults.nebraska.gov/"}
-    - {id: H-CO-08, title: "CO-08", source: manual, link: "https://www.sos.state.co.us/pubs/elections/"}
-    - {id: H-OH-09, title: "OH-09", source: manual, link: "https://liveresults.ohiosos.gov/"}
-    - {id: H-OH-10, title: "OH-10", source: manual, link: "https://liveresults.ohiosos.gov/"}
-    - {id: H-OH-15, title: "OH-15", source: manual, link: "https://liveresults.ohiosos.gov/"}
-    - {id: H-TX-28, title: "TX-28", source: manual, link: "https://results.texas-election.com/races"}
-    - {id: H-TX-35, title: "TX-35", source: manual, link: "https://results.texas-election.com/races"}
-    - {id: H-FL-13, title: "FL-13", source: manual, link: "https://results.elections.myflorida.com/"}
-    - {id: H-FL-22, title: "FL-22", source: manual, link: "https://results.elections.myflorida.com/"}
-    - {id: H-FL-25, title: "FL-25", source: manual, link: "https://results.elections.myflorida.com/"}
-    - {id: H-KY-06, title: "KY-06", source: manual, link: "https://elect.ky.gov/results/"}
-    - {id: H-AR-02, title: "AR-02", source: manual, link: "https://www.sos.arkansas.gov/elections/"}
-    - {id: H-AL-02, title: "AL-02", source: manual, link: "https://www.sos.alabama.gov/alabama-votes"}
+  feeds: {GA: georgia, NC: nc, MN: mn}
+  # Contest-name patterns per source; {n} is the district number (01 and 1 both match).
+  patterns:
+    georgia:
+      senate: "^(US|U\\.S\\.) Senate"
+      governor: "^Governor$"
+      house: "^(US|U\\.S\\.) (House of Representatives|Representative) - District 0?{n}$"
+    nc:
+      senate: "^US SENATE$"
+      house: "^US HOUSE OF REPRESENTATIVES DISTRICT 0?{n}$"
+    mn:
+      senate: "U\\.?S\\.? Senat"
+      governor: "^Governor"
+      house: "U\\.?S\\.? Representative District 0?{n}$"
+  # Seats not up this year, for the Senate control bar (current Senate: 53 R, 47 D incl. 2 independents).
+  senate_holdovers: {D: 34, R: 31}
+  senate_control: 51            # 50 + vice president's tiebreak goes to R; shown as a note
+  house_control: 218
+  # Key races, shown by default; "All races" lists everything.
+  key:
+    senate: [GA, NC, MI, ME, OH, TX, IA, AK, NH, MN, NE]
+    governor: [GA, MI, NV, OH, AK, AZ, WI, IA, KS, OR, TX]
+    house: [NY-17, NY-03, PA-01, PA-08, PA-10, WA-03, CA-13, IA-01, NE-02, CO-08, OH-09, OH-10, OH-15,
+            TX-28, TX-35, FL-13, FL-22, FL-25, NC-01, NC-11, KY-06, AR-02, AL-02]
+  notes:
+    ME: "Maine has no state election-night feed"
+    NH: "New Hampshire has no state election-night feed"
+    WI: "Wisconsin has no state election-night feed"
+    TX: "Texas's machine feed is paid; web results only"
+  # Official results pages, used when a state has no feed. Verify before election night.
+  links:
+    AL: "https://www.sos.alabama.gov/alabama-votes"
+    AK: "https://www.elections.alaska.gov/"
+    AZ: "https://results.arizona.vote/"
+    AR: "https://www.sos.arkansas.gov/elections/"
+    CA: "https://electionresults.sos.ca.gov/"
+    CO: "https://www.sos.state.co.us/pubs/elections/"
+    CT: "https://portal.ct.gov/sots/election-services"
+    DE: "https://elections.delaware.gov/"
+    FL: "https://results.elections.myflorida.com/"
+    GA: "https://results.sos.ga.gov/"
+    HI: "https://elections.hawaii.gov/"
+    ID: "https://voteidaho.gov/"
+    IL: "https://www.elections.il.gov/"
+    IN: "https://enr.indianavoters.in.gov/"
+    IA: "https://electionresults.iowa.gov/"
+    KS: "https://sos.ks.gov/elections/elections.html"
+    KY: "https://elect.ky.gov/results/"
+    LA: "https://voterportal.sos.la.gov/graphical"
+    ME: "https://www.maine.gov/sos/cec/elec/results/index.html"
+    MD: "https://elections.maryland.gov/"
+    MA: "https://electionstats.state.ma.us/"
+    MI: "https://www.michigan.gov/sos/elections"
+    MN: "https://electionresults.sos.mn.gov/"
+    MS: "https://www.sos.ms.gov/elections-voting"
+    MO: "https://www.sos.mo.gov/elections"
+    MT: "https://electionresults.mt.gov/"
+    NE: "https://electionresults.nebraska.gov/"
+    NV: "https://silverstateelection.nv.gov/"
+    NH: "https://www.sos.nh.gov/elections"
+    NJ: "https://www.nj.gov/state/elections/"
+    NM: "https://electionresults.sos.nm.gov/"
+    NY: "https://www.elections.ny.gov/"
+    NC: "https://er.ncsbe.gov/"
+    ND: "https://results.sos.nd.gov/"
+    OH: "https://liveresults.ohiosos.gov/"
+    OK: "https://results.okelections.gov/"
+    OR: "https://results.oregonvotes.gov/"
+    PA: "https://www.electionreturns.pa.gov/"
+    RI: "https://elections.ri.gov/"
+    SC: "https://electionresults.scvotes.gov/"
+    SD: "https://electionresults.sd.gov/"
+    TN: "https://sos.tn.gov/elections"
+    TX: "https://results.texas-election.com/races"
+    UT: "https://electionresults.utah.gov/"
+    VT: "https://electionarchive.vermont.gov/"
+    VA: "https://enr.elections.virginia.gov/"
+    WA: "https://results.vote.wa.gov/"
+    WV: "https://sos.wv.gov/elections/"
+    WI: "https://elections.wi.gov/elections/election-results"
+    WY: "https://sos.wyo.gov/Elections/"
 
 # ---------------------------------------------------------------- Georgia tab
 georgia:

@@ -77,9 +77,15 @@ def load(cfg: dict, get) -> dict:
             if sw is not None:
                 sw["precincts_reporting"] += c["precincts_reporting"]
                 sw["precincts_total"] += c["precincts_total"]
+                sw.setdefault("county_results", []).append({
+                    "name": cname, "pr": c["precincts_reporting"], "pt": c["precincts_total"],
+                    "votes": {cand["name"]: cand["votes"] for cand in c["candidates"]}})
             else:
                 local_ids.setdefault(c["id"], []).append(c)
         counties[cname] = items
+
+    for c in statewide.values():
+        c["statewide"] = len(c.get("county_results") or []) == len(counties) > 1
 
     # Local contests that span several counties (e.g. a city in two counties): combined totals.
     multi = {}

@@ -98,6 +98,17 @@ def finalize(contest: dict, *, race_id: str, title: str | None = None,
     # Georgia (and a few others) require a majority; flag when the leader is under 50%.
     if majority_rule and total and not measure and vote_for == 1 and len(cands) > 2:
         race["below_majority"] = cands[0]["pct"] <= 50.0
+    # County breakdown: [[county, reporting %, [votes in the same order as race candidates]], ...]
+    county_rows = contest.get("county_results") or []
+    if len(county_rows) >= 2:
+        names = [c["name"] for c in cands]
+        rows = []
+        for cr in sorted(county_rows, key=lambda r: r["name"]):
+            pt = cr.get("pt")
+            rp = round(100 * cr["pr"] / pt, 1) if pt else None
+            rows.append([cr["name"], rp, [int(cr["votes"].get(n, 0)) for n in names]])
+        race["counties"] = rows
+        race["statewide"] = bool(contest.get("statewide"))
     if extra:
         race.update(extra)
     return race

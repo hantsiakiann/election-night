@@ -11,6 +11,7 @@
   --grn: #3f9e60;
   --oth: #7d859c;
   --np1: #9b8ad6; --np2: #4fb3b0; --np3: #d58bb3; --np4: #b0b86a;
+  --map-blank: #263050; --map-none: #1a2136; --map-hatch: #3a4566; --map-edge: #141b2d;
   --num: "Barlow Condensed", "Arial Narrow", sans-serif;
   --body: "Public Sans", system-ui, sans-serif;
   color-scheme: dark;
@@ -19,11 +20,13 @@
   :root:not([data-theme="dark"]) {
     --ground: #eef1f7; --raised: #ffffff; --line: #d5dbe8; --text: #151b2c; --muted: #5d6680;
     --peach: #d9774a; --dem: #2563c9; --rep: #c73a32; color-scheme: light;
+    --map-blank: #edf0f6; --map-none: #d9dee8; --map-hatch: #b4bdd1; --map-edge: #ffffff;
   }
 }
 :root[data-theme="light"] {
   --ground: #eef1f7; --raised: #ffffff; --line: #d5dbe8; --text: #151b2c; --muted: #5d6680;
   --peach: #d9774a; --dem: #2563c9; --rep: #c73a32; color-scheme: light;
+    --map-blank: #edf0f6; --map-none: #d9dee8; --map-hatch: #b4bdd1; --map-edge: #ffffff;
 }
 html.big { font-size: 125%; }
 
@@ -161,4 +164,67 @@ details.group[open] > summary::before { content: "–"; }
 @media (prefers-reduced-motion: reduce) {
   .race.fresh { animation: none; outline: 1px solid var(--peach); }
   .bar span { transition: none; }
+}
+
+/* ---------------------------------------------------------------- maps */
+.natmap-wrap { margin-top: 18px; }
+.mapbox { margin: 10px 0 4px; }
+.mapbox svg { width: 100%; height: auto; display: block; max-height: 62vh; }
+.usmap path.st { stroke: var(--map-edge); stroke-width: .6; }
+.usmap path.st.has { cursor: pointer; }
+.usmap path.st.has:hover, .usmap path.sel { stroke: var(--text); stroke-width: 1.6; }
+.usmap .mesh { fill: none; stroke: var(--map-edge); stroke-width: .6; pointer-events: none; }
+.tilemap .tilebg { fill: color-mix(in srgb, var(--map-blank) 45%, transparent); cursor: pointer; }
+.tilemap .tile.sel .tilebg { stroke: var(--text); stroke-width: 1.5; }
+.tilemap text { font: 600 10px var(--body); fill: var(--muted); pointer-events: none; }
+.tilemap rect[data-k^="H-"] { cursor: pointer; }
+.tilemap rect[data-k^="H-"]:hover { stroke: var(--text); stroke-width: 1; }
+.legend { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: .82rem; color: var(--muted); }
+.legend li { display: flex; align-items: center; gap: 4px; }
+.legend i { width: 14px; height: 14px; border-radius: 2px; display: inline-block; }
+.legend i.hatch { background: repeating-linear-gradient(135deg, var(--map-blank) 0 3px, var(--map-hatch) 3px 5px); }
+.legend .hint { margin-left: auto; }
+
+.balance { margin-top: 6px; }
+.balance-nums { display: flex; justify-content: space-between; gap: 12px; font-size: .95rem; }
+.balance-nums b { font: 700 1.9rem/1 var(--num); vertical-align: -3px; }
+.balance-nums .D b { color: var(--dem); } .balance-nums .R b { color: var(--rep); }
+.balance-nums .O { color: var(--muted); }
+.balance-bar { position: relative; display: flex; height: 18px; margin: 6px 0 4px; border-radius: 3px; overflow: visible; background: var(--map-blank); }
+.balance-bar span { height: 100%; min-width: 1px; }
+.balance-bar .hD { background: color-mix(in srgb, var(--dem) 45%, var(--map-blank)); }
+.balance-bar .D { background: var(--dem); }
+.balance-bar .O { background: var(--oth); }
+.balance-bar .none { background: repeating-linear-gradient(135deg, var(--map-blank) 0 4px, var(--map-hatch) 4px 6px); }
+.balance-bar .R { background: var(--rep); }
+.balance-bar .hR { background: color-mix(in srgb, var(--rep) 45%, var(--map-blank)); }
+.balance-bar .mark { position: absolute; top: -5px; bottom: -5px; width: 2px; margin-left: -1px; background: var(--text); }
+.balance-note { margin: 0; font-size: .8rem; color: var(--muted); }
+
+.listbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 22px; }
+.scope { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.scope button { font: 500 .85rem var(--body); padding: 7px 12px; border: 0; background: none; color: var(--muted); cursor: pointer; }
+.scope button[aria-pressed="true"] { background: var(--raised); color: var(--text); font-weight: 600; }
+.pick { font: 600 .85rem var(--body); padding: 6px 10px; border-radius: 999px; border: 1px solid var(--peach); background: none; color: var(--text); cursor: pointer; }
+
+.flag.btn { font: inherit; border: 1px solid var(--line); background: none; color: var(--text); cursor: pointer; }
+.flag.btn[aria-expanded="true"] { border-color: var(--peach); }
+.cmap { grid-column: 1 / -1; max-width: 620px; margin: 6px 0 4px; }
+.cmap svg { width: 100%; height: auto; display: block; }
+.cmap path { stroke: var(--map-edge); stroke-width: .5; }
+.cmap path:hover { stroke: var(--text); stroke-width: 1.4; }
+.cmapnote { margin: 4px 0; font-size: .8rem; color: var(--muted); }
+
+.maptip {
+  position: fixed; left: 0; top: 0; z-index: 20; pointer-events: none; max-width: 280px;
+  background: var(--raised); color: var(--text); border: 1px solid var(--line); border-radius: 6px;
+  padding: 8px 10px; font-size: .82rem; box-shadow: 0 6px 20px rgba(0, 0, 0, .35);
+}
+.maptip table { border-collapse: collapse; margin: 4px 0; font-variant-numeric: tabular-nums; }
+.maptip td { padding: 1px 8px 1px 0; }
+.maptip td:nth-child(n+2) { text-align: right; }
+@media (max-width: 760px) {
+  .legend .hint { margin-left: 0; }
+  .balance-nums { font-size: .8rem; }
+  .balance-nums b { font-size: 1.5rem; }
 }

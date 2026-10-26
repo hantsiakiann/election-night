@@ -21,6 +21,7 @@ import yaml
 
 from .model import finalize
 from .sources import enhanced_voting, json_map, mn_sos, ncsbe
+from .states import BY_ABBR, GOVERNOR_2026, SENATE_2026, SENATE_SPECIAL, house_districts, state_table
 
 ADAPTERS = {"enhanced_voting": enhanced_voting.load, "ncsbe": ncsbe.load,
             "mn_sos": mn_sos.load, "json_map": json_map.load}
@@ -71,30 +72,58 @@ def find_contest(contests: dict, pattern: str) -> dict | None:
 
 
 # --------------------------------------------------------------------------- tabs
+def national_race_specs(ncfg):
+    """Every 2026 Senate, governor and House race, as (group, spec) pairs."""
+    key = {g: set(v) for g, v in (ncfg.get("key") or {}).items()}
+    for abbr in SENATE_2026:
+        name = BY_ABBR[abbr][1]
+        yield "senate", {"id": f"SEN-{abbr}", "state": abbr, "state_name": name,
+                         "title": name + (" (special)" if abbr in SENATE_SPECIAL else ""),
+                         "special": abbr in SENATE_SPECIAL, "key": abbr in key.get("senate", ())}
+    for abbr in GOVERNOR_2026:
+        name = BY_ABBR[abbr][1]
+        yield "governor", {"id": f"GOV-{abbr}", "state": abbr, "state_name": name, "title": name,
+                           "key": abbr in key.get("governor", ())}
+    for abbr, name, n, at_large in house_districts():
+        label = f"{abbr}-AL" if at_large else f"{abbr}-{n:02d}"
+        yield "house", {"id": f"H-{label}", "state": abbr, "state_name": name, "district": n,
+                        "at_large": at_large, "title": label, "key": label in key.get("house", ())}
+
+
 def build_national(cfg, loaded):
-    out = {}
-    for group, races in (cfg.get("national") or {}).items():
-        rows = []
-        for r in races:
-            src = r.get("source", "manual")
-            base = {"id": r["id"], "title": r.get("title", r["id"]), "group": group,
-                    "link": r.get("link"), "note": r.get("note")}
-            data = loaded.get(src)
-            contest = find_contest(data["contests"], r["contest"]) if data and r.get("contest") else None
-            if contest:
-                race = finalize(contest, race_id=r["id"], title=base["title"], source=src,
-                                source_url=r.get("link") or data.get("page"), updated=data.get("updated"),
-                                majority_rule=bool(r.get("majority_rule", src == "georgia")))
-                race.update({k: v for k, v in base.items() if v and k not in ("title", "id")})
-            else:
-                race = dict(base, candidates=[], source=src, source_url=r.get("link"),
-                            status="no-feed" if src == "manual" else ("source-error" if src not in loaded
-                                                                     else "not-found"))
-                if src != "manual" and src in loaded:
-                    race["note"] = race.get("note") or f"No contest matching /{r['contest']}/ in {src} feed yet"
-            rows.append(race)
-        out[group] = rows
+    ncfg = cfg.get("national") or {}
+    feeds, patterns = ncfg.get("feeds") or {}, ncfg.get("patterns") or {}
+    links, notes = ncfg.get("links") or {}, ncfg.get("notes") or {}
+    out = {"senate": [], "governor": [], "house": []}
+    for group, spec in national_race_specs(ncfg):
+        abbr = spec["state"]
+        src = feeds.get(abbr, "manual")
+        pattern = (patterns.get(src) or {}).get(group)
+        meta = dict(spec, group=group, link=links.get(abbr), note=notes.get(abbr), county_state=abbr)
+        data = loaded.get(src)
+        contest = None
+        if data and pattern:
+            contest = find_contest(data["contests"], pattern.format(n=spec.get("district", "")))
+        if contest:
+            race = finalize(contest, race_id=spec["id"], title=spec["title"], source=src,
+                            source_url=links.get(abbr) or data.get("page"), updated=data.get("updated"),
+                            majority_rule=(abbr == "GA"))
+            race.update({k: v for k, v in meta.items() if v is not None and k not in ("id", "title")})
+        else:
+            status = ("no-feed" if src == "manual" or not pattern
+                      else "source-error" if src not in loaded else "not-found")
+            race = dict(meta, candidates=[], total_votes=0, source=src, source_url=links.get(abbr), status=status)
+            if status == "not-found":
+                race["note"] = "Not in the state feed yet"
+        out[group].append(race)
     return out
+
+
+def national_summary(cfg):
+    ncfg = cfg.get("national") or {}
+    return {"senate_holdovers": ncfg.get("senate_holdovers") or {},
+            "senate_control": ncfg.get("senate_control", 51),
+            "house_control": ncfg.get("house_control", 218)}
 
 
 def build_georgia(cfg, ga):
@@ -104,7 +133,7 @@ def build_georgia(cfg, ga):
     majority = bool(gcfg.get("majority_rule", True))
     for c in sorted(ga["contests"].values(), key=lambda c: c.get("ballot_order") or 0):
         race = finalize(c, race_id=f"GA-{c['id']}", source="georgia", source_url=ga["page"],
-                        updated=ga["updated"], majority_rule=majority)
+                        updated=ga["updated"], majority_rule=majority, extra={"county_state": "GA"})
         for s in sections:
             if s["_rx"].search(c["name"]):
                 s["races"].append(race)
@@ -138,7 +167,7 @@ def build_metro(cfg, ga):
                 elif leg_rx.search(c["name"]):
                     leg.append(finalize(sw, race_id=f"GA-{c['id']}", source="georgia", source_url=ga["page"],
                                         updated=ga["updated"], majority_rule=True,
-                                        extra={"scope": "district-wide"}))
+                                        extra={"scope": "district-wide", "county_state": "GA"}))
             elif c["id"] in ga.get("multi_county", {}):
                 m = ga["multi_county"][c["id"]]
                 multi.append(finalize(m, race_id=f"GA-{c['id']}", source="georgia", source_url=ga["page"],
@@ -186,7 +215,12 @@ def apply_manual(results, manual):
                                        "votes": int(c.get("votes") or 0), "incumbent": bool(c.get("incumbent"))}
                                       for c in m["candidates"]],
                        "reporting_pct": m.get("reporting_pct")}
-            keep = {k: race[k] for k in ("id", "title", "group", "link", "note", "call", "called_by", "scope") if race.get(k)}
+            # Keep identity/metadata (state, district, key flag, ...); replace only the result fields.
+            result_fields = {"candidates", "total_votes", "vote_for", "measure", "precincts_reporting",
+                             "precincts_total", "reporting_pct", "status", "source", "source_url", "updated",
+                             "margin_pct", "margin_votes", "leader", "leader_party", "below_majority",
+                             "counties", "statewide", "stale", "feed_name"}
+            keep = {k: v for k, v in race.items() if k not in result_fields and v is not None}
             race.clear()
             race.update(finalize(contest, race_id=keep["id"], title=keep.get("title"), source="manual",
                                  source_url=keep.get("link"), updated=m.get("updated")))
@@ -269,6 +303,8 @@ def main(argv=None):
         "generated_at": now_iso(),
         "refresh_seconds": cfg.get("refresh_seconds", 60),
         "sources": status,
+        "states": state_table(),
+        "summary": national_summary(cfg),
         "national": build_national(cfg, loaded),
         "georgia": build_georgia(cfg, loaded["georgia"]) if "georgia" in loaded else None,
         "metro": build_metro(cfg, loaded["georgia"]) if "georgia" in loaded else None,

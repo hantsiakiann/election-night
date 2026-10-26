@@ -34,19 +34,32 @@ def load(cfg: dict, get) -> dict:
         slot = c["_cands"].setdefault(choice, {"votes": 0, "party": row.get("Choice Party"),
                                                 "order": len(c["_cands"])})
         slot["votes"] += votes
+        county = (row.get("County") or "").strip()
+        cv = c.setdefault("_counties", {}).setdefault(county, {"votes": {}, "precincts": {}})
+        cv["votes"][choice] = cv["votes"].get(choice, 0) + votes
         if (row.get("Real Precinct") or "Y").upper() == "Y":
-            key = f"{row.get('County')}|{row.get('Precinct')}"
+            key = f"{county}|{row.get('Precinct')}"
             p = precincts.setdefault(cname, {})
             p[key] = p.get(key, 0) + votes
+            cv["precincts"][key] = cv["precincts"].get(key, 0) + votes
 
     for cname, c in contests.items():
-        cands = []
+        cands, clean = [], {}
         for choice, s in c.pop("_cands").items():
             name, party, inc = clean_candidate(choice, s["party"])
+            clean[choice] = name
             cands.append({"name": name, "party": party, "incumbent": inc,
                           "votes": s["votes"], "order": s["order"]})
         c["candidates"] = cands
+        c["county_results"] = [
+            {"name": county.title(), "pt": len(cv["precincts"]) or None,
+             "pr": sum(1 for v in cv["precincts"].values() if v > 0),
+             "votes": {clean[ch]: v for ch, v in cv["votes"].items()}}
+            for county, cv in c.pop("_counties", {}).items()]
         p = precincts.get(cname, {})
         c["precincts_total"] = len(p) or None
         c["precincts_reporting"] = sum(1 for v in p.values() if v > 0) if p else None
+    n_counties = len({cr["name"] for c in contests.values() for cr in c["county_results"]})
+    for c in contests.values():
+        c["statewide"] = len(c["county_results"]) == n_counties > 1
     return {"updated": None, "page": cfg.get("page"), "contests": contests}

@@ -1,7 +1,7 @@
 # Election Night 2026 tracker
 
-Live returns for a watch party, in three tabs: **National** (Senate, Governor, House
-watchlist), **Georgia** (every statewide and legislative contest), and **Metro Atlanta**
+Live returns for a watch party, in three tabs: **National** (all 35 Senate, 36 governor
+and 435 House races, each with a map and a seat-control bar), **Georgia** (every statewide and legislative contest), and **Metro Atlanta**
 (Fulton, DeKalb, Cobb, Gwinnett, Clayton county and city races, plus how each county is
 voting at the top of the ticket).
 
@@ -22,7 +22,7 @@ GitHub Actions run (every ~2-3 min on election night)
 | Georgia SOS (Enhanced Voting) | Georgia + Metro tabs, GA Senate/Governor | JSON/ZIP export, refreshed at most once a minute | Format confirmed from the state's media guide |
 | NC State Board of Elections | NC Senate, NC-01, NC-11 | Precinct TSV zip on S3 | Format confirmed (column layout) |
 | Minnesota SOS | MN Senate | Semicolon text files | Format long-standing; **2026 URL unconfirmed** |
-| Everything else | Rest of the watchlist | `manual` until a feed is wired | See below |
+| Everything else | All other states | Link to official results; numbers via `manual.yml` | See below |
 
 States like Maine, New Hampshire and Wisconsin don't publish statewide election-night
 results at all, and Texas's machine-readable feed is a paid subscription. Those races show
@@ -47,14 +47,14 @@ results at all, and Texas's machine-readable feed is a paid subscription. Those 
   in `config/races.yml`. The state usually posts a zero-vote file beforehand, so you can
   confirm it works by running the workflow and opening the Georgia tab.
 - **Check contest names.** Locally, run `python -m fetcher.run --list-contests` to print
-  every contest name each feed publishes, and adjust the `contest:` patterns in
-  `config/races.yml` if a national race shows "No contest matching…".
+  every contest name each feed publishes, and adjust `national.patterns` in
+  `config/races.yml` if a race with a feed shows "Not in the state feed yet".
 - **Minnesota URL.** Confirm the media-file path on the MN SOS results site; update
   `sources.mn.base` if it moved.
 - **Add a state feed** if you find one: if it's JSON, add a `json_map` source (template
-  in `config/races.yml`; `python -m fetcher.probe <url>` prints the feed's fields), then
-  point that state's races at it.
-- **Edit the watchlist** freely; races are just entries under `national:`.
+  in `config/races.yml`; `python -m fetcher.probe <url>` prints the feed's fields), add the
+  state to `national.feeds`, and give the source its contest-name `patterns`.
+- **Key races** (shown by default for the House) are listed under `national.key`.
 
 ## Election night
 
@@ -67,6 +67,18 @@ results at all, and Texas's machine-readable feed is a paid subscription. Those 
 
 If a feed goes down mid-night, its races keep the last numbers received and are marked
 "Feed down".
+
+## Maps
+
+- **Senate and Governor:** a U.S. map colored by who leads each race (deeper color = wider
+  margin; hatched = no votes yet), plus a bar counting seats toward control. The Senate bar
+  includes the 65 seats not up this year (34 D, 31 R).
+- **House:** a tile map with one square per district, grouped by state. It's a tile map
+  rather than real district shapes because several states redrew their lines for 2026.
+- **County maps:** every statewide race whose feed reports by county (Georgia and North
+  Carolina) gets a county map; Senate and Governor open automatically. Hover or tap a
+  county for its numbers.
+- Click a state (or a House square) to filter the list to that state.
 
 ## Page features
 
