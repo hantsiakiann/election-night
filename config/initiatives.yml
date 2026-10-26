@@ -235,38 +235,38 @@ measures:
     yes_means: Bars the legislature from enacting a state property tax.
 
   # ---- Virginia
-  - id: VA-REPRO
+  - id: VA-Q1
     state: VA
-    title: Reproductive freedom amendment
-    name: Abortion rights
+    title: Question 1
+    name: Reproductive freedom amendment
     yes_means: Establishes a constitutional right to reproductive decisions, including abortion up to fetal viability.
-  - id: VA-MARRIAGE
+  - id: VA-Q2
     state: VA
-    title: Marriage amendment
-    name: Repeal same-sex marriage ban
+    title: Question 2
+    name: Marriage amendment
     yes_means: Removes the constitutional ban on same-sex marriage and affirms that two adults may marry regardless of sex.
-  - id: VA-VOTING
+  - id: VA-Q3
     state: VA
-    title: Voting rights amendment
-    name: Restore voting rights after prison
+    title: Question 3
+    name: Voting rights amendment
     yes_means: Establishes a right to vote and restores voting rights automatically when a person is released from prison for a felony.
 
   # ---- Washington
-  - id: WA-INCTAX
+  - id: WA-I1
     state: WA
-    title: Income tax repeal initiative
+    title: Initiative 1
+    name: Parental rights in public schools
+    yes_means: Restores parental notice and record-review rights changed by a 2025 law.
+  - id: WA-I638
+    state: WA
+    title: Initiative 638
+    name: Girls' sports
+    yes_means: Requires sex-based eligibility for girls' school sports.
+  - id: WA-I645
+    state: WA
+    title: Initiative 645
     name: Repeal the tax on income over $1 million
     yes_means: Repeals the 9.9% tax on income over $1 million and bars future income taxes.
-  - id: WA-PARENTS
-    state: WA
-    title: Parental rights initiative
-    name: Parents' rights in public schools
-    yes_means: Restores parental notice and record-review rights changed by a 2025 law.
-  - id: WA-SPORTS
-    state: WA
-    title: Girls' sports initiative
-    name: School sports by sex
-    yes_means: Requires sex-based eligibility for girls' school sports.
 
   # ---- Wisconsin
   - id: WI-DISCRIM

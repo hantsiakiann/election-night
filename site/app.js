@@ -4,6 +4,8 @@
   const PARTY = { D: "var(--dem)", R: "var(--rep)", L: "var(--lib)", G: "var(--grn)", I: "var(--ind)", C: "var(--con)", WF: "var(--wf)" };
   const NEUTRAL = ["var(--np1)", "var(--np2)", "var(--np3)", "var(--np4)", "var(--oth)"];
   const GROUP_NAMES = { senate: "Senate", governor: "Governor", house: "House" };
+  const NAT_ORDER = ["senate", "house", "governor"];
+  const GA_TABS = { statewide: "Statewide", senate: "State Senate", house: "State House" };
   const PARTY_NAME = { D: "Democrat", R: "Republican", L: "Libertarian", G: "Green", I: "Independent", C: "Constitution", WF: "Working Families" };
   const partyName = (p) => PARTY_NAME[p] || p || "";
   // Before votes arrive: Democrat and Republican first, other parties next, independents last.
@@ -20,7 +22,7 @@
     set(k, v) { try { localStorage.setItem("en26:" + k, JSON.stringify(v)); } catch { /* storage unavailable */ } },
   };
   const state = {
-    data: null, tab: "national", natGroup: store.get("natGroup", "senate"), county: store.get("county", null),
+    data: null, tab: "national", natGroup: store.get("natGroup", "senate"), county: store.get("county", null), gaTab: "statewide",
     scope: store.get("scope", { senate: "all", governor: "all", house: "key" }), pick: null,
     houseView: store.get("houseView", "grid"), pickDist: null,
     senView: store.get("senView", "up"),
@@ -41,10 +43,12 @@
     if (["national", "initiatives", "georgia", "metro"].includes(tab)) state.tab = tab;
     if (tab === "national" && sub && GROUP_NAMES[sub]) state.natGroup = sub;
     if (tab === "metro" && sub) state.county = decodeURIComponent(sub);
+    if (tab === "georgia") state.gaTab = GA_TABS[sub] ? sub : "statewide";
   }
   function writeHash() {
     const sub = state.tab === "national" ? "/" + state.natGroup
-      : state.tab === "metro" && state.county ? "/" + encodeURIComponent(state.county) : "";
+      : state.tab === "metro" && state.county ? "/" + encodeURIComponent(state.county)
+      : state.tab === "georgia" && state.gaTab !== "statewide" ? "/" + state.gaTab : "";
     history.replaceState(null, "", "#" + state.tab + sub);
   }
 
@@ -197,7 +201,7 @@
     </div>`;
   }
   function renderNational(d) {
-    const groups = Object.keys(d.national || {});
+    const groups = Object.keys(d.national || {}).sort((a, b) => NAT_ORDER.indexOf(a) - NAT_ORDER.indexOf(b));
     if (!groups.includes(state.natGroup)) state.natGroup = groups[0];
     const g = state.natGroup, all = d.national[g] || [];
     const keyCount = all.filter((r) => r.key).length;
@@ -251,9 +255,16 @@
       `<p class="cmapnote">Only North Carolina's measures come from a live feed here; the rest show "No feed" with a link to official results unless numbers are entered by hand.</p>`;
   }
   function renderGeorgia(d) {
-    if (!d.georgia) return notice("Georgia results aren't flowing yet.",
+    const t = state.gaTab || "statewide";
+    const pills = `<div class="subnav" role="group" aria-label="Georgia races">${Object.entries(GA_TABS).map(([k, v]) =>
+      `<button data-gatab="${k}" aria-pressed="${t === k}">${v}</button>`).join("")}</div>`;
+    if (!d.georgia) return pills + notice("Georgia results aren't flowing yet.",
       "They start once the Secretary of State posts the November 3 election and its ID is set in <code>config/races.yml</code>.");
-    return d.georgia.sections.map((s) => group(s.name, s.races, { collapsible: true, collapsed: s.collapsed, key: "ga:" + s.name })).join("");
+    const secs = d.georgia.sections.filter((s) => (s.tab || "statewide") === t);
+    const body = t === "statewide"
+      ? secs.map((s) => group(s.name, s.races, { collapsible: true, collapsed: s.collapsed, key: "ga:" + s.name })).join("")
+      : secs.map((s) => group(s.name, s.races)).join("");
+    return pills + (body || notice(state.q ? "No races here match the search." : `No ${GA_TABS[t]} contests in the feed yet.`));
   }
   function renderMetro(d) {
     if (!d.metro) return notice("Metro Atlanta results come from the same Georgia feed, which isn't flowing yet.");
@@ -447,7 +458,8 @@
     state.tab = next.dataset.tab; render(); next.focus();
   });
   $("#panel").addEventListener("click", (e) => {
-    const n = e.target.closest("[data-nat]"), c = e.target.closest("[data-county]");
+    const n = e.target.closest("[data-nat]"), c = e.target.closest("[data-county]"), gt = e.target.closest("[data-gatab]");
+    if (gt) { state.gaTab = gt.dataset.gatab; render(); return; }
     const sc = e.target.closest("[data-scope]"), tg = e.target.closest("[data-cmap-toggle]");
     const hv = e.target.closest("[data-hview]"), sv = e.target.closest("[data-sview]");
     if (sv) { state.senView = sv.dataset.sview; store.set("senView", state.senView); render(); return; }

@@ -119,7 +119,7 @@ candidates sort by votes. The header has a light/dark switch.
 
 Closest-first sort, search by race or candidate, a brief
 highlight on rows whose count just moved, a "Leader under 50%" flag for Georgia's runoff
-rule, and deep links (`#georgia`, `#metro/Fulton`, `#national/senate`).
+rule, and deep links (`#national/senate`, `#georgia`, `#georgia/senate`, `#georgia/house`, `#metro/Fulton`, `#initiatives`).
 
 ## Testing offline
 

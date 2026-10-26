@@ -192,7 +192,8 @@ def build_initiatives(cfg, loaded, measures):
 
 def build_georgia(cfg, ga):
     gcfg = cfg.get("georgia") or {}
-    sections = [dict(name=s["name"], collapsed=bool(s.get("collapsed")), races=[], _rx=re.compile(s["match"], re.I))
+    sections = [dict(name=s["name"], collapsed=bool(s.get("collapsed")), tab=s.get("tab", "statewide"), races=[],
+                     _rx=re.compile(s["match"], re.I))
                 for s in gcfg.get("sections", [{"name": "All", "match": ".*"}])]
     majority = bool(gcfg.get("majority_rule", True))
     for c in sorted(ga["contests"].values(), key=lambda c: c.get("ballot_order") or 0):
