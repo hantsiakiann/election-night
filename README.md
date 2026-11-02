@@ -65,6 +65,8 @@ results at all, and Texas's machine-readable feed is a paid subscription. Those 
 - **Forecaster ratings.** Every race card shows the Cook, Sabato's Crystal Ball and Inside
   Elections rating, from `config/ratings.yml`. The "Update forecaster ratings" workflow rebuilds
   it daily from 270toWin's forecaster maps through Election Day (or run it by hand).
+  Updates published before 270toWin copies them go in `config/ratings_overrides.yml`, which
+  takes precedence (it holds Sabato's Nov 2 final ratings and the late Cook and Inside Elections changes).
 
 ## Election night
 

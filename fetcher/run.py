@@ -449,7 +449,19 @@ def main(argv=None):
     if not rat_path.exists():
         rat_path = Path("config/ratings.yml")
     if rat_path.exists():
-        cfg.setdefault("national", {})["ratings"] = yaml.safe_load(rat_path.read_text()) or {}
+        ratings = yaml.safe_load(rat_path.read_text()) or {}
+        # hand-entered updates newer than 270toWin's copies (config/ratings_overrides.yml) win
+        ov_path = rat_path.with_name("ratings_overrides.yml")
+        ov = (yaml.safe_load(ov_path.read_text()) or {}) if ov_path.exists() else {}
+        for group in ("senate", "governor", "house"):
+            for rid, by in (ov.get(group) or {}).items():
+                ratings.setdefault(group, {}).setdefault(rid, {}).update(by)
+        ratings.setdefault("as_of", {}).update(ov.get("as_of") or {})
+        order = ["Cook", "Sabato", "Inside Elections"]
+        for group in ("senate", "governor", "house"):
+            for rid, by in (ratings.get(group) or {}).items():
+                ratings[group][rid] = {k: by[k] for k in order if k in by}
+        cfg.setdefault("national", {})["ratings"] = ratings
 
     previous = load_previous(args.previous, None if args.fixtures else cfg.get("site_url"))
     # Enhanced Voting sites (GA, UT): reuse an election ID found by an earlier run, so a run whose

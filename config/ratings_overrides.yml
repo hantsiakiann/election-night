@@ -1,0 +1,213 @@
+_note: 'Rating updates published after 270toWin''s copies were last refreshed. Applied on top of config/ratings.yml by the fetcher. Sources: Sabato''s Crystal Ball final ratings (Nov 2, 2026); Inside Elections
+  via Roll Call (Oct 31, 2026); Cook Political Report (Oct 29-30, 2026, via Newsweek and Cook''s final governors ratings).'
+as_of:
+  Sabato house: Nov. 2, 2026
+  Sabato senate: Nov. 2, 2026
+  Sabato governor: Nov. 2, 2026
+  Inside Elections house: Oct. 31, 2026
+  Inside Elections senate: Oct. 31, 2026
+  Inside Elections governor: Oct. 31, 2026
+  Cook house: Oct. 30, 2026
+  Cook senate: Oct. 30, 2026
+  Cook governor: Oct. 29, 2026
+senate:
+  SEN-FL:
+    Cook: Likely R
+  SEN-GA:
+    Inside Elections: Likely D
+  SEN-IA:
+    Inside Elections: Toss-up
+    Sabato: Lean R
+  SEN-KS:
+    Inside Elections: Toss-up
+    Sabato: Lean D
+  SEN-LA:
+    Inside Elections: Likely R
+    Sabato: Lean R
+  SEN-ME:
+    Sabato: Lean D
+  SEN-MN:
+    Sabato: Likely D
+  SEN-MS:
+    Inside Elections: Likely R
+  SEN-NE:
+    Inside Elections: Tilt R
+    Cook: Lean R
+  SEN-OH:
+    Inside Elections: Tilt D
+    Sabato: Lean D
+  SEN-SC:
+    Inside Elections: Tilt R
+  SEN-TX:
+    Inside Elections: Tilt D
+    Sabato: Lean D
+governor:
+  GOV-AK:
+    Inside Elections: Tilt D
+    Sabato: Likely D
+  GOV-AZ:
+    Cook: Likely D
+  GOV-GA:
+    Inside Elections: Tilt D
+    Sabato: Lean D
+  GOV-IA:
+    Inside Elections: Lean D
+  GOV-MI:
+    Inside Elections: Lean D
+  GOV-NH:
+    Sabato: Lean R
+  GOV-NV:
+    Inside Elections: Toss-up
+    Sabato: Lean D
+  GOV-OH:
+    Inside Elections: Tilt D
+  GOV-OR:
+    Inside Elections: Tilt D
+  GOV-TN:
+    Inside Elections: Likely R
+  GOV-TX:
+    Inside Elections: Tilt R
+  GOV-WI:
+    Inside Elections: Tilt D
+    Cook: Lean D
+house:
+  H-AL-02:
+    Inside Elections: Tilt R
+    Sabato: Lean D
+  H-AZ-02:
+    Inside Elections: Lean R
+  H-AZ-06:
+    Inside Elections: Tilt D
+  H-CA-06:
+    Inside Elections: Likely D
+  H-CA-45:
+    Inside Elections: Solid D
+  H-CO-03:
+    Sabato: Lean R
+  H-CO-04:
+    Inside Elections: Likely R
+  H-CO-05:
+    Inside Elections: Toss-up
+    Cook: Toss-up
+    Sabato: Lean D
+  H-CO-08:
+    Inside Elections: Tilt D
+  H-FL-07:
+    Cook: Lean R
+    Sabato: Lean R
+  H-FL-09:
+    Cook: Lean R
+    Sabato: Lean R
+  H-FL-14:
+    Inside Elections: Tilt D
+    Sabato: Lean D
+  H-FL-22:
+    Inside Elections: Toss-up
+    Sabato: Lean D
+  H-FL-25:
+    Inside Elections: Tilt D
+  H-IN-05:
+    Cook: Lean R
+  H-KS-02:
+    Inside Elections: Likely R
+  H-KY-06:
+    Inside Elections: Toss-up
+    Sabato: Lean R
+  H-LA-05:
+    Sabato: Safe R
+  H-MI-01:
+    Sabato: Likely R
+  H-MI-04:
+    Inside Elections: Toss-up
+    Sabato: Lean D
+  H-MI-07:
+    Sabato: Lean D
+  H-MI-10:
+    Sabato: Lean D
+  H-MO-02:
+    Sabato: Lean R
+  H-MT-01:
+    Inside Elections: Toss-up
+    Sabato: Lean D
+  H-NC-01:
+    Inside Elections: Tilt D
+  H-NC-03:
+    Inside Elections: Likely R
+  H-NC-05:
+    Cook: Likely R
+  H-NC-09:
+    Inside Elections: Likely R
+    Cook: Likely R
+    Sabato: Likely R
+  H-NC-11:
+    Inside Elections: Tilt D
+  H-NC-13:
+    Inside Elections: Likely R
+    Sabato: Likely R
+  H-NH-02:
+    Inside Elections: Solid D
+  H-NJ-02:
+    Inside Elections: Likely R
+    Cook: Likely R
+    Sabato: Lean R
+  H-NV-02:
+    Inside Elections: Tilt R
+  H-NY-17:
+    Sabato: Lean R
+  H-OH-01:
+    Inside Elections: Lean D
+  H-OH-07:
+    Inside Elections: Tilt D
+    Sabato: Lean D
+  H-OH-09:
+    Inside Elections: Tilt D
+    Cook: Lean D
+    Sabato: Lean D
+  H-OH-10:
+    Inside Elections: Lean R
+  H-OH-15:
+    Inside Elections: Lean R
+  H-OK-05:
+    Inside Elections: Likely R
+  H-PA-01:
+    Inside Elections: Toss-up
+    Cook: Toss-up
+    Sabato: Lean D
+  H-PA-08:
+    Cook: Lean D
+  H-PA-10:
+    Inside Elections: Tilt D
+  H-SC-01:
+    Inside Elections: Tilt R
+    Cook: Toss-up
+  H-TN-05:
+    Sabato: Likely R
+  H-TN-09:
+    Inside Elections: Likely R
+    Sabato: Likely R
+  H-TX-09:
+    Inside Elections: Lean R
+  H-TX-15:
+    Inside Elections: Tilt D
+  H-TX-28:
+    Inside Elections: Lean D
+  H-TX-35:
+    Inside Elections: Toss-up
+    Sabato: Lean D
+  H-VA-01:
+    Inside Elections: Tilt R
+    Sabato: Lean D
+  H-VA-02:
+    Inside Elections: Tilt D
+  H-VA-05:
+    Inside Elections: Lean R
+    Sabato: Lean D
+  H-VA-07:
+    Inside Elections: Solid D
+  H-WA-05:
+    Inside Elections: Likely R
+    Cook: Likely R
+  H-WI-01:
+    Inside Elections: Lean R
+  H-WI-03:
+    Inside Elections: Tilt D
