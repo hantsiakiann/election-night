@@ -388,7 +388,8 @@ def carry_forward(results, previous, failed_sources):
     for group in (results.get("national") or {}).values():
         for i, race in enumerate(group):
             p = prev.get(race["id"])
-            if race.get("source") in failed_sources and p and p.get("candidates"):
+            # only carry forward real numbers; before any votes, keep the placeholder as is
+            if race.get("source") in failed_sources and p and p.get("total_votes"):
                 group[i] = dict(p, stale=True, status="stale")
     for st in (results.get("initiatives") or {}).get("states", []):
         for i, race in enumerate(st["measures"]):
