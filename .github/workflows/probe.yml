@@ -24,6 +24,7 @@ jobs:
           mkdir out && i=0
           for u in $URLS; do
             i=$((i+1))
+            for try in 1 2 3; do code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36" "$u"); [ "$code" = "202" ] && sleep 5 || break; done
             { echo "### $u"; curl -sSL --compressed -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36" -H "Accept: */*" -H "Accept-Language: en-US,en;q=0.9" --max-time 60 -o "out/body$i" -w "status=%{http_code} type=%{content_type} size=%{size_download} final=%{url_effective}\n" "$u" || echo "curl failed"; } >> out/summary.txt
             head -c 8000000 "out/body$i" > "out/$i.txt" 2>/dev/null || true; rm -f "out/body$i"
           done
