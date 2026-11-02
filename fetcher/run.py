@@ -130,6 +130,14 @@ def build_national(cfg, loaded, prelim=None):
                             source_url=links.get(abbr) or data.get("page"), updated=data.get("updated"),
                             majority_rule=(abbr == "GA"))
             race.update({k: v for k, v in meta.items() if v is not None and k not in ("id", "title")})
+            # Some feeds give only a last name (Florida's governor tickets: "Donalds"); use the full
+            # name from the preliminary candidate list when exactly one last name matches.
+            known = prelim.get(spec["id"]) or []
+            for cand in race["candidates"]:
+                if " " not in cand["name"].strip():
+                    hits = [k for k in known if k["name"].split()[-1].lower() == cand["name"].strip().lower()]
+                    if len(hits) == 1:
+                        cand["name"] = hits[0]["name"]
         else:
             status = ("no-feed" if src == "manual" or not pattern
                       else "source-error" if src not in loaded else "not-found")

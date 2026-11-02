@@ -129,6 +129,8 @@ def fl_dos(cfg: dict, get) -> dict:
             c["precincts_total"] += pt
             cr = c["_counties"].setdefault(county, {"name": county, "pr": 0, "pt": 0, "votes": {}})
             cr["pr"], cr["pt"] = pr, pt
+        if (r.get("PartyCode") or "").strip().upper() == "WRI":  # write-in candidates
+            continue
         label = _space(r.get("CanNameLast"))
         yn = _yes_no(label) if r.get("RaceCode") == "AMD" else None
         if (r.get("CanNameMiddle") or "").strip() == "/":  # governor ticket: "Donalds / Avila"
