@@ -181,6 +181,6 @@ if __name__ == "__main__":
     (HERE / "nc" / "results_pct_20261103.zip").write_bytes(nc(a.reporting, a.seed))
     (HERE / "mn").mkdir(exist_ok=True)
     (HERE / "mn" / "ussenate.txt").write_bytes(mn(a.reporting))
-    for f in ("ushouse.txt", "stateoffice.txt"):
+    for f in ("ushouse.txt", "governor.txt"):
         (HERE / "mn" / f).write_bytes(b"")
     print(f"fixtures written at reporting={a.reporting}")

@@ -14,10 +14,12 @@ refresh_seconds: 60          # how often each open browser re-checks for new dat
 sources:
   georgia:
     type: enhanced_voting
-    # Set this once the Secretary of State posts the Nov 3 election (usually days before).
-    # It's the last part of the URL at results.sos.ga.gov/results/public/Georgia/elections/<ID>
+    # Leave election_id blank: the fetcher looks up the Nov 3 election in the state's election
+    # list (results.sos.ga.gov/results/public/api/jurisdictions/Georgia) by election_date. Set it
+    # only to force a specific election (the last part of .../Georgia/elections/<ID>).
     # Past IDs for reference: GeneralPrimary51926, 08252026SpecialElectionRunoff
     election_id: ""
+    election_date: "2026-11-03"
     base: "https://results.sos.ga.gov/cdn/results/Georgia"
     page: "https://results.sos.ga.gov/results/public/Georgia/elections/{election_id}"
   nc:
@@ -26,9 +28,9 @@ sources:
     page: "https://er.ncsbe.gov/?election_dt=11/03/2026&county_id=0&office=FED&contest=0"
   mn:
     type: mn_sos
-    # Unverified for 2026: confirm the path on the MN SOS results site on election day.
+    # Verified Nov 1, 2026: zero-vote files are posted at this path (governor is governor.txt).
     base: "https://electionresultsfiles.sos.mn.gov/20261103/"
-    files: [ussenate.txt, ushouse.txt, stateoffice.txt]
+    files: [ussenate.txt, ushouse.txt, governor.txt]
     page: "https://electionresults.sos.mn.gov/"
   # Template for any state that turns out to publish JSON (see fetcher/sources/json_map.py):
   # az:

@@ -19,8 +19,15 @@ def load(cfg: dict, get) -> dict:
     base = cfg["base"].rstrip("/") + "/"
     contests: dict[str, dict] = {}
     seen = set()
+    errors, loaded = [], 0
     for fname in cfg.get("files", []):
-        raw = get(base + fname)
+        # one missing file (e.g. a renamed office file) shouldn't take down the others
+        try:
+            raw = get(base + fname)
+        except Exception as e:
+            errors.append(f"{fname}: {e}")
+            continue
+        loaded += 1
         rows = csv.reader(io.StringIO(raw.decode("latin-1")), delimiter=";", quotechar="|")
         for r in rows:
             if len(r) < 16:
@@ -39,6 +46,8 @@ def load(cfg: dict, get) -> dict:
                 c["precincts_reporting"] += int(r[11] or 0)
                 c["precincts_total"] += int(r[12] or 0)
             name, party, inc = clean_candidate(r[7], r[10])
+            if "Lt Governor" in cname and " and " in name:  # "Amy Klobuchar and Ben Schierer" -> governor only
+                name = name.split(" and ")[0].strip()
             slot = c["_cands"].setdefault(r[6], {"name": name, "party": party,
                                                   "incumbent": inc or r[9].strip().upper() in ("I", "Y", "TRUE"),
                                                   "votes": 0, "order": len(c["_cands"])})
@@ -46,4 +55,6 @@ def load(cfg: dict, get) -> dict:
     for c in contests.values():
         c["candidates"] = list(c.pop("_cands").values())
         c.pop("_units")
+    if not loaded:
+        raise RuntimeError("; ".join(errors))
     return {"updated": None, "page": cfg.get("page"), "contests": contests}

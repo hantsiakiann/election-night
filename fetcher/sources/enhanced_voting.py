@@ -41,11 +41,29 @@ def _decode(raw: bytes) -> dict:
     return json.loads(raw.decode("utf-8-sig"))
 
 
+def discover_election_id(base: str, date: str, get) -> str:
+    """Find the election's public ID from the state's election list, so nobody has to paste it
+    into the config on election night. base is .../cdn/results/<Jurisdiction>."""
+    from urllib.parse import urlsplit
+    parts = urlsplit(base)
+    jurisdiction = parts.path.rstrip("/").rsplit("/", 1)[-1]
+    url = f"{parts.scheme}://{parts.netloc}/results/public/api/jurisdictions/{jurisdiction}"
+    info = json.loads(get(url).decode("utf-8-sig"))
+    matches = [e for e in info.get("elections") or [] if e.get("electionDate") == date]
+    # prefer the main general election over specials held the same day
+    matches.sort(key=lambda e: ("general" not in (e.get("publicElectionId") or "").lower(), e.get("publicElectionId") or ""))
+    if not matches:
+        raise RuntimeError(f"{jurisdiction} hasn't posted the {date} election yet")
+    return matches[0]["publicElectionId"]
+
+
 def load(cfg: dict, get) -> dict:
+    base = cfg.get("base", "https://results.sos.ga.gov/cdn/results/Georgia").rstrip("/")
     eid = (cfg.get("election_id") or "").strip()
     if not eid:
-        raise RuntimeError("georgia.election_id not set in config/races.yml")
-    base = cfg.get("base", "https://results.sos.ga.gov/cdn/results/Georgia").rstrip("/")
+        if not cfg.get("election_date"):
+            raise RuntimeError("set election_id (or election_date for auto-discovery) in config/races.yml")
+        eid = discover_election_id(base, cfg["election_date"], get)
     raw = None
     errors = []
     for ext in ("zip", "json"):
@@ -106,6 +124,7 @@ def load(cfg: dict, get) -> dict:
         multi[cid] = merged
 
     page = cfg.get("page", "https://results.sos.ga.gov/results/public/Georgia/elections/{election_id}")
+
     return {
         "updated": data.get("createdAt"),
         "election_name": data.get("electionName"),
