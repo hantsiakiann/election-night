@@ -451,6 +451,14 @@ def main(argv=None):
     if rat_path.exists():
         cfg.setdefault("national", {})["ratings"] = yaml.safe_load(rat_path.read_text()) or {}
 
+    previous = load_previous(args.previous, None if args.fixtures else cfg.get("site_url"))
+    # Enhanced Voting sites (GA, UT): reuse an election ID found by an earlier run, so a run whose
+    # election-list request gets blocked can still go straight to the results export.
+    for name, scfg in (cfg.get("sources") or {}).items():
+        prev_id = (((previous or {}).get("sources") or {}).get(name) or {}).get("election_id")
+        if scfg.get("type") == "enhanced_voting" and not scfg.get("election_id") and prev_id:
+            scfg["election_id"] = prev_id
+
     loaded, status = {}, {}
     for name, scfg in (cfg.get("sources") or {}).items():
         t0 = time.time()
@@ -458,6 +466,7 @@ def main(argv=None):
             loaded[name] = ADAPTERS[scfg["type"]](scfg, make_getter(args.fixtures, name))
             status[name] = {"ok": True, "updated": loaded[name].get("updated"),
                             "contests": len(loaded[name]["contests"]), "page": loaded[name].get("page"),
+                            "election_id": loaded[name].get("election_id"),
                             "seconds": round(time.time() - t0, 1)}
         except Exception as e:
             status[name] = {"ok": False, "error": str(e)[:300], "page": scfg.get("page")}
@@ -489,7 +498,7 @@ def main(argv=None):
         "metro": build_metro(cfg, loaded["georgia"]) if "georgia" in loaded else build_metro_placeholder(cfg, ga_prelim),
     }
     failed = {n for n, s in status.items() if not s["ok"]}
-    carry_forward(results, load_previous(args.previous, None if args.fixtures else cfg.get("site_url")), failed)
+    carry_forward(results, previous, failed)
     apply_manual(results, manual)
 
     out = Path(args.out)

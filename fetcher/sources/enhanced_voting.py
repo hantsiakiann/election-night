@@ -129,6 +129,7 @@ def load(cfg: dict, get) -> dict:
         "updated": data.get("createdAt"),
         "election_name": data.get("electionName"),
         "page": page.format(election_id=eid),
+        "election_id": eid,
         "contests": {c["id"]: c for c in statewide.values()},
         "counties": counties,
         "multi_county": multi,
