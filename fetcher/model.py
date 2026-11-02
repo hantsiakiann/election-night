@@ -21,6 +21,10 @@ PARTY_MAP = {
     "con": "C", "cst": "C", "constitution": "C", "c": "C",
     "wfp": "WF", "wf": "WF", "working families": "WF",
     "np": "", "nonpartisan": "", "non-partisan": "", "": "",
+    "lpf": "L",            # Libertarian Party of Florida
+    "pet": "I",            # Nebraska: on the ballot by petition (independent)
+    "non": "", "wri": "",  # nonpartisan / write-in
+    "lmn": "LMN",          # Legal Marijuana Now
 }
 
 # Trailing party marker inside a candidate name: "Jane Doe (Rep)" / "Jane Doe - Dem"

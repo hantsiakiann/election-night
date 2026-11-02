@@ -20,12 +20,14 @@ import requests
 import yaml
 
 from .model import finalize, norm_party
-from .sources import enhanced_voting, json_map, mn_sos, ncsbe
+from .sources import enhanced_voting, json_map, mn_sos, ncsbe, state_feeds
 from .states import BY_ABBR, GOVERNOR_2026, SENATE_2026, SENATE_SPECIAL, house_districts, state_table
 
 ADAPTERS = {"enhanced_voting": enhanced_voting.load, "ncsbe": ncsbe.load,
-            "mn_sos": mn_sos.load, "json_map": json_map.load}
-UA = "election-night-tracker (watch party; github.com/hantsiakiann)"
+            "mn_sos": mn_sos.load, "json_map": json_map.load,
+            "results_csv": state_feeds.results_csv, "fl_dos": state_feeds.fl_dos, "ca_sos": state_feeds.ca_sos,
+            "nist1500": state_feeds.nist1500, "la_sos": state_feeds.la_sos}
+UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36"
 
 
 def now_iso() -> str:

@@ -39,39 +39,46 @@ measures:
     title: Proposition 3
     name: Make top income tax rates permanent
     yes_means: Permanently extends the higher income tax rates on high earners that are set to expire after 2030, for schools and health care.
+    pattern: "^Proposition 3:"
   - id: CA-P39
     state: CA
     title: Proposition 39
     name: Voter ID and citizenship verification
     yes_means: Requires photo ID to vote in person, ID numbers on mail ballots, and citizenship checks of voter rolls. Constitutional amendment.
+    pattern: "^Proposition 39:"
   - id: CA-P40
     state: CA
     title: Proposition 40
     name: One-time billionaire tax
     yes_means: Imposes a one-time tax of up to 5% on the net worth of residents with more than $1 billion, for health, education and food programs.
     note: Conflicts with Props 41 and 42; if both sides pass, the one with more Yes votes generally prevails.
+    pattern: "^Proposition 40:"
   - id: CA-P41
     state: CA
     title: Proposition 41
     name: Audits and spending limit for special taxes
     yes_means: Requires audits of programs funded by new state special taxes and bars exempting new taxes from the state spending limit. Constitutional amendment.
     note: Conflicts with Prop 40.
+    pattern: "^Proposition 41:"
   - id: CA-P42
     state: CA
     title: Proposition 42
     name: Ban taxes on savings and personal assets
     yes_means: Prohibits new state taxes on personal property such as savings, investments and retirement accounts, and limits retroactive taxes. Constitutional amendment.
     note: Conflicts with Prop 40.
+    pattern: "^Proposition 42:"
   - id: CA-P43
     state: CA
     title: Proposition 43
     name: Two-thirds vote for local special taxes
     yes_means: Requires two-thirds voter approval for local special taxes placed by initiative and bars property taxes by initiative.
+    pattern: "^Proposition 43:"
   - id: CA-P45
     state: CA
     title: Proposition 45
     name: Faster environmental review (CEQA)
     yes_means: Sets deadlines and limits on CEQA environmental review and court challenges for designated housing, water, energy and transportation projects.
+    pattern: "^Proposition 45:"
 
   # ---- Colorado
   - id: CO-A81
@@ -117,6 +124,7 @@ measures:
     name: Property tax relief
     yes_means: Raises homestead exemptions, caps yearly assessment growth on non-homestead property at 5%, and limits local property-tax spending.
     needs: 60%
+    pattern: "Homestead Exemption; Lower Cap"
 
   # ---- Idaho
   - id: ID-P1
@@ -214,6 +222,7 @@ measures:
     title: Issue 3
     name: Photo ID to vote
     yes_means: Requires a photo ID to vote.
+    pattern: "^State Issue 3\\b"
 
   # ---- South Dakota
   - id: SD-J
@@ -221,11 +230,13 @@ measures:
     title: Amendment J
     name: Citizenship requirement for voting
     yes_means: Limits state and local voting to U.S. citizens.
+    pattern: "^Constitutional Amendment J:"
   - id: SD-L
     state: SD
     title: Amendment L
     name: 60% to amend the constitution
     yes_means: Requires 60% voter approval for constitutional amendments.
+    pattern: "^Constitutional Amendment L:"
 
   # ---- Tennessee
   - id: TN-A2

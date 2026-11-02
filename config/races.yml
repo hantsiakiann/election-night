@@ -32,6 +32,48 @@ sources:
     base: "https://electionresultsfiles.sos.mn.gov/20261103/"
     files: [ussenate.txt, ushouse.txt, governor.txt]
     page: "https://electionresults.sos.mn.gov/"
+  # Added Nov 1, 2026; each checked against the state's zero-vote Nov 3 file (fetcher/sources/state_feeds.py).
+  ut:
+    type: enhanced_voting        # same platform and export format as Georgia
+    base: "https://electionresults.utah.gov/cdn/results/Utah"
+    election_id: ""
+    election_date: "2026-11-03"  # resolves to General11032026
+    page: "https://electionresults.utah.gov/results/public/Utah/elections/{election_id}"
+  oh:
+    type: nist1500               # NIST SP 1500-100 XML (marked IsTest until election night)
+    url: "https://liveresults.ohiosos.gov/Api/v1/download?filename=VSSC1622XmlFileBlob"
+    page: "https://liveresults.ohiosos.gov/"
+  fl:
+    type: fl_dos
+    url: "https://flelectionfiles.floridados.gov/enightfilespublic/20261103_ElecResultsFL.txt"
+    page: "https://results.elections.myflorida.com/"
+  ca:
+    type: ca_sos
+    urls:
+      - "https://media.sos.ca.gov/media/governor.json"
+      - "https://media.sos.ca.gov/media/us-rep.json"
+      - "https://media.sos.ca.gov/media/ballot-measures.json"
+    page: "https://electionresults.sos.ca.gov/"
+  la:
+    type: la_sos
+    base: "https://voterportal.sos.la.gov/ElectionResults/ElectionResults/Data?blob=20261103/"
+    page: "https://voterportal.sos.la.gov/graphical"
+  ne:
+    type: results_csv
+    urls: ["https://electionresults.nebraska.gov/resultsCSV.aspx?text=All&type=All&map=CTY"]
+    page: "https://electionresults.nebraska.gov/"
+  sd:
+    type: results_csv
+    urls:
+      - "https://electionresults.sd.gov/resultsCSV.aspx?text=All&type=SWR&map=CTY"
+      - "https://electionresults.sd.gov/resultsCSV.aspx?text=All&type=BQ&map=CTY"
+    page: "https://electionresults.sd.gov/"
+  nm:
+    type: results_csv
+    urls:
+      - "https://electionresults.sos.nm.gov/resultsCSV.aspx?text=All&type=FED&map=CTY"
+      - "https://electionresults.sos.nm.gov/resultsCSV.aspx?text=All&type=SW&map=CTY"
+    page: "https://electionresults.sos.nm.gov/"
   # Template for any state that turns out to publish JSON (see fetcher/sources/json_map.py):
   # az:
   #   type: json_map
@@ -51,7 +93,7 @@ sources:
 # A state's races pull from a feed only if the state is listed under `feeds`; all others
 # show a link to `links` and can be filled in through config/manual.yml.
 national:
-  feeds: {GA: georgia, NC: nc, MN: mn}
+  feeds: {GA: georgia, NC: nc, MN: mn, UT: ut, OH: oh, FL: fl, CA: ca, LA: la, NE: ne, SD: sd, NM: nm}
   # Contest-name patterns per source; {n} is the district number (01 and 1 both match).
   patterns:
     georgia:
@@ -65,6 +107,34 @@ national:
       senate: "U\\.?S\\.? Senat"
       governor: "^Governor"
       house: "U\\.?S\\.? Representative District 0?{n}$"
+    ut:
+      house: "^U\\.S\\. House District 0?{n}$"
+    oh:
+      senate: "^U\\.S\\. Senator$"
+      governor: "^Governor and Lieutenant Governor$"
+      house: "^Representative to Congress - District 0?{n}$"
+    fl:
+      senate: "^United States Senator$"
+      governor: "^Governor and Lieutenant Governor$"
+      house: "^Representative in Congress, District 0?{n}$"
+    ca:
+      governor: "^Governor$"
+      house: "^United States Representative District 0?{n}$"
+    la:
+      senate: "^U\\. ?S\\. Senator$"
+      house: "^U\\. ?S\\. Representative -- 0?{n}(st|nd|rd|th) Congressional District$"
+    ne:
+      senate: "^For United States Senator"
+      governor: "^For Governor"
+      house: "^For Representative in Congress.* District 0?{n}$"
+    sd:
+      senate: "^United States Senator$"
+      governor: "^Governor and Lieutenant Governor$"
+      house: "^United States Representative$"
+    nm:
+      senate: "^United States Senator$"
+      governor: "^Governor and Lieutenant Governor$"
+      house: "^United States Representative District 0?{n}$"
   # Seats not up this year, for the Senate control bar (current Senate: 53 R, 47 D incl. 2 independents).
   senate_holdovers: {D: 34, R: 31}
   # Party holding each governorship now (Oct 2026). Seats not up in 2026 count toward the
