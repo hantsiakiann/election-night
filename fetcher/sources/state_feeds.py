@@ -11,6 +11,7 @@ votes, order, incumbent}], optional "county_results": [{name, pr, pt, votes: {ca
   nist1500     Ohio's NIST SP 1500-100 / IEEE 1622 XML (VSSC1622XmlFileBlob)
   la_sos       Louisiana Secretary of State graphical-results JSON blobs
   vt_sos       Vermont Secretary of State static results JSON (town-level)
+  pa_sos       Pennsylvania Department of State election-returns API (JSON; governor by county)
   or_sos       Oregon Secretary of State CSV exports (ASP.NET postback on ResultsExport.aspx)
 """
 import csv
@@ -36,7 +37,7 @@ def _name(s: str, ticket: bool = False) -> str:
     if s.isupper() and len(s) > 3:
         s = " ".join(w if re.fullmatch(r"(I|II|III|IV|JR|SR)\.?", w)
                      else re.sub(r"[A-Z]+", lambda m: m.group(0).capitalize(), w) for w in s.split())
-        s = re.sub(r"\b(Jr|Sr)\b", lambda m: m.group(1).capitalize(), s)
+        s = re.sub(r"\b(JR|SR|Jr|Sr)\b", lambda m: m.group(1).capitalize(), s)
     return s
 
 
@@ -413,3 +414,87 @@ def _or_parse(raw: bytes, contests: dict) -> None:
         yn = _yes_no(label)
         party = (r.get("NominatingParty") or "").split(",")[0]
         _add(c, r.get("CandidateID") or label, yn or label, "" if yn else norm_party(party), _int(r.get("CandidateVotes")))
+
+
+# ----------------------------------------------------------------------------- Pennsylvania
+PA_API = "https://www.electionreturns.pa.gov/api/ElectionReturn"
+
+
+def _pa_json(raw: bytes):
+    """The API returns JSON encoded as a JSON string (sometimes twice)."""
+    d = json.loads(raw.decode("utf-8-sig"))
+    while isinstance(d, str):
+        d = json.loads(d) if d.strip() else {}
+    return d
+
+
+def pa_sos(cfg: dict, get) -> dict:
+    """GetSummaryData has the statewide races (governor), GetOfficeData/GetOfficeDetails each
+    district race for an office (11 = U.S. House), GetCountyBreak one race by county. No
+    precinct counts are published."""
+    api = cfg.get("api", PA_API).rstrip("/")
+    eid = str(cfg.get("election_id") or "").strip()
+    if not eid:
+        latest = _pa_json(get(f"{api}/GetLatestElection?methodName=GetLatestElection"))
+        hit = [e for e in latest or [] if str(e.get("ElectionDate", "")).startswith(cfg["election_date"])]
+        if not hit:
+            raise RuntimeError(f"Pennsylvania hasn't posted the {cfg['election_date']} election yet")
+        eid = str(hit[0]["ElectionID"])
+    q = f"electionid={eid}&electiontype=G&isactive=1"
+    contests = {}
+
+    def add_cands(name, cands, county=None):
+        c = contests.get(name)
+        if c is None:
+            c = contests[name] = _new_contest(name)
+        for x in cands or []:
+            if (x.get("CandidateName") or "").strip().lower().startswith("write"):
+                continue
+            nm = _name(x.get("CandidateName") or "")
+            _add(c, nm, nm, norm_party(x.get("PartyName")), _int(x.get("Votes")), county)
+        return c
+
+    def items(v):  # values arrive as [ {key: [...]}, ... ] or {key: [...]}
+        for block in (v if isinstance(v, list) else [v]):
+            if isinstance(block, dict):
+                yield from block.items()
+
+    summary = _pa_json(get(f"{api}/GET?methodName=GetSummaryData&{q}")).get("Election") or {}
+    statewide = set()
+    for office, entries in summary.items():
+        for e in entries or []:
+            if isinstance(e, dict) and "Statewide" in e:
+                add_cands(office, e["Statewide"])
+                statewide.add(office)
+                if cfg.get("county_breaks", True):
+                    _pa_counties(contests[office], get, f"{api}/GetCountyBreak?officeId={e.get('OfficeId')}"
+                                 f"&districtId={e.get('DistrictId')}&methodName=GetCountyBreak&{q}", items)
+    for oid in cfg.get("offices", [11]):
+        data = _pa_json(get(f"{api}/GetOfficeData?officeId={oid}&methodName=GetOfficeDetails&{q}")).get("Election") or {}
+        for office, entries in data.items():
+            for key, races in items(entries):
+                for race in races or []:
+                    dist = _space(race.get("District") or key.split("$$")[0])
+                    name = f"{office} - {dist}"
+                    add_cands(name, race.get("Candidates"))
+                    n = re.match(r"(\d+)", dist)
+                    if oid == 11 and n and int(n.group(1)) in cfg.get("house_county_breaks", []):
+                        _pa_counties(contests[name], get, f"{api}/GetCountyBreak?officeId={oid}"
+                                     f"&districtId={race.get('DistrictId')}&methodName=GetCountyBreak&{q}", items)
+    return {"updated": None, "page": cfg.get("page", "https://www.electionreturns.pa.gov/"),
+            "election_id": eid, "contests": _finish(contests, statewide_names=statewide)}
+
+
+def _pa_counties(c, get, url, items):
+    try:
+        cb = _pa_json(get(url))
+    except Exception:  # county detail is a bonus; statewide totals still count
+        return
+    names = {v["name"] for v in c["_cands"].values()}
+    for county, cands in items(next(iter((cb.get("Election") or {}).values()), [])):
+        cn = county.title()
+        cr = c["_counties"].setdefault(cn, {"name": cn, "pr": 0, "pt": 0, "votes": {}})
+        for x in cands or []:
+            nm = _name(x.get("CandidateName") or "")
+            if nm in names:
+                cr["votes"][nm] = cr["votes"].get(nm, 0) + _int(x.get("Votes"))

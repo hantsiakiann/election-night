@@ -85,6 +85,12 @@ sources:
     election_date_text: "11/3/2026"
     targets: ["ctl00$MainContent$Statewide", "ctl00$MainContent$Governor"]
     page: "https://results.oregonvotes.gov/"
+  pa:
+    type: pa_sos
+    election_date: "2026-11-03"   # resolves to election 117 via GetLatestElection
+    offices: [11]                 # U.S. House; the governor comes from the statewide summary
+    house_county_breaks: [1, 7, 8, 10]   # county detail for the competitive districts
+    page: "https://www.electionreturns.pa.gov/"
   # Template for any state that turns out to publish JSON (see fetcher/sources/json_map.py):
   # az:
   #   type: json_map
@@ -104,7 +110,7 @@ sources:
 # A state's races pull from a feed only if the state is listed under `feeds`; all others
 # show a link to `links` and can be filled in through config/manual.yml.
 national:
-  feeds: {GA: georgia, NC: nc, MN: mn, UT: ut, OH: oh, FL: fl, CA: ca, LA: la, NE: ne, SD: sd, NM: nm, VT: vt, OR: or}
+  feeds: {GA: georgia, NC: nc, MN: mn, UT: ut, OH: oh, FL: fl, CA: ca, LA: la, NE: ne, SD: sd, NM: nm, VT: vt, OR: or, PA: pa}
   # Contest-name patterns per source; {n} is the district number (01 and 1 both match).
   patterns:
     georgia:
@@ -153,6 +159,9 @@ national:
       senate: "^US Senator$"
       governor: "^Governor$"
       house: "^US Representative, 0?{n}(st|nd|rd|th) District$"
+    pa:
+      governor: "^Governor$"
+      house: "^Representative in Congress - 0?{n}(st|nd|rd|th) Congressional District$"
   # Seats not up this year, for the Senate control bar (current Senate: 53 R, 47 D incl. 2 independents).
   senate_holdovers: {D: 34, R: 31}
   # Party holding each governorship now (Oct 2026). Seats not up in 2026 count toward the
