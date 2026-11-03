@@ -13,6 +13,7 @@ votes, order, incumbent}], optional "county_results": [{name, pr, pt, votes: {ca
   vt_sos       Vermont Secretary of State static results JSON (town-level)
   pa_sos       Pennsylvania Department of State election-returns API (JSON; governor by county)
   in_sos       Indiana Election Division ENR JSON (settings.json gives the file version)
+  tx_sos       Texas Secretary of State election-night JSON (County.json, summed to the state)
   or_sos       Oregon Secretary of State CSV exports (ASP.NET postback on ResultsExport.aspx)
 """
 import csv
@@ -526,3 +527,49 @@ def in_sos(cfg: dict, get) -> dict:
                 _add(c, label, label, norm_party(x.get("PARTY")), _int(x.get("TOTAL")))
     return {"updated": updated, "page": cfg.get("page", "https://enr.indianavoters.in.gov/"),
             "contests": _finish(contests)}
+
+
+# ----------------------------------------------------------------------------- Texas
+TX_DATA = "https://results.texas-election.com/static/data"
+
+
+def tx_sos(cfg: dict, get) -> dict:
+    """Version.json -> ElectionConstants_<v>.json lists elections by year and type; each
+    election's Version.json names the current snapshot folder, whose County.json has every
+    race by county with all candidates (OfficeSummary.json only keeps the top two)."""
+    base = cfg.get("base", TX_DATA).rstrip("/")
+    load = lambda url: json.loads(get(url).decode("utf-8-sig"))
+    eid = str(cfg.get("election_id") or "").strip()
+    if not eid:
+        v = load(f"{base}/Version.json")["___versionNo"]
+        info = load(f"{base}/ElectionConstants_{v}.json").get("electionInfo") or {}
+        year, match = cfg["election_date"][:4], cfg.get("election_name", "GENERAL ELECTION")
+        hits = [k for k, e in ((info.get(year) or {}).get("G") or {}).items() if match.upper() in (e.get("N") or "").upper()]
+        if not hits:
+            raise RuntimeError(f"Texas hasn't posted the {cfg['election_date']} election yet")
+        eid = hits[0]
+    snap = load(f"{base}/election/{eid}/Version.json")["___versionNo"]
+    folder = f"{base}/election/{eid}/{snap}"
+    home = load(f"{folder}/Home.json")
+    counties = load(f"{folder}/County.json")
+    contests = {}
+    for fips, county in counties.items():
+        cn = _name(county.get("N") or fips)
+        for race in (county.get("Races") or {}).values():
+            name = _space(race.get("ON"))
+            c = contests.get(name)
+            if c is None:
+                c = contests[name] = _new_contest(name)
+            for x in sorted((race.get("C") or {}).values(), key=lambda x: x.get("O") or 0):
+                if (x.get("P") or "").upper() in ("W", "WRI"):
+                    continue
+                nm, party, inc = clean_candidate(_name(x.get("N") or "", ticket=True), x.get("P"))
+                _add(c, x.get("id") or nm, nm, party, _int(x.get("V")), cn, incumbent=inc)
+    pr = (home.get("PrecinctsReporting") or {})
+    out = _finish(contests)
+    for c in out.values():
+        if c.get("county_results") and len(c["county_results"]) == len(counties):
+            c["statewide"] = True
+            c["precincts_reporting"], c["precincts_total"] = _int(pr.get("PR")), _int(pr.get("PT"))
+    return {"updated": home.get("LastUpdatedTime"), "page": cfg.get("page", "https://results.texas-election.com/races"),
+            "election_id": eid, "contests": out}

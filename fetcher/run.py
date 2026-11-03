@@ -28,7 +28,7 @@ ADAPTERS = {"enhanced_voting": enhanced_voting.load, "ncsbe": ncsbe.load,
             "results_csv": state_feeds.results_csv, "fl_dos": state_feeds.fl_dos, "ca_sos": state_feeds.ca_sos,
             "nist1500": state_feeds.nist1500, "la_sos": state_feeds.la_sos,
             "vt_sos": state_feeds.vt_sos, "or_sos": state_feeds.or_sos, "pa_sos": state_feeds.pa_sos,
-            "in_sos": state_feeds.in_sos}
+            "in_sos": state_feeds.in_sos, "tx_sos": state_feeds.tx_sos}
 UA = "election-night-tracker (watch party; github.com/hantsiakiann)"
 
 

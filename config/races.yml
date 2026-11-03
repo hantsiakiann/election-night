@@ -91,6 +91,11 @@ sources:
     election_date_text: "11/3/2026"
     targets: ["ctl00$MainContent$Statewide", "ctl00$MainContent$Governor"]
     page: "https://results.oregonvotes.gov/"
+  tx:
+    type: tx_sos
+    election_date: "2026-11-03"   # picks the 2026 general from the state's election list once posted
+    election_name: "GENERAL ELECTION"
+    page: "https://results.texas-election.com/races"
   in:
     type: in_sos
     base: "https://enr.indianavoters.in.gov/site/data"
@@ -122,7 +127,7 @@ sources:
 # A state's races pull from a feed only if the state is listed under `feeds`; all others
 # show a link to `links` and can be filled in through config/manual.yml.
 national:
-  feeds: {GA: georgia, NC: nc, MN: mn, UT: ut, OH: oh, FL: fl, CA: ca, LA: la, NE: ne, SD: sd, NM: nm, VT: vt, OR: or, PA: pa, ID: id, IN: in}
+  feeds: {GA: georgia, NC: nc, MN: mn, UT: ut, OH: oh, FL: fl, CA: ca, LA: la, NE: ne, SD: sd, NM: nm, VT: vt, OR: or, PA: pa, ID: id, IN: in, TX: tx}
   # Contest-name patterns per source; {n} is the district number (01 and 1 both match).
   patterns:
     georgia:
@@ -175,6 +180,10 @@ national:
       senate: "^United States Senator$"
       governor: "^Governor$"
       house: "^United States Representative District 0?{n}$"
+    tx:
+      senate: "^U\\. ?S\\. SENATOR"
+      governor: "^GOVERNOR$"
+      house: "^U\\. ?S\\. REPRESENTATIVE DISTRICT 0?{n}$"
     in:
       house: "^United States Representative, \\(0?{n}\\) District$"
     pa:

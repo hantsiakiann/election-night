@@ -31,6 +31,7 @@ GitHub Actions run (every ~2-3 min on election night)
 | Nebraska, South Dakota, New Mexico SOS | Senate, Governor, House, SD amendments | Results CSV exports | Nov 3 files verified |
 | Vermont SOS | VT Governor, House | Town-level JSON, with counties | Nov 3 files verified Nov 3 |
 | Oregon SOS | OR Senate, Governor, House | CSV export (form postback), statewide totals only | Nov 3 export verified Nov 3 |
+| Texas SOS | TX Senate, Governor, House | Election-night JSON by county | Format verified on 2024 files; starts when the state posts 2026 |
 | Indiana Election Division | IN House | ENR JSON files (no precinct counts) | Nov 3 files verified Nov 3 |
 | Pennsylvania DOS | PA Governor (with counties), House | Election-returns JSON API (no precinct counts) | Nov 3 data verified Nov 3 |
 | Everything else | All other states | Link to official results; numbers via `manual.yml` | See below |
