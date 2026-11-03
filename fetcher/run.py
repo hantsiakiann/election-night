@@ -30,13 +30,15 @@ ADAPTERS = {"enhanced_voting": enhanced_voting.load, "ncsbe": ncsbe.load,
             "vt_sos": state_feeds.vt_sos, "or_sos": state_feeds.or_sos, "pa_sos": state_feeds.pa_sos,
             "in_sos": state_feeds.in_sos, "tx_sos": state_feeds.tx_sos}
 UA = "election-night-tracker (watch party; github.com/hantsiakiann)"
+# Some state sites refuse anything that doesn't look like a browser (a source can set user_agent: browser).
+BROWSER_UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36"
 
 
 def now_iso() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
 
 
-def make_getter(fixtures: Path | None, source: str):
+def make_getter(fixtures: Path | None, source: str, user_agent: str | None = None):
     if fixtures:
         folder = fixtures / source
 
@@ -49,7 +51,7 @@ def make_getter(fixtures: Path | None, source: str):
         return get
 
     session = requests.Session()
-    session.headers["User-Agent"] = UA
+    session.headers["User-Agent"] = BROWSER_UA if user_agent == "browser" else (user_agent or UA)
 
     def get(url: str) -> bytes:
         last = None
@@ -485,7 +487,7 @@ def main(argv=None):
     for name, scfg in (cfg.get("sources") or {}).items():
         t0 = time.time()
         try:
-            loaded[name] = ADAPTERS[scfg["type"]](scfg, make_getter(args.fixtures, name))
+            loaded[name] = ADAPTERS[scfg["type"]](scfg, make_getter(args.fixtures, name, scfg.get("user_agent")))
             status[name] = {"ok": True, "updated": loaded[name].get("updated"),
                             "contests": len(loaded[name]["contests"]), "page": loaded[name].get("page"),
                             "election_id": loaded[name].get("election_id"),

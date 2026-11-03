@@ -95,6 +95,7 @@ sources:
     type: tx_sos
     election_date: "2026-11-03"   # picks the 2026 general from the state's election list once posted
     election_name: "GENERAL ELECTION"
+    user_agent: browser           # the Texas site returns 403 to non-browser user agents
     page: "https://results.texas-election.com/races"
   in:
     type: in_sos
