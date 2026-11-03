@@ -239,8 +239,8 @@
             <button class="mapback" data-unpick-all>Back to U.S. map</button><span class="mapcap" id="mapcap"></span></div>` : ""}
         </div>
         <ul class="legend">
-          <li><i style="background:var(--dem)"></i><i style="background:color-mix(in srgb, var(--dem) 55%, var(--map-blank))"></i>Democrat leads</li>
-          <li><i style="background:var(--rep)"></i><i style="background:color-mix(in srgb, var(--rep) 55%, var(--map-blank))"></i>Republican leads</li>
+          <li><i style="background:var(--dem)"></i><i style="background:color-mix(in srgb, var(--dem) 20%, var(--map-blank))"></i>Democrat leads</li>
+          <li><i style="background:var(--rep)"></i><i style="background:color-mix(in srgb, var(--rep) 20%, var(--map-blank))"></i>Republican leads</li>
           <li><i style="background:var(--map-blank)"></i>No results yet</li>
           ${g === "house" ? "" : `<li><i class="flipsw"></i>Striped: seat would flip</li>
           ${g === "senate" && state.senView === "up" ? `<li><i style="background:var(--map-none)"></i>No Senate race this year</li>`

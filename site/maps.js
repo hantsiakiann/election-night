@@ -22,7 +22,7 @@ window.ENMaps = (() => {
   // ---------------------------------------------------------------- colors
   function leadFill(base, margin, called) {
     if (called) return base;
-    const strength = Math.round(55 + Math.min(1, Math.abs(margin) / 20) * 40); // 55%..95%
+    const strength = Math.round(20 + Math.min(1, Math.abs(margin) / 20) * 75); // 20%..95%
     return `color-mix(in srgb, ${base} ${strength}%, var(--map-blank))`;
   }
   // Party currently ahead: the called winner, the vote leader, or a party settled before Election Day.
