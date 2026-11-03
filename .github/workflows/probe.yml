@@ -8,6 +8,10 @@ on:
       urls:
         description: "Space-separated URLs"
         required: true
+      postback:
+        description: "Optional: URL followed by ASP.NET __EVENTTARGET values (runs tools/probe_postback.py)"
+        required: false
+        default: ""
 
 permissions:
   contents: write
@@ -29,6 +33,15 @@ jobs:
             head -c 8000000 "out/body$i" > "out/$i.txt" 2>/dev/null || true; rm -f "out/body$i"
           done
           cat out/summary.txt
+      - uses: actions/checkout@v4
+        if: ${{ inputs.postback != '' }}
+        with:
+          path: repo
+      - name: Postback
+        if: ${{ inputs.postback != '' }}
+        env:
+          PB: ${{ inputs.postback }}
+        run: python repo/tools/probe_postback.py $PB || true
       - name: Save to probe branch
         run: |
           cd out && git init -q -b probe && git add -A
