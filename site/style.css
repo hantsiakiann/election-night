@@ -216,9 +216,10 @@ details.group[open] > summary::before { content: "–"; }
 
 .flag.btn { font: inherit; border: 1px solid var(--line); background: none; color: var(--text); cursor: pointer; }
 .flag.btn[aria-expanded="true"] { border-color: var(--peach); }
-.cmap { grid-column: 1 / -1; max-width: 620px; margin: 6px 0 4px; }
+.cmap { grid-column: 1 / -1; width: 100%; max-width: 620px; margin: 6px auto 4px; justify-self: center; text-align: center; }
 .cmap svg { width: 100%; height: auto; display: block; }
-.cmap path { stroke: var(--map-edge); stroke-width: .5; }
+.cmap path[data-k] { stroke: var(--map-edge); stroke-width: .5; }
+.cmap path[data-k]:hover { cursor: default; }
 .cmapnote { margin: 4px 0; font-size: .8rem; color: var(--muted); }
 
 .maptip {
