@@ -12,6 +12,7 @@ votes, order, incumbent}], optional "county_results": [{name, pr, pt, votes: {ca
   la_sos       Louisiana Secretary of State graphical-results JSON blobs
   vt_sos       Vermont Secretary of State static results JSON (town-level)
   pa_sos       Pennsylvania Department of State election-returns API (JSON; governor by county)
+  in_sos       Indiana Election Division ENR JSON (settings.json gives the file version)
   or_sos       Oregon Secretary of State CSV exports (ASP.NET postback on ResultsExport.aspx)
 """
 import csv
@@ -498,3 +499,30 @@ def _pa_counties(c, get, url, items):
             nm = _name(x.get("CandidateName") or "")
             if nm in names:
                 cr["votes"][nm] = cr["votes"].get(nm, 0) + _int(x.get("Votes"))
+
+
+# ----------------------------------------------------------------------------- Indiana
+def in_sos(cfg: dict, get) -> dict:
+    """settings.json names the current election and the version suffix of the data files;
+    OffCatC_<category>_<version>.json holds every race in an office category (1005 = U.S.
+    House) with statewide totals. No precinct counts per race."""
+    base = cfg.get("base", "https://enr.indianavoters.in.gov/site/data").rstrip("/")
+    root = lambda raw: (lambda d: d.get("Root", d))(json.loads(raw.decode("utf-8-sig")))
+    settings = root(get(f"{base}/settings.json"))
+    if cfg.get("election_date_text") and settings.get("CurrentElection") != cfg["election_date_text"]:
+        raise RuntimeError(f"Indiana's site is on the {settings.get('CurrentElection')} election")
+    ver = settings.get("VersionType") or ""
+    contests, updated = {}, settings.get("WriteTime")
+    for cat in cfg.get("categories", [1005]):
+        data = root(get(f"{base}/OffCatC_{cat}_{ver}.json"))
+        updated = data.get("WriteTime") or updated
+        for race in ((data.get("StatewideSummary") or {}).get("Race") or []):
+            name = _space(race.get("SubSortOrder") or race.get("OFFICE_TITLE"))
+            c = contests[name] = _new_contest(name, _int(race.get("NumofSeats")) or 1)
+            for x in ((race.get("Candidates") or {}).get("Candidate") or []):
+                label = _space(x.get("NAME_ON_BALLOT"))
+                if not label or "(W/I)" in label:
+                    continue
+                _add(c, label, label, norm_party(x.get("PARTY")), _int(x.get("TOTAL")))
+    return {"updated": updated, "page": cfg.get("page", "https://enr.indianavoters.in.gov/"),
+            "contests": _finish(contests)}

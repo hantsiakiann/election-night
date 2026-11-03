@@ -91,6 +91,12 @@ sources:
     election_date_text: "11/3/2026"
     targets: ["ctl00$MainContent$Statewide", "ctl00$MainContent$Governor"]
     page: "https://results.oregonvotes.gov/"
+  in:
+    type: in_sos
+    base: "https://enr.indianavoters.in.gov/site/data"
+    election_date_text: "11/03/2026"
+    categories: [1005]            # U.S. House (no Senate or governor race in Indiana this year)
+    page: "https://enr.indianavoters.in.gov/"
   pa:
     type: pa_sos
     election_date: "2026-11-03"   # resolves to election 117 via GetLatestElection
@@ -116,7 +122,7 @@ sources:
 # A state's races pull from a feed only if the state is listed under `feeds`; all others
 # show a link to `links` and can be filled in through config/manual.yml.
 national:
-  feeds: {GA: georgia, NC: nc, MN: mn, UT: ut, OH: oh, FL: fl, CA: ca, LA: la, NE: ne, SD: sd, NM: nm, VT: vt, OR: or, PA: pa, ID: id}
+  feeds: {GA: georgia, NC: nc, MN: mn, UT: ut, OH: oh, FL: fl, CA: ca, LA: la, NE: ne, SD: sd, NM: nm, VT: vt, OR: or, PA: pa, ID: id, IN: in}
   # Contest-name patterns per source; {n} is the district number (01 and 1 both match).
   patterns:
     georgia:
@@ -169,6 +175,8 @@ national:
       senate: "^United States Senator$"
       governor: "^Governor$"
       house: "^United States Representative District 0?{n}$"
+    in:
+      house: "^United States Representative, \\(0?{n}\\) District$"
     pa:
       governor: "^Governor$"
       house: "^Representative in Congress - 0?{n}(st|nd|rd|th) Congressional District$"
