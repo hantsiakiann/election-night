@@ -39,6 +39,12 @@ sources:
     election_id: ""
     election_date: "2026-11-03"  # resolves to General11032026
     page: "https://electionresults.utah.gov/results/public/Utah/elections/{election_id}"
+  id:
+    type: enhanced_voting        # same platform as Georgia and Utah; jurisdiction "id"
+    base: "https://results.voteidaho.gov/cdn/results/id"
+    election_id: ""
+    election_date: "2026-11-03"  # resolves to nov2026
+    page: "https://results.voteidaho.gov/results/public/id/elections/{election_id}"
   oh:
     type: nist1500               # NIST SP 1500-100 XML (marked IsTest until election night)
     url: "https://liveresults.ohiosos.gov/Api/v1/download?filename=VSSC1622XmlFileBlob"
@@ -110,7 +116,7 @@ sources:
 # A state's races pull from a feed only if the state is listed under `feeds`; all others
 # show a link to `links` and can be filled in through config/manual.yml.
 national:
-  feeds: {GA: georgia, NC: nc, MN: mn, UT: ut, OH: oh, FL: fl, CA: ca, LA: la, NE: ne, SD: sd, NM: nm, VT: vt, OR: or, PA: pa}
+  feeds: {GA: georgia, NC: nc, MN: mn, UT: ut, OH: oh, FL: fl, CA: ca, LA: la, NE: ne, SD: sd, NM: nm, VT: vt, OR: or, PA: pa, ID: id}
   # Contest-name patterns per source; {n} is the district number (01 and 1 both match).
   patterns:
     georgia:
@@ -159,6 +165,10 @@ national:
       senate: "^US Senator$"
       governor: "^Governor$"
       house: "^US Representative, 0?{n}(st|nd|rd|th) District$"
+    id:
+      senate: "^United States Senator$"
+      governor: "^Governor$"
+      house: "^United States Representative District 0?{n}$"
     pa:
       governor: "^Governor$"
       house: "^Representative in Congress - 0?{n}(st|nd|rd|th) Congressional District$"

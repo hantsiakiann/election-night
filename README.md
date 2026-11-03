@@ -22,6 +22,7 @@ GitHub Actions run (every ~2-3 min on election night)
 | Georgia SOS (Enhanced Voting) | Georgia + Metro tabs, GA Senate/Governor | JSON/ZIP export, refreshed at most once a minute | Format confirmed from the state's media guide |
 | NC State Board of Elections | NC Senate, NC-01, NC-11 | Precinct TSV zip on S3 | Format confirmed (column layout) |
 | Minnesota SOS | MN Senate, Governor, House | Semicolon text files | Nov 3 files verified Nov 1 |
+| Idaho SOS | ID Senate, Governor, House, Prop 1 | Enhanced Voting export (same as Georgia) | Nov 3 election verified Nov 3 |
 | Utah Lt. Governor | UT House | Enhanced Voting export (same as Georgia) | Nov 3 election verified |
 | Ohio SOS | OH Senate, Governor, House, Issue 3 | NIST 1500-100 XML | Verified; numbers ignored while the file is marked as a test |
 | Florida Division of Elections | FL Senate, Governor, House, Amendment 3 | Tab-separated, by county | Nov 3 file verified |

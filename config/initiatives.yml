@@ -132,6 +132,7 @@ measures:
     title: Proposition 1
     name: Reproductive Freedom and Privacy Act (abortion rights)
     yes_means: Creates a state law right to reproductive decisions, allowing abortion to be regulated after viability except in medical emergencies.
+    pattern: "^Proposition 1:"
 
   # ---- Indiana
   - id: IN-PQ1
