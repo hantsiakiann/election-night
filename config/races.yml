@@ -74,6 +74,17 @@ sources:
       - "https://electionresults.sos.nm.gov/resultsCSV.aspx?text=All&type=FED&map=CTY"
       - "https://electionresults.sos.nm.gov/resultsCSV.aspx?text=All&type=SW&map=CTY"
     page: "https://electionresults.sos.nm.gov/"
+  vt:
+    type: vt_sos
+    election_date: "2026-11-03"
+    groups: [federal, stateWide]
+    page: "https://electionresults.vermont.gov/"
+  or:
+    type: or_sos
+    url: "https://results.oregonvotes.gov/ResultsExport.aspx"
+    election_date_text: "11/3/2026"
+    targets: ["ctl00$MainContent$Statewide", "ctl00$MainContent$Governor"]
+    page: "https://results.oregonvotes.gov/"
   # Template for any state that turns out to publish JSON (see fetcher/sources/json_map.py):
   # az:
   #   type: json_map
@@ -93,7 +104,7 @@ sources:
 # A state's races pull from a feed only if the state is listed under `feeds`; all others
 # show a link to `links` and can be filled in through config/manual.yml.
 national:
-  feeds: {GA: georgia, NC: nc, MN: mn, UT: ut, OH: oh, FL: fl, CA: ca, LA: la, NE: ne, SD: sd, NM: nm}
+  feeds: {GA: georgia, NC: nc, MN: mn, UT: ut, OH: oh, FL: fl, CA: ca, LA: la, NE: ne, SD: sd, NM: nm, VT: vt, OR: or}
   # Contest-name patterns per source; {n} is the district number (01 and 1 both match).
   patterns:
     georgia:
@@ -135,6 +146,13 @@ national:
       senate: "^United States Senator$"
       governor: "^Governor and Lieutenant Governor$"
       house: "^United States Representative District 0?{n}$"
+    vt:
+      governor: "^GOVERNOR$"
+      house: "^REPRESENTATIVE TO CONGRESS$"
+    or:
+      senate: "^US Senator$"
+      governor: "^Governor$"
+      house: "^US Representative, 0?{n}(st|nd|rd|th) District$"
   # Seats not up this year, for the Senate control bar (current Senate: 53 R, 47 D incl. 2 independents).
   senate_holdovers: {D: 34, R: 31}
   # Party holding each governorship now (Oct 2026). Seats not up in 2026 count toward the

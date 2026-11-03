@@ -10,6 +10,8 @@ votes, order, incumbent}], optional "county_results": [{name, pr, pt, votes: {ca
   ca_sos       California Secretary of State media JSON (statewide/district totals plus counties)
   nist1500     Ohio's NIST SP 1500-100 / IEEE 1622 XML (VSSC1622XmlFileBlob)
   la_sos       Louisiana Secretary of State graphical-results JSON blobs
+  vt_sos       Vermont Secretary of State static results JSON (town-level)
+  or_sos       Oregon Secretary of State CSV exports (ASP.NET postback on ResultsExport.aspx)
 """
 import csv
 import io
@@ -32,7 +34,8 @@ def _name(s: str, ticket: bool = False) -> str:
     if ticket:
         s = re.split(r"\s+(?:and|AND|&|/)\s+", s)[0]
     if s.isupper() and len(s) > 3:
-        s = " ".join(w if re.fullmatch(r"(I|II|III|IV|JR|SR)\.?", w) else w.capitalize() for w in s.split())
+        s = " ".join(w if re.fullmatch(r"(I|II|III|IV|JR|SR)\.?", w)
+                     else re.sub(r"[A-Z]+", lambda m: m.group(0).capitalize(), w) for w in s.split())
         s = re.sub(r"\b(Jr|Sr)\b", lambda m: m.group(1).capitalize(), s)
     return s
 
@@ -300,3 +303,113 @@ def la_sos(cfg: dict, get) -> dict:
             _add(c, ch["ID"], _name(nm), party, got.get(ch["ID"], 0), incumbent=inc)
     return {"updated": (votes.get("Races") or {}).get("VersionDateTime"), "page": cfg.get("page"),
             "contests": _finish(contests)}
+
+
+# ----------------------------------------------------------------------------- Vermont
+VT_BASE = "https://static.electionresults.vermont.gov/elections"
+
+
+def vt_sos(cfg: dict, get) -> dict:
+    """elections.json lists elections; {guid}.json points at timestamped office-group files
+    (federal, stateWide) holding one entry per town per office. Towns sum to the state; the
+    election file maps towns to counties."""
+    base = cfg.get("base", VT_BASE).rstrip("/")
+    date = cfg["election_date"]
+    guid = (cfg.get("election_guid") or "").strip()
+    if not guid:
+        idx = json.loads(get(f"{base}/elections.json").decode("utf-8-sig"))
+        items = idx if isinstance(idx, list) else idx.get("elections") or idx.get("d") or []
+        for e in items:
+            d = e.get("electionDetails", e)
+            if str(d.get("electionDate", "")).startswith(date) and d.get("isGeneralElection", True):
+                guid = d.get("electionGuid")
+                break
+        if not guid:
+            raise RuntimeError(f"Vermont hasn't posted the {date} election yet")
+    info = json.loads(get(f"{base}/{guid}.json").decode("utf-8-sig"))
+    county_of = {t["townId"]: _name(t.get("countyName") or "") for t in info.get("townDistricts") or []}
+    root = base.rsplit("/elections", 1)[0]
+    contests = {}
+    for group in cfg.get("groups", ["federal", "stateWide"]):
+        g = info.get(group) or {}
+        if not g.get("path"):
+            continue
+        data = json.loads(get(f"{root}/{g['path'].replace(chr(92), '/')}").decode("utf-8-sig"))
+        for party_block in data.get("d") or []:
+            for o in party_block.get("o") or []:
+                name = _space(o.get("on"))
+                c = contests.get(name)
+                if c is None:
+                    c = contests[name] = _new_contest(name, o.get("vf") or 1)
+                for town in o.get("cs") or []:
+                    county = county_of.get(town.get("tid"))
+                    m = re.match(r"(\d+)\s*/\s*(\d+)", town.get("distReported") or "")
+                    if m:
+                        c["precincts_reporting"] += int(m.group(1))
+                        c["precincts_total"] += int(m.group(2))
+                        if county:
+                            cr = c["_counties"].setdefault(county, {"name": county, "pr": 0, "pt": 0, "votes": {}})
+                            cr["pr"] += int(m.group(1))
+                            cr["pt"] += int(m.group(2))
+                    for r in town.get("rc") or []:
+                        if r.get("isWriteIn") or not r.get("cid"):
+                            continue
+                        nm = _name(r.get("cn") or "")
+                        _add(c, r["cid"], nm, norm_party(r.get("pn")), _int(r.get("vc")), county)
+    return {"updated": info.get("lastUpdatedDate"),
+            "page": cfg.get("page", "https://electionresults.vermont.gov/"),
+            "election_id": guid,
+            "contests": _finish(contests, statewide_names=set(contests))}
+
+
+# ----------------------------------------------------------------------------- Oregon
+def or_sos(cfg: dict, get, post=None) -> dict:
+    """ResultsExport.aspx only hands out CSVs in answer to a form postback: read the page's
+    hidden ASP.NET fields, then post each export link's __EVENTTARGET with type 1 (CSV)."""
+    import http.cookiejar
+    import urllib.parse
+    import urllib.request
+    url = cfg.get("url", "https://results.oregonvotes.gov/ResultsExport.aspx")
+    ua = {"User-Agent": "election-night-tracker (watch party; github.com/hantsiakiann)"}
+    op = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
+    html = op.open(urllib.request.Request(url, headers=ua), timeout=60).read().decode("utf-8", "replace")
+    if cfg.get("election_date_text") and cfg["election_date_text"] not in html:
+        raise RuntimeError("Oregon's export page isn't on this election yet")
+    fields = dict(re.findall(r'<input type="hidden" name="([^"]+)" id="[^"]*" value="([^"]*)"', html))
+    contests, errors, loaded = {}, [], 0
+    for target in cfg.get("targets", ["ctl00$MainContent$Statewide", "ctl00$MainContent$Governor"]):
+        form = dict(fields, __EVENTTARGET=target, __EVENTARGUMENT="")
+        form["ctl00$MainContent$rblTypes"] = "1"
+        try:
+            req = urllib.request.Request(url, data=urllib.parse.urlencode(form).encode(), headers=dict(
+                ua, **{"Content-Type": "application/x-www-form-urlencoded", "Referer": url}))
+            raw = op.open(req, timeout=60).read()
+            if raw.lstrip()[:1] == b"<":
+                raise RuntimeError("got a web page, not a CSV")
+        except Exception as e:
+            errors.append(f"{target}: {e}")
+            continue
+        loaded += 1
+        _or_parse(raw, contests)
+    if not loaded:
+        raise RuntimeError("; ".join(errors))
+    return {"updated": None, "page": cfg.get("page", "https://results.oregonvotes.gov/"), "contests": _finish(contests)}
+
+
+def _or_parse(raw: bytes, contests: dict) -> None:
+    for r in csv.DictReader(io.StringIO(raw.decode("utf-8-sig", "replace"))):
+        race = _space(r.get("ContestName"))
+        label = _space(r.get("CandidateName"))
+        if not race or not label:
+            continue
+        c = contests.get(race)
+        if c is None:
+            c = contests[race] = _new_contest(race, _int(r.get("VoteFor")) or 1)
+        m = re.search(r"(\d+)\s*/\s*(\d+)", r.get("PrecinctsReporting") or "")
+        if m:
+            c["precincts_reporting"], c["precincts_total"] = int(m.group(1)), int(m.group(2))
+        if label.lower().startswith("write-in"):
+            continue
+        yn = _yes_no(label)
+        party = (r.get("NominatingParty") or "").split(",")[0]
+        _add(c, r.get("CandidateID") or label, yn or label, "" if yn else norm_party(party), _int(r.get("CandidateVotes")))

@@ -15,6 +15,7 @@ PARTY_MAP = {
     "rep": "R", "republican": "R", "r": "R",
     "dem": "D", "democrat": "D", "democratic": "D", "d": "D", "dfl": "D",
     "lib": "L", "libertarian": "L", "lp": "L",
+    "dem/prog": "D", "pacific green": "G", "progressive": "PRO",
     "grn": "G", "green": "G", "gp": "G", "gre": "G", "g": "G",
     "ind": "I", "independent": "I", "i": "I", "una": "I", "unaffiliated": "I", "npa": "I",
     "no party affiliation": "I", "no party preference": "I", "npp": "I", "nonaffiliated": "I",
