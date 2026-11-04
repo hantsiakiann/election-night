@@ -173,6 +173,7 @@
   const notice = (...lines) => `<div class="notice">${lines.map((l) => `<p>${l}</p>`).join("")}</div>`;
 
   // ------------------------------------------------------------------ tabs
+  const unopposed = (r) => r.candidates?.length === 1 && (r.vote_for || 1) === 1;  // e.g. Georgia legislative seats
   function tally(races) {
     const t = { D: 0, R: 0, O: 0, none: 0 };
     for (const r of races) {
@@ -180,13 +181,26 @@
       // count toward a party; leading in the count doesn't.
       // (A call naming someone not in the race counts as not called, so typos don't skew the tally.)
       const who = r.call ? r.candidates.find((c) => c.name.toLowerCase() === String(r.call).toLowerCase()) || null
-        : r.decided ? { party: r.decided.party } : null;
+        : r.decided ? { party: r.decided.party } : unopposed(r) ? r.candidates[0] : null;
       if (!who) t.none++; else if (who.party === "D" || who.party === "R") t[who.party]++; else t.O++;
     }
     return t;
   }
-  function balanceBar(g, races, summary, { need: needOpt, senateNote = g === "senate" } = {}) {
+  // Uncalled races split by who's ahead in the count (D, R), with the rest (no votes, ties,
+  // others ahead) left in none.
+  function leading(races) {
+    const l = { D: 0, R: 0 };
+    for (const r of races) {
+      if (r.call || r.decided || unopposed(r) || !r.total_votes || r.margin_votes === 0) continue;
+      const p = r.candidates[0]?.party;
+      if (p === "D" || p === "R") l[p]++;
+    }
+    return l;
+  }
+  function balanceBar(g, races, summary, { need: needOpt, senateNote = g === "senate", showLeading = false } = {}) {
     const t = tally(races);
+    const l = showLeading ? leading(races) : { D: 0, R: 0 };
+    t.none -= l.D + l.R;
     const hold = summary[g + "_holdovers"] || {};
     const hD = hold.D || 0, hR = hold.R || 0;
     const total = races.length + hD + hR;
@@ -194,14 +208,15 @@
     const seg = (n, cls, label) => n ? `<span class="${cls}" style="flex-grow:${n}" title="${label}: ${n}"></span>` : "";
     const word = g === "governor" ? "governorships" : "seats";
     return `<div class="balance">
-      <div class="balance-nums"><span class="D"><b>${hD + t.D}</b> Democrats${hD ? ` (${hD} not up)` : ""}</span>
+      <div class="balance-nums"><span class="D"><b>${hD + t.D}</b> Democrats${hD ? ` (${hD} not up)` : ""}${showLeading ? ` <span class="lead">called</span>` : ""}</span>
         ${t.O ? `<span class="O"><b>${t.O}</b> other</span>` : ""}
-        <span class="R">Republicans <b>${hR + t.R}</b>${hR ? ` (${hR} not up)` : ""}</span></div>
-      <div class="balance-bar" role="img" aria-label="${hD + t.D} Democratic, ${hR + t.R} Republican, ${t.none} not called, of ${total} ${word}">
-        ${seg(hD, "hD", "Democratic seats not up")}${seg(t.D, "D", "Called for Democrats")}${seg(t.O, "O", "Called for others")}
-        ${seg(t.none, "none", "Not called yet")}${seg(t.R, "R", "Called for Republicans")}${seg(hR, "hR", "Republican seats not up")}
+        <span class="R">${showLeading ? `<span class="lead">called</span> ` : ""}Republicans <b>${hR + t.R}</b>${hR ? ` (${hR} not up)` : ""}</span></div>
+      <div class="balance-bar" role="img" aria-label="${hD + t.D} Democratic, ${hR + t.R} Republican called${showLeading ? `; ${l.D} Democratic and ${l.R} Republican leading` : ""}; ${t.none} ${showLeading ? "with no leader" : "not called"}, of ${total} ${word}">
+        ${seg(hD, "hD", "Democratic seats not up")}${seg(t.D, "D", "Called or unopposed: Democrats")}${seg(l.D, "lD", "Democrats leading, not called")}${seg(t.O, "O", "Called for others")}
+        ${seg(t.none, "none", showLeading ? "No votes yet, tied, or not called" : "Not called yet")}${seg(l.R, "lR", "Republicans leading, not called")}${seg(t.R, "R", "Called or unopposed: Republicans")}${seg(hR, "hR", "Republican seats not up")}
         ${need ? `<i class="mark" style="left:${(100 * need) / total}%"></i>` : ""}
       </div>
+      ${showLeading ? `<div class="balance-lead"><span class="D"><em>${l.D}</em> more leading</span><span class="R"><em>${l.R}</em> more leading</span></div>` : ""}
 
     </div>`;
   }
@@ -271,7 +286,7 @@
     const secs = d.georgia.sections.filter((s) => (s.tab || "statewide") === t);
     // Georgia legislature: majority tracker (every seat is up; 29 of 56 Senate, 91 of 180 House)
     const chamber = t !== "statewide" && secs.length
-      ? balanceBar("ga-" + t, secs.flatMap((s) => s.races), {}, { need: t === "senate" ? 29 : 91, senateNote: false }) : "";
+      ? balanceBar("ga-" + t, secs.flatMap((s) => s.races), {}, { need: t === "senate" ? 29 : 91, senateNote: false, showLeading: true }) : "";
     const body = t === "statewide"
       ? secs.map((s) => group(s.name, s.races, { collapsible: true, collapsed: s.collapsed, key: "ga:" + s.name })).join("")
       : secs.map((s) => group(s.name, s.races)).join("");

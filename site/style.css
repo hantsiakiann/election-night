@@ -202,6 +202,13 @@ details.group[open] > summary::before { content: "–"; }
 .balance-bar .hD { background: var(--dem); box-shadow: inset -2px 0 0 var(--ground); }
 .balance-bar .D { background: var(--dem); }
 .balance-bar .O { background: var(--oth); }
+.balance-bar .lD { background: color-mix(in srgb, var(--dem) 45%, var(--map-blank)); }
+.balance-bar .lR { background: color-mix(in srgb, var(--rep) 45%, var(--map-blank)); }
+.balance-nums .lead { font-size: .8rem; color: var(--muted); }
+.balance-lead { display: flex; justify-content: space-between; gap: 12px; margin-top: 2px; font-size: .85rem; color: var(--muted); }
+.balance-lead em { font: 700 1.15rem/1 var(--num); font-style: normal; }
+.balance-lead .D em { color: color-mix(in srgb, var(--dem) 60%, var(--map-blank)); }
+.balance-lead .R em { color: color-mix(in srgb, var(--rep) 60%, var(--map-blank)); }
 .balance-bar .none { background: var(--map-blank); }
 .balance-bar .R { background: var(--rep); }
 .balance-bar .hR { background: var(--rep); box-shadow: inset 2px 0 0 var(--ground); }
