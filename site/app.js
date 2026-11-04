@@ -1,6 +1,9 @@
 (() => {
   "use strict";
   const DATA_URL = "data/results.json";
+  // Same file, pushed to the repo's "live" branch by every update run; it keeps updating even
+  // if GitHub Pages stops publishing new deployments. Whichever copy is newer wins.
+  const LIVE_URL = "https://raw.githubusercontent.com/hantsiakiann/election-night/live/results.json";
   const PARTY = { D: "var(--dem)", R: "var(--rep)", L: "var(--lib)", G: "var(--grn)", I: "var(--ind)", C: "var(--con)", WF: "var(--wf)" };
   const NEUTRAL = ["var(--np1)", "var(--np2)", "var(--np3)", "var(--np4)", "var(--oth)"];
   const GROUP_NAMES = { senate: "Senate", governor: "Governor", house: "House" };
@@ -467,9 +470,12 @@
   }
   async function load() {
     try {
-      const res = await fetch(`${DATA_URL}?t=${Date.now()}`, { cache: "no-store" });
-      if (!res.ok) throw new Error(res.status);
-      const d = await res.json();
+      const get = (u) => fetch(`${u}?t=${Date.now()}`, { cache: "no-store" })
+        .then((r) => (r.ok ? r.json() : Promise.reject(new Error(r.status))));
+      const got = (await Promise.allSettled([get(DATA_URL), get(LIVE_URL)]))
+        .filter((x) => x.status === "fulfilled" && x.value?.generated_at).map((x) => x.value);
+      if (!got.length) throw new Error("no data");
+      const d = got.reduce((a, b) => (Date.parse(b.generated_at) > Date.parse(a.generated_at) ? b : a));
       if (state.data && d.generated_at === state.data.generated_at) { renderStatus(); return; }
       state.fresh.clear();
       for (const r of allRaces(d)) {

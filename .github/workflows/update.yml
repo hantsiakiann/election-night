@@ -18,7 +18,7 @@ on:
     - cron: "*/10 0-15 4 11 *"
 
 permissions:
-  contents: read
+  contents: write   # results.json is also pushed to the "live" branch (see below)
   pages: write
   id-token: write
   actions: write
@@ -43,6 +43,16 @@ jobs:
           mkdir -p _site
           cp -r site/. _site/
           python -m fetcher.run --out _site/data/results.json
+      # GitHub Pages can quietly stop publishing new deployments after many in a row, so the
+      # page also reads results.json from the "live" branch (raw.githubusercontent.com),
+      # which updates as soon as this push lands. One orphan commit, force-pushed: no history.
+      - name: Publish results.json to the live branch
+        if: github.event_name != 'push'
+        run: |
+          mkdir -p /tmp/live && cp _site/data/results.json /tmp/live/ && cd /tmp/live
+          git init -q -b live && git add results.json
+          git -c user.name=hantsiakiann -c user.email=hantsiakiann@gmail.com commit -qm "results $(date -u +%FT%TZ)"
+          git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" live || echo "live push failed"
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site
