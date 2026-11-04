@@ -1,0 +1,6 @@
+### https://raw.githubusercontent.com/hantsiakiann/election-night/live/results.json?t=1793774078
+status=200 type=text/plain; charset=utf-8 size=147746 final=https://raw.githubusercontent.com/hantsiakiann/election-night/live/results.json?t=1793774078
+### https://hantsiakiann.github.io/election-night/app.js?x=1793774078
+status=200 type=application/javascript; charset=utf-8 size=11944 final=https://hantsiakiann.github.io/election-night/app.js?x=1793774078
+### https://hantsiakiann.github.io/election-night/data/results.json?x=1793774078
+status=200 type=application/json; charset=utf-8 size=151301 final=https://hantsiakiann.github.io/election-night/data/results.json?x=1793774078
